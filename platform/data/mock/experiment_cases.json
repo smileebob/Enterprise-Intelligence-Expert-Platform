@@ -1,0 +1,180 @@
+{
+  "_meta": {
+    "description": "传化功能化学（模拟）历史实验/试样报告 —— 内部验证证据。赛事模拟数据。含冲突场景引用的关键实验。",
+    "is_mock": true,
+    "source_type": "internal",
+    "domain": "chemical",
+    "record_count": 8,
+    "test_methods": {
+      "柔软度": "主观手感评分1-10 + 织物风格仪辅助",
+      "防水等级": "AATCC 22 喷水法（0-100）",
+      "耐洗": "AATCC 135 / ISO 6330 标准洗涤N次后复测",
+      "黄变": "GB/T 30688 或 AATCC EP9 热黄变评级（1严重-5无）",
+      "强力保留率": "拉伸/撕破强力处理后与原始比值"
+    }
+  },
+  "experiment_cases": [
+    {
+      "case_id": "EXP-2201",
+      "title": "TF-WR-6608 无氟防水剂在涤纶上的耐洗性验证",
+      "fabric": "涤纶塔夫绸（100%涤，85g/m²）",
+      "product_id": "TF-WR-6608",
+      "formula_id": "FORM-6608-WR",
+      "process": "二浸二轧，轧余率65%，pH4.8，预烘100℃×2min，焙烘160℃×90s",
+      "results": {
+        "初始防水等级(AATCC22)": 90,
+        "20次洗涤后": 85,
+        "30次洗涤后": 82,
+        "50次洗涤后": 80,
+        "耐洗保持率%": 85
+      },
+      "conclusion": "在配套无金属交联剂8g/L、焙烘160℃×90s条件下，TF-WR-6608 无氟防水50次洗涤后仍保持80级、保持率85%，满足客户耐洗30-50次要求。",
+      "customer": "某户外面料客户（模拟）",
+      "tested_at": "2025-11-18",
+      "source_type": "internal",
+      "source_ref": "内部实验报告/EXP-2201",
+      "confidence": 0.9,
+      "conflict_ref": "CS-01",
+      "notes": "该结论与外部文献『无氟防水剂普遍耐洗差、30次后<65%』相冲突，属内部专有实测数据"
+    },
+    {
+      "case_id": "EXP-2205",
+      "title": "TF-WR-6608 焙烘条件对防水耐洗的影响（工艺对比）",
+      "fabric": "涤纶塔夫绸",
+      "product_id": "TF-WR-6608",
+      "formula_id": "FORM-6608-WR",
+      "process": "对比组：A=160℃×90s（内部推荐）；B=180℃×60s（外部专利建议）",
+      "results": {
+        "A组_50次耐洗保持率%": 85,
+        "B组_50次耐洗保持率%": 83,
+        "A组_强力保留率%": 96,
+        "B组_强力保留率%": 91,
+        "A组_黄变等级": "4-5",
+        "B组_黄变等级": "3-4"
+      },
+      "conclusion": "内部推荐工艺A（160℃×90s）在耐洗持平的情况下，强力保留更好、黄变更轻，综合优于外部专利建议的B（180℃×60s）。",
+      "tested_at": "2025-12-05",
+      "source_type": "internal",
+      "source_ref": "内部实验报告/EXP-2205",
+      "confidence": 0.9,
+      "conflict_ref": "CS-03",
+      "notes": "为工艺参数冲突 CS-03 提供内部实测裁决依据"
+    },
+    {
+      "case_id": "EXP-3301",
+      "title": "TF-SOFT-2201 氨基硅油在白色涤纶上的黄变评估",
+      "fabric": "白色涤纶针织布",
+      "product_id": "TF-SOFT-2201",
+      "formula_id": "FORM-2201-POLY",
+      "process": "焙烘160℃×90s（内部）；对比180℃×90s",
+      "results": {
+        "160℃黄变等级": "4（轻微）",
+        "180℃黄变等级": "3（明显）",
+        "柔软度评分": 9.0
+      },
+      "conclusion": "TF-SOFT-2201 在160℃×90s下黄变轻微（4级），但180℃下黄变加重至3级；白色/浅色涤纶建议控制焙烘≤170℃，或改用低黄变型号。",
+      "customer": "某白色涤纶面料客户投诉复现（模拟）",
+      "tested_at": "2026-01-12",
+      "source_type": "internal",
+      "source_ref": "内部实验报告/EXP-3301",
+      "confidence": 0.88,
+      "conflict_ref": "CS-02",
+      "notes": "内部160℃黄变4级（轻微）与外部论文『氨基硅油高温易黄变2-3级』存在口径冲突（CS-02）"
+    },
+    {
+      "case_id": "EXP-2210",
+      "title": "TF-SS-2210 嵌段硅油高端柔软手感评测",
+      "fabric": "涤氨弹力布",
+      "product_id": "TF-SS-2210",
+      "formula_id": "FORM-2210-POLY",
+      "process": "二浸二轧，轧余率70%，焙烘150℃×90s",
+      "results": {
+        "柔软度评分": 9.5,
+        "50次洗涤柔软保持率%": 88,
+        "弹滑手感": "优"
+      },
+      "conclusion": "TF-SS-2210 复配方案柔软度达9.5分，弹滑糯感突出，50次耐洗保持88%，为旗舰级柔软方案。",
+      "tested_at": "2026-02-20",
+      "source_type": "internal",
+      "source_ref": "内部实验报告/EXP-2210",
+      "confidence": 0.92,
+      "conflict_ref": "CS-04",
+      "notes": "内部评测9.5分，外部第三方竞品评测同类嵌段硅油仅7分（数值冲突 CS-04）"
+    },
+    {
+      "case_id": "EXP-4401",
+      "title": "棉织物柔软+固色+增深一浴整理试样",
+      "fabric": "棉平布（深色）",
+      "product_id": "TF-SOFT-3305",
+      "formula_id": "FORM-COTTON-COMB",
+      "process": "浸轧，轧余率75%，pH6.0，焙烘150℃×3min",
+      "results": {
+        "柔软度评分": 7.8,
+        "湿摩擦牢度提升(级)": 1,
+        "K/S值提升%": 22,
+        "强力保留率%": 97
+      },
+      "conclusion": "一浴法同时实现柔软、固色、增深，湿摩牢度提升1级，增深效果明显，工艺可行；需注意固色剂与硅油先稀释后混合避免沉淀。",
+      "tested_at": "2026-03-08",
+      "source_type": "internal",
+      "source_ref": "内部实验报告/EXP-4401",
+      "confidence": 0.87
+    },
+    {
+      "case_id": "EXP-8801",
+      "title": "涤纶抗静电+柔软一浴法可行性验证",
+      "fabric": "涤纶府绸",
+      "product_id": "TF-AS-8801",
+      "formula_id": "FORM-POLY-AS-COMB",
+      "process": "二浸二轧，轧余率65%，焙烘155℃×90s",
+      "results": {
+        "表面电阻率(Ω)": "3e9",
+        "柔软度评分": 8.5,
+        "20次洗涤后表面电阻率(Ω)": "8e9"
+      },
+      "conclusion": "非离子抗静电剂 TF-AS-8801 与氨基硅油 TF-SOFT-2201 同浴相容性好，一浴法实现抗静电+柔软，初始抗静电优良，耐洗中等（20次后衰减）。",
+      "tested_at": "2026-03-25",
+      "source_type": "internal",
+      "source_ref": "内部实验报告/EXP-8801",
+      "confidence": 0.88
+    },
+    {
+      "case_id": "EXP-7701",
+      "title": "真丝增深+柔软低温整理试样",
+      "fabric": "真丝电力纺",
+      "product_id": "TF-DP-7701",
+      "formula_id": null,
+      "process": "浸渍，浴比1:10，pH6.0，40℃×20min，低温80℃烘干",
+      "results": {
+        "K/S值提升%": 20,
+        "柔软度评分": 8.0,
+        "强力保留率%": 94,
+        "光泽": "基本保持"
+      },
+      "conclusion": "真丝低温浸渍增深+柔软方案可行，K/S提升20%、强力保留94%、光泽基本保持；须严格控温≤50℃避免伤丝。",
+      "tested_at": "2026-04-10",
+      "source_type": "internal",
+      "source_ref": "内部实验报告/EXP-7701",
+      "confidence": 0.85
+    },
+    {
+      "case_id": "EXP-6612",
+      "title": "TF-WR-6612 有机氟防水防油高性能验证",
+      "fabric": "涤纶牛津布",
+      "product_id": "TF-WR-6612",
+      "formula_id": "FORM-6612-WR",
+      "process": "二浸二轧，轧余率60%，焙烘170℃×60s",
+      "results": {
+        "初始防水等级(AATCC22)": 100,
+        "防油等级(AATCC118)": 5,
+        "50次洗涤防水保持率%": 92
+      },
+      "conclusion": "TF-WR-6612 有机氟体系防水防油性能优异、耐洗突出（50次92%）；但为C6短链氟，出口欧盟订单需评估全氟化合物合规风险。",
+      "tested_at": "2026-05-06",
+      "source_type": "internal",
+      "source_ref": "内部实验报告/EXP-6612",
+      "confidence": 0.9,
+      "conflict_ref": "CS-05"
+    }
+  ]
+}

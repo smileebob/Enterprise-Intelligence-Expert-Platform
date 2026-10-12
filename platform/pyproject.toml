@@ -1,0 +1,53 @@
+[project]
+name = "angentplatform"
+version = "0.1.0"
+description = "企业级领域专家 Agent 平台（AI 化学家 / AI 产业招商专家）—— 赛事演示实现"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["alembic/versions", ".venv", "var"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = [
+    "S101",  # assert（测试与契约断言）
+    "E501",  # 行长由 formatter 控制
+    "B008",  # FastAPI 依赖注入（Depends/Query/Header）在默认参数中的标准用法
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S105", "S106"]
+"conftest.py" = ["S105", "S106"]
+"scripts/*" = ["S101", "T201"]
+"alembic/env.py" = ["E402"]
+"app/config.py" = ["S105"]        # 演示种子口令默认值（生产必须改，.env 注入）
+"core/admin/seed.py" = ["S105"]   # 演示账号种子
+"core/gateway/permissions.py" = ["S105"]  # 演示口令常量来源见 app.config
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
+warn_unused_ignores = true
+exclude = ["alembic/", ".venv/", "var/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --cov=app --cov=core --cov=adapters --cov=domains --cov-report=term-missing:skip-covered --cov-fail-under=60"
+filterwarnings = [
+    "ignore::DeprecationWarning:celery.*",
+]
+
+[tool.coverage.run]
+omit = [
+    "alembic/*",
+    "scripts/*",
+    "tests/*",
+    "*/migrations/*",
+]
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests", "alembic"]
+skips = ["B101"]

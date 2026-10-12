@@ -1,0 +1,129 @@
+{
+  "_meta": {
+    "description": "传化功能化学（模拟）配方数据 —— 助剂工作液配方与原料配比。赛事模拟数据，非真实配方。",
+    "is_mock": true,
+    "source_type": "internal",
+    "domain": "chemical",
+    "record_count": 6,
+    "field_notes": {
+      "composition": "工作液原料配比（g/L 或 %）",
+      "pickup": "轧余率/带液率",
+      "confidential": "内部专有配方，融合优先级 P0"
+    }
+  },
+  "formulas": [
+    {
+      "formula_id": "FORM-2201-POLY",
+      "product_id": "TF-SOFT-2201",
+      "name": "涤纶氨基硅油柔软整理工作液",
+      "composition": [
+        {"material": "TF-SOFT-2201 氨基硅油", "amount_g_per_L": 30, "role": "主柔软剂"},
+        {"material": "渗透剂 JFC", "amount_g_per_L": 2, "role": "渗透"},
+        {"material": "冰醋酸", "amount_g_per_L": "调 pH 至 5.5-6.0", "role": "pH调节"},
+        {"material": "水", "amount_g_per_L": "余量至 1L", "role": "溶剂"}
+      ],
+      "pickup": "60-70%",
+      "cure": "预烘100℃×2min → 焙烘160℃×90s",
+      "notes": "手感滑爽；焙烘温度不宜超170℃以防黄变（与外部高温工艺建议冲突，见 CS-02/CS-03）",
+      "confidential": true,
+      "source_type": "internal",
+      "source_ref": "内部配方库/FORM-2201-POLY",
+      "confidence": 0.95
+    },
+    {
+      "formula_id": "FORM-2210-POLY",
+      "product_id": "TF-SS-2210",
+      "name": "涤氨弹性面料高端柔软工作液",
+      "composition": [
+        {"material": "TF-SS-2210 嵌段硅油", "amount_g_per_L": 40, "role": "主柔软剂"},
+        {"material": "TF-SOFT-2201 氨基硅油", "amount_g_per_L": 10, "role": "复配增效"},
+        {"material": "渗透剂 JFC", "amount_g_per_L": 2, "role": "渗透"},
+        {"material": "冰醋酸", "amount_g_per_L": "调 pH 至 6.0", "role": "pH调节"},
+        {"material": "水", "amount_g_per_L": "余量至 1L", "role": "溶剂"}
+      ],
+      "pickup": "65-75%",
+      "cure": "预烘100℃×2min → 焙烘150℃×90s",
+      "notes": "旗舰弹滑手感配方；内部柔软度评测9.5分",
+      "confidential": true,
+      "source_type": "internal",
+      "source_ref": "内部配方库/FORM-2210-POLY",
+      "confidence": 0.95
+    },
+    {
+      "formula_id": "FORM-6608-WR",
+      "product_id": "TF-WR-6608",
+      "name": "涤纶无氟防水整理工作液",
+      "composition": [
+        {"material": "TF-WR-6608 无氟防水剂", "amount_g_per_L": 40, "role": "主防水剂"},
+        {"material": "交联剂（无金属/低金属）", "amount_g_per_L": 8, "role": "提升耐洗"},
+        {"material": "渗透剂 JFC", "amount_g_per_L": 3, "role": "渗透"},
+        {"material": "冰醋酸", "amount_g_per_L": "调 pH 至 4.5-5.0", "role": "pH调节"},
+        {"material": "水", "amount_g_per_L": "余量至 1L", "role": "溶剂"}
+      ],
+      "pickup": "60-70%",
+      "cure": "预烘100℃×2min → 焙烘160℃×90s",
+      "notes": "内部工艺推荐焙烘160℃×90s；某外部专利建议180℃×60s（工艺参数冲突，见 CS-03）。内部实验显示50次耐洗保持85%（见 EXP-2201，与外部文献冲突 CS-01）",
+      "confidential": true,
+      "source_type": "internal",
+      "source_ref": "内部配方库/FORM-6608-WR",
+      "confidence": 0.9
+    },
+    {
+      "formula_id": "FORM-6612-WR",
+      "product_id": "TF-WR-6612",
+      "name": "涤纶有机氟高性能防水防油工作液",
+      "composition": [
+        {"material": "TF-WR-6612 C6有机氟防水剂", "amount_g_per_L": 30, "role": "主防水剂"},
+        {"material": "交联剂", "amount_g_per_L": 6, "role": "提升耐洗"},
+        {"material": "TF-WR-6608 无氟防水剂", "amount_g_per_L": 15, "role": "复配降本增效"},
+        {"material": "冰醋酸", "amount_g_per_L": "调 pH 至 4.5-5.0", "role": "pH调节"},
+        {"material": "水", "amount_g_per_L": "余量至 1L", "role": "溶剂"}
+      ],
+      "pickup": "55-65%",
+      "cure": "预烘100℃×2min → 焙烘170℃×60s",
+      "notes": "高性能防水防油；出口欧盟订单需评估全氟化合物合规风险（见 CS-05）",
+      "confidential": true,
+      "source_type": "internal",
+      "source_ref": "内部配方库/FORM-6612-WR",
+      "confidence": 0.9
+    },
+    {
+      "formula_id": "FORM-COTTON-COMB",
+      "product_id": "TF-SOFT-3305",
+      "name": "棉织物柔软+固色+增深一浴工作液",
+      "composition": [
+        {"material": "TF-SOFT-3305 亲水氨基硅油", "amount_g_per_L": 25, "role": "柔软"},
+        {"material": "TF-FIX-9901 固色剂", "amount_g_per_L": 15, "role": "固色"},
+        {"material": "TF-DP-7701 增深剂", "amount_g_per_L": 10, "role": "增深"},
+        {"material": "冰醋酸", "amount_g_per_L": "调 pH 至 6.0", "role": "pH调节"},
+        {"material": "水", "amount_g_per_L": "余量至 1L", "role": "溶剂"}
+      ],
+      "pickup": "70-80%",
+      "cure": "预烘100℃×2min → 焙烘150℃×3min",
+      "notes": "棉类多功能一浴整理；需注意固色剂与硅油的相容性（先稀释后混合）",
+      "confidential": true,
+      "source_type": "internal",
+      "source_ref": "内部配方库/FORM-COTTON-COMB",
+      "confidence": 0.88
+    },
+    {
+      "formula_id": "FORM-POLY-AS-COMB",
+      "product_id": "TF-AS-8801",
+      "name": "涤纶抗静电+柔软一浴工作液",
+      "composition": [
+        {"material": "TF-SOFT-2201 氨基硅油", "amount_g_per_L": 25, "role": "柔软"},
+        {"material": "TF-AS-8801 抗静电剂", "amount_g_per_L": 20, "role": "抗静电"},
+        {"material": "渗透剂 JFC", "amount_g_per_L": 2, "role": "渗透"},
+        {"material": "冰醋酸", "amount_g_per_L": "调 pH 至 5.5-6.0", "role": "pH调节"},
+        {"material": "水", "amount_g_per_L": "余量至 1L", "role": "溶剂"}
+      ],
+      "pickup": "60-70%",
+      "cure": "预烘100℃×2min → 焙烘155℃×90s",
+      "notes": "抗静电与柔软同浴，非离子体系相容性好",
+      "confidential": true,
+      "source_type": "internal",
+      "source_ref": "内部配方库/FORM-POLY-AS-COMB",
+      "confidence": 0.9
+    }
+  ]
+}

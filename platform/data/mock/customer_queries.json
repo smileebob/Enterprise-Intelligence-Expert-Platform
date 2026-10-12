@@ -1,0 +1,124 @@
+{
+  "_meta": {
+    "description": "客户技术咨询/业务问答样例（模拟）—— 用于 Demo 演示与回归测试。含需求描述、澄清项、期望答案要点、应引用的知识。对应大赛官方『业务问答样例』数据类型。",
+    "is_mock": true,
+    "domain": "chemical",
+    "record_count": 8,
+    "categories": ["产品选型与方案推荐", "内外部知识融合", "实验分析与优化建议", "工艺诊断", "合规咨询"]
+  },
+  "queries": [
+    {
+      "query_id": "Q-01",
+      "category": "产品选型与方案推荐",
+      "customer_need": "涤纶面料，要求柔软手感好且耐洗50次不明显下降",
+      "clarify_items": ["面料具体成分（纯涤/涤棉/涤氨）", "目标手感（滑爽/蓬松/弹滑）", "是否浅色（黄变敏感）", "现有焙烘设备条件"],
+      "expected_answer_points": [
+        "主推 TF-SS-2210 嵌段硅油（柔软9.5、50次保持88%）或 TF-SOFT-2201（柔软9.0、50次保持82%）",
+        "给出工作液配方（FORM-2210-POLY / FORM-2201-POLY）与工艺（PROC-POLY-SOFT）",
+        "若浅色/白色，提示控温≤170℃防黄变（引用 EXP-3301）",
+        "每条结论附来源引用与置信度"
+      ],
+      "should_reference": ["TF-SS-2210", "TF-SOFT-2201", "FORM-2210-POLY", "EXP-2210", "PROC-POLY-SOFT"],
+      "difficulty": "基础"
+    },
+    {
+      "query_id": "Q-02",
+      "category": "内外部知识融合",
+      "customer_need": "棉织物做无氟防水，耐洗30次，出口欧盟需环保合规",
+      "clarify_items": ["面料克重与结构", "是否需防油", "目标市场具体法规要求", "现有工艺设备"],
+      "expected_answer_points": [
+        "推荐无氟方案 TF-WR-6608 + 交联剂（FORM-6608-WR），耐洗可达标（引用 EXP-2201）",
+        "识别出口欧盟合规：无氟(C0)规避PFAS限制，优于C6有机氟（引用 EXT-STD-006，触发 CS-05 合规优先逻辑）",
+        "融合内部实测耐洗数据 + 外部法规要求，标注来源",
+        "说明达成耐洗的关键（交联剂用量+焙烘到位）"
+      ],
+      "should_reference": ["TF-WR-6608", "FORM-6608-WR", "EXP-2201", "EXT-STD-006", "EXT-STD-005"],
+      "conflict_ref": "CS-01, CS-05",
+      "difficulty": "进阶（含融合+合规）"
+    },
+    {
+      "query_id": "Q-03",
+      "category": "产品选型与方案推荐",
+      "customer_need": "锦纶面料要抗静电+柔软，希望一浴法简化工艺",
+      "clarify_items": ["抗静电耐久性要求（是否需耐洗）", "柔软手感偏好", "锦纶具体品种"],
+      "expected_answer_points": [
+        "一浴法可行：TF-AS-8801 抗静电 + TF-SOFT-2201 柔软同浴（非离子相容性好，引用 EXP-8801 / FORM-POLY-AS-COMB）",
+        "提示抗静电耐洗中等（20次后衰减），若需高耐久需权衡",
+        "给出工艺 PROC-POLY-SOFT"
+      ],
+      "should_reference": ["TF-AS-8801", "TF-SOFT-2201", "FORM-POLY-AS-COMB", "EXP-8801"],
+      "difficulty": "基础"
+    },
+    {
+      "query_id": "Q-04",
+      "category": "工艺诊断",
+      "customer_need": "客户反馈用氨基硅油后白色涤纶泛黄，求原因与解决",
+      "clarify_items": ["焙烘温度与时间", "硅油用量", "面料是否漂白/增白", "具体型号"],
+      "expected_answer_points": [
+        "原因：氨基硅油胺基高温氧化生成发色基团（外部机理 EXT-PAP-003）",
+        "内部实测：160℃黄变4级轻微、180℃加重至3级（EXP-3301）",
+        "解决：控焙烘≤170℃、降低用量、或改低黄变/亲水型号 TF-SOFT-3305",
+        "融合内外部：内部温度阈值 + 外部机理（触发 CS-02）"
+      ],
+      "should_reference": ["EXP-3301", "EXT-PAP-003", "TF-SOFT-2201", "TF-SOFT-3305"],
+      "conflict_ref": "CS-02",
+      "difficulty": "进阶（诊断+融合）"
+    },
+    {
+      "query_id": "Q-05",
+      "category": "产品选型与方案推荐",
+      "customer_need": "真丝面料要增深+柔软，不能影响光泽和强力",
+      "clarify_items": ["真丝品种与克重", "颜色深浅", "现有设备（能否低温浸渍）"],
+      "expected_answer_points": [
+        "推荐 TF-DP-7701 增深 + 低温浸渍工艺 PROC-SILK-FUNC（40-50℃、pH弱酸、低温烘干）",
+        "引用 EXP-7701：K/S提升20%、强力保留94%、光泽基本保持",
+        "强调真丝须严格控温≤50℃避免伤丝"
+      ],
+      "should_reference": ["TF-DP-7701", "PROC-SILK-FUNC", "EXP-7701"],
+      "difficulty": "基础"
+    },
+    {
+      "query_id": "Q-06",
+      "category": "内外部知识融合",
+      "customer_need": "网上评测说嵌段硅油柔软度就7分，你们TF-SS-2210凭什么9.5分？",
+      "clarify_items": ["对比口径", "客户关注手感还是检测数值"],
+      "expected_answer_points": [
+        "坚持内部评测9.5分（统一预处理与洗涤条件，EXP-2210，confidence 0.92）",
+        "说明外部第三方为跨品牌盲评、未统一条件，不可直接比较（EXT-RPT-007，confidence 0.5）",
+        "解释柔软度为主观+仪器综合评分，跨机构不可比（触发 CS-04）"
+      ],
+      "should_reference": ["EXP-2210", "TF-SS-2210", "EXT-RPT-007"],
+      "conflict_ref": "CS-04",
+      "difficulty": "进阶（数值可比性识别）"
+    },
+    {
+      "query_id": "Q-07",
+      "category": "实验分析与优化建议",
+      "customer_need": "综合多份历史试样报告，影响无氟防水耐洗的关键因素是什么？后续怎么优化？",
+      "clarify_items": ["目标耐洗次数", "客户现有交联/焙烘条件"],
+      "expected_answer_points": [
+        "关键因素：交联剂用量与类型、焙烘充分度（温度×时间）、pH（EXP-2201/EXP-2205）",
+        "优化方向：保证交联剂8g/L、焙烘160℃×90s到位、pH4.5-5.0",
+        "对比实验显示160℃×90s优于180℃×60s（强力保留、黄变）",
+        "后续验证建议：按客户实际设备做小样复现"
+      ],
+      "should_reference": ["EXP-2201", "EXP-2205", "FORM-6608-WR", "PROC-POLY-WR"],
+      "conflict_ref": "CS-03",
+      "difficulty": "高（跨报告综合分析）"
+    },
+    {
+      "query_id": "Q-08",
+      "category": "合规咨询",
+      "customer_need": "内销涤纶高性能防水防油，成本可控，怎么配？",
+      "clarify_items": ["是否出口", "防油等级要求", "成本上限"],
+      "expected_answer_points": [
+        "内销非受限场景可用 TF-WR-6612 有机氟（防水100/防油5级/耐洗92%，EXP-6612）",
+        "复配无氟 TF-WR-6608 降本增效（FORM-6612-WR）",
+        "提示：若后续转出口欧盟需评估PFAS合规（EXT-STD-006）",
+        "对比无氟方案性能差异，供客户按场景选择"
+      ],
+      "should_reference": ["TF-WR-6612", "TF-WR-6608", "FORM-6612-WR", "EXP-6612", "EXT-STD-006"],
+      "difficulty": "进阶"
+    }
+  ]
+}

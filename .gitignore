@@ -1,0 +1,39 @@
+# 环境与密钥（禁止入库）
+.env
+.env.*
+!.env.example
+!.env.slowapi-disabled
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# 运行数据与临时文件
+var/
+_tmp/
+tmp/
+*.log
+
+# 前端
+node_modules/
+dist/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# 本地/内部资料（不随仓库发布）
+.qoder/
+传化比赛文档/
+python/
+TASKS.md

@@ -1,0 +1,45 @@
+"""M0 抽象层：接口、DTO 与共享枚举。"""
+
+from core.abstraction.dtos import (  # noqa: F401
+    AuditEntry,
+    ChatResult,
+    ConflictClaims,
+    ConflictRecord,
+    EvalStandardRecord,
+    Evidence,
+    FusedEvidence,
+    KbChunkRecord,
+    KbDocumentRecord,
+    MemoryCandidate,
+    MemoryItemRecord,
+    RetrievalQuery,
+    ScoredChunk,
+    ToolResult,
+    ToolSpec,
+)
+from core.abstraction.enums import (  # noqa: F401
+    FUSION_PRIORITY,
+    ChunkStatus,
+    ConflictStatus,
+    DegradeLevel,
+    DomainStatus,
+    FeedbackRating,
+    HookAction,
+    HookStage,
+    IngestStatus,
+    MemoryLayer,
+    MemoryStatus,
+    PermissionScope,
+    RiskLevel,
+    Roles,
+    SourceType,
+    StandardStatus,
+)
+from core.abstraction.protocols import (  # noqa: F401
+    AuditRepository,
+    BlobRepository,
+    EvalRepository,
+    KnowledgeRepository,
+    MemoryRepository,
+    ModelGateway,
+)

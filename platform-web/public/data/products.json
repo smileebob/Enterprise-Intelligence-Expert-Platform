@@ -1,0 +1,251 @@
+{
+  "_meta": {
+    "description": "传化功能化学（模拟）产品主数据 —— 纺织印染助剂。本文件为赛事模拟数据，非真实企业产品。",
+    "is_mock": true,
+    "source_type": "internal",
+    "domain": "chemical",
+    "record_count": 10,
+    "field_notes": {
+      "performance": "关键性能指标，数值为模拟",
+      "applicable_fabric": "适用面料",
+      "process_ref": "关联工艺ID",
+      "compliance": "环保合规声明（内部资料口径，可能与外部标准冲突，见 conflict_scenarios）"
+    }
+  },
+  "products": [
+    {
+      "product_id": "TF-SOFT-2201",
+      "name": "氨基硅油柔软剂 TF-SOFT-2201",
+      "category": "柔软剂",
+      "sub_type": "氨基改性有机硅",
+      "tech_params": {
+        "外观": "乳白色微透液体",
+        "离子性": "弱阳离子",
+        "固含量%": 30,
+        "pH(1%工作液)": "5.5-6.5",
+        "氨基含量": "中高",
+        "黄变等级(180℃/涤纶)": "4级（轻微）"
+      },
+      "performance": {
+        "柔软度评分(1-10)": 9.0,
+        "耐洗性(50次洗涤柔软保持率%)": 82,
+        "适用性": "手感滑爽蓬松，适用于涤纶及涤棉"
+      },
+      "applicable_fabric": ["涤纶", "涤棉", "锦纶"],
+      "process_ref": "PROC-POLY-SOFT",
+      "compliance": "符合 OEKO-TEX Standard 100（内部检测）",
+      "notes": "主打高端涤类柔软整理，滑爽感强",
+      "data_source": "产品技术说明书 V3.2",
+      "source_ref": "内部产品库/TF-SOFT-2201技术说明书"
+    },
+    {
+      "product_id": "TF-SOFT-3305",
+      "name": "亲水氨基硅油 TF-SOFT-3305",
+      "category": "柔软剂",
+      "sub_type": "亲水改性有机硅",
+      "tech_params": {
+        "外观": "透明至微黄液体",
+        "离子性": "非离子偏弱阳",
+        "固含量%": 25,
+        "pH(1%工作液)": "6.0-7.0",
+        "亲水性": "良好（滴水沉降<3s）"
+      },
+      "performance": {
+        "柔软度评分(1-10)": 7.5,
+        "吸湿排汗性": "良好",
+        "耐洗性(30次保持率%)": 78
+      },
+      "applicable_fabric": ["棉", "涤棉", "粘胶"],
+      "process_ref": "PROC-COTTON-SOFT",
+      "compliance": "符合 OEKO-TEX Standard 100",
+      "notes": "兼顾柔软与亲水，适合贴身面料",
+      "data_source": "产品技术说明书 V2.0",
+      "source_ref": "内部产品库/TF-SOFT-3305技术说明书"
+    },
+    {
+      "product_id": "TF-SOFT-5501",
+      "name": "软片 TF-SOFT-5501",
+      "category": "柔软剂",
+      "sub_type": "硬脂酸酰胺类（软片）",
+      "tech_params": {
+        "外观": "淡黄色片状",
+        "离子性": "阳离子",
+        "固含量%": 100,
+        "开稀比例": "1:9（化成10%乳液使用）"
+      },
+      "performance": {
+        "柔软度评分(1-10)": 8.0,
+        "耐洗性(30次保持率%)": 65,
+        "适用性": "性价比高，通用型柔软"
+      },
+      "applicable_fabric": ["棉", "涤棉", "粘胶"],
+      "process_ref": "PROC-COTTON-SOFT",
+      "compliance": "符合 OEKO-TEX Standard 100",
+      "notes": "经济型柔软，耐洗一般",
+      "data_source": "产品技术说明书 V1.8",
+      "source_ref": "内部产品库/TF-SOFT-5501技术说明书"
+    },
+    {
+      "product_id": "TF-SS-2210",
+      "name": "嵌段硅油弹性柔软剂 TF-SS-2210",
+      "category": "柔软剂",
+      "sub_type": "嵌段共聚硅油",
+      "tech_params": {
+        "外观": "乳白色液体",
+        "离子性": "非离子",
+        "固含量%": 28,
+        "pH(1%工作液)": "6.0-7.0",
+        "手感": "弹滑、糯感"
+      },
+      "performance": {
+        "柔软度评分(1-10)": 9.5,
+        "耐洗性(50次保持率%)": 88,
+        "适用性": "高端弹滑手感，涤/涤氨弹性面料"
+      },
+      "applicable_fabric": ["涤纶", "涤氨", "锦纶"],
+      "process_ref": "PROC-POLY-SOFT",
+      "compliance": "符合 OEKO-TEX Standard 100 及 ZDHC（内部声明）",
+      "notes": "旗舰级柔软手感（内部评测柔软度9.5，外部竞品评测数值存在冲突，见 conflict_scenarios CS-04）",
+      "data_source": "产品技术说明书 V4.0",
+      "source_ref": "内部产品库/TF-SS-2210技术说明书"
+    },
+    {
+      "product_id": "TF-WR-6608",
+      "name": "无氟防水剂 TF-WR-6608",
+      "category": "防水剂",
+      "sub_type": "无氟（有机硅/聚氨酯体系）",
+      "tech_params": {
+        "外观": "乳白色液体",
+        "离子性": "非离子",
+        "固含量%": 20,
+        "pH(1%工作液)": "4.5-5.5",
+        "氟含量": "无氟（C0）"
+      },
+      "performance": {
+        "初始防水等级(AATCC22)": 90,
+        "耐洗后防水等级(50次洗涤)": 80,
+        "耐洗保持率%": 85,
+        "适用性": "无氟环保防水，适用于涤/涤棉"
+      },
+      "applicable_fabric": ["涤纶", "涤棉", "锦纶"],
+      "process_ref": "PROC-POLY-WR",
+      "compliance": "无氟，符合 ZDHC / OEKO-TEX（内部声明）",
+      "notes": "主打无氟环保防水（内部50次耐洗保持率85%，与外部文献对无氟耐洗性的普遍结论冲突，见 CS-01）",
+      "data_source": "产品技术说明书 V2.5 + 实验报告 EXP-2201/2205",
+      "source_ref": "内部产品库/TF-WR-6608技术说明书"
+    },
+    {
+      "product_id": "TF-WR-6612",
+      "name": "有机氟防水剂 TF-WR-6612（C6短链）",
+      "category": "防水剂",
+      "sub_type": "有机氟（C6 短链）",
+      "tech_params": {
+        "外观": "乳白色液体",
+        "离子性": "弱阳离子",
+        "固含量%": 30,
+        "氟类型": "C6 短链（不含PFOA/PFOS）"
+      },
+      "performance": {
+        "初始防水等级(AATCC22)": 100,
+        "耐洗后防水等级(50次洗涤)": 90,
+        "耐洗保持率%": 92,
+        "防油性": "良好（AATCC118 5级）"
+      },
+      "applicable_fabric": ["涤纶", "锦纶", "涤棉"],
+      "process_ref": "PROC-POLY-WR",
+      "compliance": "内部资料称『C6短链环保、不含PFOA/PFOS』（与外部ZDHC/REACH对全氟化合物限制口径存在冲突，见 CS-05）",
+      "notes": "高性能防水防油，耐洗优异，但氟类合规存在争议",
+      "data_source": "产品技术说明书 V3.0",
+      "source_ref": "内部产品库/TF-WR-6612技术说明书"
+    },
+    {
+      "product_id": "TF-DP-7701",
+      "name": "增深剂 TF-DP-7701",
+      "category": "功能整理剂",
+      "sub_type": "有机硅增深",
+      "tech_params": {
+        "外观": "乳白色液体",
+        "离子性": "非离子",
+        "固含量%": 22
+      },
+      "performance": {
+        "增深效果(K/S值提升%)": 25,
+        "对光泽影响": "轻微增亮",
+        "适用性": "深色/黑色面料增深，减少染料用量"
+      },
+      "applicable_fabric": ["棉", "涤纶", "真丝"],
+      "process_ref": "PROC-COTTON-SOFT",
+      "compliance": "符合 OEKO-TEX Standard 100",
+      "notes": "深色增深，兼顾手感",
+      "data_source": "产品技术说明书 V1.5",
+      "source_ref": "内部产品库/TF-DP-7701技术说明书"
+    },
+    {
+      "product_id": "TF-AS-8801",
+      "name": "抗静电剂 TF-AS-8801",
+      "category": "功能整理剂",
+      "sub_type": "非离子抗静电",
+      "tech_params": {
+        "外观": "浅黄色液体",
+        "离子性": "非离子",
+        "固含量%": 18
+      },
+      "performance": {
+        "表面电阻率(Ω)": "1e9-1e10",
+        "耐洗性(20次)": "中等",
+        "适用性": "化纤抗静电，可与柔软剂同浴"
+      },
+      "applicable_fabric": ["涤纶", "锦纶", "涤棉"],
+      "process_ref": "PROC-POLY-SOFT",
+      "compliance": "符合 OEKO-TEX Standard 100",
+      "notes": "可与氨基硅油同浴使用（一浴法）",
+      "data_source": "产品技术说明书 V2.1",
+      "source_ref": "内部产品库/TF-AS-8801技术说明书"
+    },
+    {
+      "product_id": "TF-FIX-9901",
+      "name": "固色剂 TF-FIX-9901",
+      "category": "固色剂",
+      "sub_type": "反应型无醛固色",
+      "tech_params": {
+        "外观": "无色至浅黄液体",
+        "离子性": "阳离子",
+        "固含量%": 20,
+        "甲醛": "无醛"
+      },
+      "performance": {
+        "湿摩擦牢度提升(级)": "0.5-1",
+        "水洗牢度提升(级)": "0.5-1",
+        "对色光影响": "轻微"
+      },
+      "applicable_fabric": ["棉", "粘胶", "涤棉"],
+      "process_ref": "PROC-COTTON-SOFT",
+      "compliance": "无醛，符合 OEKO-TEX Standard 100",
+      "notes": "提升活性/直接染料牢度",
+      "data_source": "产品技术说明书 V2.3",
+      "source_ref": "内部产品库/TF-FIX-9901技术说明书"
+    },
+    {
+      "product_id": "TF-WS-4401",
+      "name": "吸湿排汗整理剂 TF-WS-4401",
+      "category": "功能整理剂",
+      "sub_type": "亲水性高分子",
+      "tech_params": {
+        "外观": "透明液体",
+        "离子性": "非离子",
+        "固含量%": 15
+      },
+      "performance": {
+        "吸水率(%)": 220,
+        "蒸发速率": "较快",
+        "耐洗性(30次保持率%)": 80
+      },
+      "applicable_fabric": ["涤纶", "涤棉", "锦纶"],
+      "process_ref": "PROC-POLY-SOFT",
+      "compliance": "符合 OEKO-TEX Standard 100",
+      "notes": "运动面料吸湿速干",
+      "data_source": "产品技术说明书 V1.9",
+      "source_ref": "内部产品库/TF-WS-4401技术说明书"
+    }
+  ]
+}

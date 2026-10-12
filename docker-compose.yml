@@ -1,0 +1,134 @@
+# 企业级领域专家 Agent 平台 · Docker Compose（初赛一键起栈，零云依赖）
+# 默认 5 容器：web / api / worker / db(PG16+pgvector) / valkey
+# 可选 profiles：minio（多模态原件）/ ollama（本地模型）/ observability（Prometheus+Grafana）
+# 全部演示数据为赛事模拟数据（is_mock）。密钥只经环境变量注入。
+
+name: angentplatform
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: angentplatform
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d angentplatform"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5432:5432"
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--appendonly", "yes"]
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./platform
+      dockerfile: Dockerfile.api
+    env_file: ./platform/.env
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+psycopg://app:${POSTGRES_PASSWORD:-app}@db:5432/angentplatform
+      CACHE_BACKEND: redis
+      REDIS_URL: redis://valkey:6379/0
+      CELERY_TASK_ALWAYS_EAGER: "false"
+      CELERY_BROKER_URL: redis://valkey:6379/1
+      LOG_FORMAT: json
+      METRICS_ENABLED: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      context: ./platform
+      dockerfile: Dockerfile.api
+    command: ["sh", "-c", "celery -A core.celery_app.celery_app worker -B -l info --concurrency=2"]
+    env_file: ./platform/.env
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+psycopg://app:${POSTGRES_PASSWORD:-app}@db:5432/angentplatform
+      CACHE_BACKEND: redis
+      REDIS_URL: redis://valkey:6379/0
+      CELERY_TASK_ALWAYS_EAGER: "false"
+      CELERY_BROKER_URL: redis://valkey:6379/1
+      LOG_FORMAT: json
+    depends_on:
+      api:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./platform-web
+      dockerfile: Dockerfile.web
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+
+  # ---- 可选 profile：多模态原件对象存储（MinIO 为 AGPL-3.0，仅演示可选） ----
+  minio:
+    image: minio/minio:latest
+    profiles: ["minio"]
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  # ---- 可选 profile：本地模型（Ollama；配合 DEMO_MODE=live + LLM_BASE_URL=http://ollama:11434/v1） ----
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+
+  # ---- 可选 profile：可观测（Prometheus + Grafana；指标端点 /metrics） ----
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: ["observability"]
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    profiles: ["observability"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    ports:
+      - "3000:3000"
+
+volumes:
+  db_data:
+  valkey_data:
+  minio_data:
+  ollama_data:

@@ -1,0 +1,50 @@
+# 招商领域插件（AI 产业招商专家）——轻量装配（证明「换配置即换领域」）
+domain_id: investment
+name: AI 产业招商专家
+version: 0.1.0
+status: draft                  # 初赛以 draft 交付，可一键 publish 转 online 演示
+
+# ① 知识包
+knowledge_binding:
+  collections:
+    - { name: investment_input, source_types: [external, internal], permission_level: 1 }
+  default_partition_order: [internal, external]
+  fusion_priority: [confirmed, internal, stated, external, ai_inferred]
+  compliance_override: { enabled: false, category_tag: "compliance" }
+
+# ② 评估配置：企业六维（技术方案 04 §4.2：权重按 track 配置）
+eval_config:
+  object_type: enterprise_profile
+  standard_ref: std-2026Q4-investment-v1
+  dimensions:
+    - { code: E1, name: 技术先进性,   default_weight: 20, scorer: investment.e1_technology }
+    - { code: E2, name: 资本健康度,   default_weight: 20, scorer: investment.e2_capital }
+    - { code: E3, name: 团队实力,     default_weight: 15, scorer: investment.e3_team }
+    - { code: E4, name: 市场与商业化, default_weight: 15, scorer: investment.e4_market }
+    - { code: E5, name: 成长动能,     default_weight: 15, scorer: investment.e5_growth }
+    - { code: E6, name: 落地匹配度,   default_weight: 15, scorer: investment.e6_fit }
+  scenario_profiles:
+    # 赛道权重表（产品 02 §4.2；由领域标准层配置，不改代码）
+    默认:     { E1: 20, E2: 20, E3: 15, E4: 15, E5: 15, E6: 15 }
+    创新药:   { E1: 30, E2: 20, E3: 15, E4: 15, E5: 10, E6: 10 }
+    基因细胞: { E1: 30, E2: 25, E3: 15, E4: 10, E5: 10, E6: 10 }
+    AI制药:   { E1: 20, E2: 20, E3: 20, E4: 15, E5: 15, E6: 10 }
+    器械:     { E1: 25, E2: 15, E3: 15, E4: 25, E5: 10, E6: 10 }
+    医美:     { E1: 15, E2: 20, E3: 15, E4: 30, E5: 10, E6: 10 }
+
+# ③ 智能体配置
+agent_config:
+  role_prompt_ref: prompts/investment_system.md
+  clarify_slots: [产业方向, 企业阶段, 落地需求, 政策需求]
+  constraints: [数据充分度标注, 强制引用, 无据不下结论]
+  confidence_threshold: 0.6
+  routing_keywords:
+    parallel: [政策, 融资, 专利, 趋势]
+
+# ④ 领域工具集（轻量）
+toolset_ref: tools/investment_tools.yaml
+
+# ⑤ 记忆策略
+memory_policy:
+  promotion: { min_distinct_users: 2, require_review: true }
+  decay:     { gt_1y: 0.8, gt_2y: 0.5, archive_below: 0.3 }

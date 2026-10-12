@@ -1,0 +1,183 @@
+{
+  "_meta": {
+    "description": "AI 产业招商专家（副领域）赛事模拟数据：生物医药企业/画像/园区资源/政策。is_mock=true，与主领域数据集同构标注。",
+    "is_mock": true,
+    "domain": "investment",
+    "record_count": 13
+  },
+  "enterprises": [
+    {
+      "ent_id": "ENT-1001",
+      "name": "启元生物科技（模拟）",
+      "aliases": ["启元生物"],
+      "track": "AI制药",
+      "stage": "B轮",
+      "region": "杭州",
+      "unified_credit_code": "91330100MA2XXXXX1A",
+      "source_type": "external",
+      "source_ref": "外部工商数据/ENT-1001",
+      "profile": {
+        "tech_direction": {"核心": "AI驱动的先导化合物筛选", "平台": "自研分子生成模型 + 湿实验验证闭环"},
+        "funding_stage": "B轮（2025-09，2.1亿元）",
+        "rd_needs": {"人才": "算法+药化复合团队", "设备": "高通量筛选平台"},
+        "expansion_signals": {"扩产": "拟建 GMP 中试基地", "选址": "关注杭州/苏州"},
+        "six_dim": {"E1": 88, "E2": 82, "E3": 79, "E4": 74, "E5": 86, "E6": 90},
+        "data_completeness": 0.85
+      }
+    },
+    {
+      "ent_id": "ENT-1002",
+      "name": "澄源基因医学（模拟）",
+      "aliases": ["澄源基因"],
+      "track": "基因细胞",
+      "stage": "A轮",
+      "region": "上海",
+      "unified_credit_code": "91310115MA1XXXXX2B",
+      "source_type": "external",
+      "source_ref": "外部工商数据/ENT-1002",
+      "profile": {
+        "tech_direction": {"核心": "通用型 CAR-T", "管线": "2 条临床 I 期"},
+        "funding_stage": "A轮（2025-12，1.2亿元）",
+        "rd_needs": {"临床": "多中心临床资源", "生产": "病毒载体产能"},
+        "expansion_signals": {"扩张": "计划设立华东研发中心"},
+        "six_dim": {"E1": 85, "E2": 70, "E3": 76, "E4": 66, "E5": 80, "E6": 78},
+        "data_completeness": 0.7
+      }
+    },
+    {
+      "ent_id": "ENT-1003",
+      "name": "柏睿医疗器械（模拟）",
+      "aliases": ["柏睿医疗"],
+      "track": "器械",
+      "stage": "C轮",
+      "region": "苏州",
+      "unified_credit_code": "91320594MA1XXXXX3C",
+      "source_type": "external",
+      "source_ref": "外部工商数据/ENT-1003",
+      "profile": {
+        "tech_direction": {"核心": "手术机器人", "注册": "三类证获批 1 项"},
+        "funding_stage": "C轮（2025-06，3.5亿元）",
+        "rd_needs": {"供应链": "精密加工配套", "市场": "院端渠道"},
+        "expansion_signals": {"产能": "扩产手术机器人产线"},
+        "six_dim": {"E1": 80, "E2": 88, "E3": 83, "E4": 85, "E5": 76, "E6": 72},
+        "data_completeness": 0.9
+      }
+    },
+    {
+      "ent_id": "ENT-1004",
+      "name": "沐恩生物制药（模拟）",
+      "aliases": ["沐恩生物"],
+      "track": "创新药",
+      "stage": "天使轮",
+      "region": "杭州",
+      "unified_credit_code": "91330108MA2XXXXX4D",
+      "source_type": "external",
+      "source_ref": "外部工商数据/ENT-1004",
+      "profile": {
+        "tech_direction": {"核心": "小核酸药物递送", "阶段": "临床前"},
+        "funding_stage": "天使轮（2026-01，2000万元）",
+        "rd_needs": {"实验室": "P2 实验室空间", "资金": "pre-A 融资"},
+        "expansion_signals": {"入驻": "寻求孵化器场地"},
+        "six_dim": {"E1": 78, "E2": 55, "E3": 70, "E4": 52, "E5": 74, "E6": 82},
+        "data_completeness": 0.55
+      }
+    },
+    {
+      "ent_id": "ENT-1005",
+      "name": "维塔医美科技（模拟）",
+      "aliases": ["维塔医美"],
+      "track": "医美",
+      "stage": "B轮",
+      "region": "广州",
+      "unified_credit_code": "91440101MA5XXXXX5E",
+      "source_type": "external",
+      "source_ref": "外部工商数据/ENT-1005",
+      "profile": {
+        "tech_direction": {"核心": "重组胶原蛋白填充剂", "注册": "三类证在审"},
+        "funding_stage": "B轮（2025-11，1.8亿元）",
+        "rd_needs": {"产能": "无菌灌装", "渠道": "连锁医美机构"},
+        "expansion_signals": {"区域": "华北渠道扩张"},
+        "six_dim": {"E1": 74, "E2": 80, "E3": 72, "E4": 82, "E5": 78, "E6": 66},
+        "data_completeness": 0.75
+      }
+    },
+    {
+      "ent_id": "ENT-1006",
+      "name": "澜芯合成生物（模拟）",
+      "aliases": ["澜芯生物"],
+      "track": "创新药",
+      "stage": "Pre-A",
+      "region": "杭州",
+      "unified_credit_code": "91330110MA2XXXXX6F",
+      "source_type": "external",
+      "source_ref": "外部工商数据/ENT-1006",
+      "profile": {
+        "tech_direction": {"核心": "酶催化绿色合成", "平台": "AI 酶设计"},
+        "funding_stage": "Pre-A（2025-10，6000万元）",
+        "rd_needs": {"中试": "中试车间", "人才": "发酵工程团队"},
+        "expansion_signals": {"落地": "拟在长三角建中试基地"},
+        "six_dim": {"E1": 82, "E2": 66, "E3": 74, "E4": 60, "E5": 84, "E6": 86},
+        "data_completeness": 0.65
+      }
+    }
+  ],
+  "park_resources": [
+    {
+      "resource_id": "PARK-01",
+      "type": "空间",
+      "name": "生命健康产业园 A 区研发楼（模拟）",
+      "attributes": {"面积": "1200㎡ 起", "适配": ["实验室", "研发办公"], "层高": "4.5m", "配套": "P2 实验室预留"},
+      "availability": "available"
+    },
+    {
+      "resource_id": "PARK-02",
+      "type": "空间",
+      "name": "GMP 标准厂房 B3 栋（模拟）",
+      "attributes": {"面积": "3000㎡", "适配": ["中试", "GMP 生产"], "洁净等级": "C/D 级"},
+      "availability": "available"
+    },
+    {
+      "resource_id": "PARK-03",
+      "type": "产业配套",
+      "name": "公共仪器共享平台（模拟）",
+      "attributes": {"设备": ["高分辨质谱", "流式细胞仪", "高通量筛选"], "收费": "园区企业 5 折"},
+      "availability": "available"
+    },
+    {
+      "resource_id": "PARK-04",
+      "type": "产业配套",
+      "name": "临床转化合作网络（模拟）",
+      "attributes": {"合作医院": "3 家三甲（模拟）", "服务": ["IIT 研究", "多中心临床协调"]},
+      "availability": "available"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-01",
+      "title": "生物医药产业高质量发展若干政策（模拟）",
+      "applicability": {"适配": ["创新药", "AI制药", "基因细胞"], "条件": "落户园区且实到资本≥1000万元"},
+      "issuing_body": "某区政府（模拟）",
+      "valid_until": "2027-12-31",
+      "source_type": "external",
+      "source_ref": "园区政策库/POL-01"
+    },
+    {
+      "policy_id": "POL-02",
+      "title": "高端人才引进补贴办法（模拟）",
+      "applicability": {"适配": ["全部赛道"], "条件": "全职引进博士/领军人才"},
+      "issuing_body": "某区人社局（模拟）",
+      "valid_until": "2026-12-31",
+      "source_type": "external",
+      "source_ref": "园区政策库/POL-02"
+    },
+    {
+      "policy_id": "POL-03",
+      "title": "医疗器械注册奖励实施细则（模拟）",
+      "applicability": {"适配": ["器械", "医美"], "条件": "取得二/三类医疗器械注册证"},
+      "issuing_body": "某区经信局（模拟）",
+      "valid_until": "2027-06-30",
+      "source_type": "external",
+      "source_ref": "园区政策库/POL-03"
+    }
+  ]
+}

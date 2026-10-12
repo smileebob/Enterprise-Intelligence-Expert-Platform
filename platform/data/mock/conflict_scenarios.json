@@ -1,0 +1,137 @@
+{
+  "_meta": {
+    "description": "内置冲突场景 —— 用于演示与验证『内外部知识融合与冲突消解』核心能力。每个场景含内部专有结论、外部通用结论、冲突类型、期望消解策略与标准答案要点，可作为 Demo 的测试用例与评分基准。",
+    "is_mock": true,
+    "domain": "chemical",
+    "record_count": 5,
+    "resolution_principle": "内部专有(internal)优先级 P0 > AI推断 > 外部通用(external) P2；冲突必须显式标注，不得用外部静默覆盖内部；按置信度加权裁决，无法消解则输出『存在冲突，建议人工核验』",
+    "usage": "Demo 时向智能体提问对应 query，检验其是否：①以内部为准给出结论 ②显式标注冲突与外部观点 ③逐条附来源引用 ④给出置信度与人工核验提示"
+  },
+  "conflict_scenarios": [
+    {
+      "conflict_id": "CS-01",
+      "title": "无氟防水剂的耐洗性：内部实测 vs 外部行业普遍结论",
+      "topic": "无氟防水耐洗性",
+      "internal_claim": {
+        "source_type": "internal",
+        "refs": ["EXP-2201", "TF-WR-6608", "FORM-6608-WR"],
+        "statement": "在配套无金属交联剂8g/L、焙烘160℃×90s条件下，TF-WR-6608 无氟防水50次洗涤后防水等级保持80、保持率85%。",
+        "confidence": 0.9
+      },
+      "external_claim": {
+        "source_type": "external",
+        "refs": ["EXT-PAP-002"],
+        "statement": "行业普遍结论：无氟防水剂耐洗性弱于有机氟，多数体系30次洗涤后保持率低于65%。",
+        "confidence": 0.65
+      },
+      "conflict_type": "数值/结论冲突（内部特定配方实测 vs 外部行业普遍规律）",
+      "expected_resolution": {
+        "primary": "以内部实测为准（internal P0，置信度0.9 > 外部0.65）",
+        "must_note": "必须标注：外部文献反映的是『无氟体系普遍规律』，而内部85%是『特定配方+交联剂+焙烘条件』下的实测结果，二者不矛盾于同一前提；对外沟通时应说明达成条件（交联剂用量与焙烘到位）。",
+        "action": "推荐 TF-WR-6608 + FORM-6608-WR，并强调交联剂与焙烘是达成耐洗的关键；提示客户复现需按内部工艺执行。"
+      },
+      "demo_query": "客户要涤纶面料做无氟防水，要求耐洗50次不明显下降，无氟能做到吗？",
+      "trap": "朴素RAG可能直接采信外部『无氟耐洗差』而否定内部产品，或反过来无依据地夸大——正确做法是以内部实测为准并说明达成条件+标注外部普遍规律"
+    },
+    {
+      "conflict_id": "CS-02",
+      "title": "氨基硅油黄变程度：内部160℃实测 vs 外部高温机理结论",
+      "topic": "氨基硅油黄变",
+      "internal_claim": {
+        "source_type": "internal",
+        "refs": ["EXP-3301", "TF-SOFT-2201"],
+        "statement": "TF-SOFT-2201 在160℃×90s下白涤纶黄变4级（轻微），180℃下加重至3级。",
+        "confidence": 0.88
+      },
+      "external_claim": {
+        "source_type": "external",
+        "refs": ["EXT-PAP-003"],
+        "statement": "氨基硅油高温焙烘易黄变，180℃以上评级常降至2-3级。",
+        "confidence": 0.7
+      },
+      "conflict_type": "口径/前提冲突（温度条件不同导致的结论差异）",
+      "expected_resolution": {
+        "primary": "以内部实测为准，但需说明『黄变与焙烘温度强相关』这一外部机理成立",
+        "must_note": "标注：内外结论并不真正矛盾——差异来自焙烘温度。内部160℃黄变轻微(4级)，外部所指为180℃以上(2-3级)。白色/浅色涤纶应控制焙烘≤170℃。",
+        "action": "对白色涤纶客户，推荐 TF-SOFT-2201 但严格控温≤170℃，或改用低黄变/亲水型号；解释黄变机理来自胺氧化。"
+      },
+      "demo_query": "客户反馈用了我们的氨基硅油后白色涤纶泛黄，是什么原因、怎么解决？",
+      "trap": "朴素RAG可能只答外部机理或只答内部数据，正确做法是融合：内部实测温度阈值 + 外部机理解释 + 给出控温/换型号方案"
+    },
+    {
+      "conflict_id": "CS-03",
+      "title": "无氟防水焙烘工艺参数：内部160℃×90s vs 外部专利180℃×60s",
+      "topic": "焙烘工艺参数",
+      "internal_claim": {
+        "source_type": "internal",
+        "refs": ["PROC-POLY-WR", "FORM-6608-WR", "EXP-2205"],
+        "statement": "内部推荐无氟防水焙烘160℃×90s；对比实验显示该条件耐洗持平、强力保留更好(96% vs 91%)、黄变更轻。",
+        "confidence": 0.9
+      },
+      "external_claim": {
+        "source_type": "external",
+        "refs": ["EXT-PAT-001"],
+        "statement": "某专利建议180℃×60s以实现充分交联。",
+        "confidence": 0.6
+      },
+      "conflict_type": "工艺参数冲突",
+      "expected_resolution": {
+        "primary": "以内部工艺为准（有对比实验 EXP-2205 支撑，置信度0.9 > 外部专利0.6）",
+        "must_note": "标注外部专利的180℃×60s为另一种可行路径，但内部对比实验显示160℃×90s在强力保留与黄变上更优。",
+        "action": "推荐内部工艺160℃×90s，并引用 EXP-2205 对比数据说明理由；若客户设备/交期限制需高温短时，提示权衡强力与黄变风险。"
+      },
+      "demo_query": "做无氟防水焙烘到底该用多少温度、多长时间？有专利说180度60秒。",
+      "trap": "考察是否会被外部专利带偏；正确做法是以内部对比实验为准，但承认外部参数也是一种路径并说明权衡"
+    },
+    {
+      "conflict_id": "CS-04",
+      "title": "嵌段硅油柔软度评分：内部9.5 vs 外部第三方盲评7",
+      "topic": "柔软度性能数值",
+      "internal_claim": {
+        "source_type": "internal",
+        "refs": ["EXP-2210", "TF-SS-2210"],
+        "statement": "TF-SS-2210 复配方案内部评测柔软度9.5分（统一预处理与洗涤条件）。",
+        "confidence": 0.92
+      },
+      "external_claim": {
+        "source_type": "external",
+        "refs": ["EXT-RPT-007"],
+        "statement": "第三方跨品牌盲评同类嵌段硅油柔软度综合约7分（未统一预处理与洗涤条件）。",
+        "confidence": 0.5
+      },
+      "conflict_type": "数值冲突（测试条件不一致导致的不可直接比较）",
+      "expected_resolution": {
+        "primary": "以内部评测为准（置信度0.92），但需说明外部评分条件不统一、不可直接对比",
+        "must_note": "标注：柔软度为主观+仪器综合评分，跨机构/跨条件不可直接比较；外部7分为多品牌混合盲评且未统一洗涤，参考价值有限(confidence 0.5)。",
+        "action": "对客户可引用内部9.5分及测试条件；不采信外部7分作为本产品结论，但可提及行业存在不同评测口径。"
+      },
+      "demo_query": "网上有评测说嵌段硅油柔软度就7分，你们TF-SS-2210凭什么说9.5分？",
+      "trap": "考察对『测试条件不一致导致数值不可比』的识别；正确做法是坚持内部数据但解释外部口径差异与低可信度"
+    },
+    {
+      "conflict_id": "CS-05",
+      "title": "C6有机氟防水剂合规性：内部『环保』声明 vs 外部PFAS限制法规",
+      "topic": "环保合规",
+      "internal_claim": {
+        "source_type": "internal",
+        "refs": ["TF-WR-6612", "EXP-6612"],
+        "statement": "内部产品资料称 TF-WR-6612 为C6短链、不含PFOA/PFOS、『环保』，防水防油性能优异(50次92%)。",
+        "confidence": 0.85
+      },
+      "external_claim": {
+        "source_type": "external",
+        "refs": ["EXT-STD-006", "EXT-STD-005"],
+        "statement": "ZDHC MRSL 与欧盟 REACH 对全氟/多氟烷基物质(PFAS，含部分C6相关物质)设限或拟限制，出口欧盟场景C6防水剂存在合规风险。",
+        "confidence": 0.8
+      },
+      "conflict_type": "合规口径冲突（内部营销口径 vs 外部法规）",
+      "expected_resolution": {
+        "primary": "合规问题以外部法规为准（此场景外部优先级高于内部营销声明）——这是『内部优先』原则的重要例外：涉及法规/安全/合规时以权威外部标准为准",
+        "must_note": "标注：内部『环保』为营销口径，不能凌驾于 ZDHC/REACH 等法规之上；出口欧盟订单应评估PFAS限制风险，优先推荐无氟 TF-WR-6608。",
+        "action": "对内销/非受限场景可用 TF-WR-6612（性能优异）；对出口欧盟订单，提示合规风险并推荐无氟方案 TF-WR-6608 + 交联剂，或要求提供最新合规检测。"
+      },
+      "demo_query": "客户做出口欧盟的户外面料，要高性能防水，能用我们的C6有机氟TF-WR-6612吗？",
+      "trap": "这是最关键的合规陷阱：考察智能体是否会盲目『内部优先』而忽视外部法规。正确做法是识别合规例外，以外部法规为准，提示风险并推荐无氟替代"
+    }
+  ]
+}

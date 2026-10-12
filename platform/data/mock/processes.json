@@ -1,0 +1,102 @@
+{
+  "_meta": {
+    "description": "传化功能化学（模拟）工艺数据 —— 纺织印染后整理工艺条件。赛事模拟数据。",
+    "is_mock": true,
+    "source_type": "internal",
+    "domain": "chemical",
+    "record_count": 5
+  },
+  "processes": [
+    {
+      "process_id": "PROC-POLY-SOFT",
+      "name": "涤纶类柔软/功能整理工艺（浸轧-焙烘）",
+      "method": "二浸二轧",
+      "conditions": {
+        "轧余率%": "60-70",
+        "工作液pH": "5.5-6.5",
+        "预烘": "100℃ × 2min",
+        "焙烘": "160℃ × 90s（氨基硅油体系上限170℃以防黄变）",
+        "浴比": "不适用（连续浸轧）"
+      },
+      "applicable_fabric": ["涤纶", "涤棉", "涤氨", "锦纶"],
+      "equipment": "轧车 + 热风拉幅定型机",
+      "key_controls": ["轧余率均匀性", "焙烘温度与时间", "工作液pH稳定性"],
+      "common_issues": ["焙烘过高致黄变", "轧液不匀致手感花", "硅油破乳粘辊"],
+      "source_type": "internal",
+      "source_ref": "内部工艺文件/PROC-POLY-SOFT",
+      "notes": "内部推荐焙烘160℃×90s；部分外部专利/标准建议180℃×60s（冲突 CS-03）"
+    },
+    {
+      "process_id": "PROC-POLY-WR",
+      "name": "涤纶类防水整理工艺（浸轧-焙烘）",
+      "method": "二浸二轧",
+      "conditions": {
+        "轧余率%": "55-70",
+        "工作液pH": "4.5-5.5",
+        "预烘": "100℃ × 2min",
+        "焙烘": "无氟体系160℃×90s；有机氟体系170℃×60s",
+        "备注": "防水整理焙烘充分才能交联成膜"
+      },
+      "applicable_fabric": ["涤纶", "涤棉", "锦纶"],
+      "equipment": "轧车 + 热风拉幅定型机",
+      "key_controls": ["交联充分（焙烘到位）", "无氟体系需配套交联剂", "pH控制"],
+      "common_issues": ["焙烘不足致耐洗差", "无氟防水初始防水偏低", "与柔软剂同浴相容性"],
+      "source_type": "internal",
+      "source_ref": "内部工艺文件/PROC-POLY-WR",
+      "notes": "无氟防水耐洗性依赖交联剂与焙烘，内部实验达50次85%保持（EXP-2201）"
+    },
+    {
+      "process_id": "PROC-COTTON-SOFT",
+      "name": "棉类柔软/多功能整理工艺",
+      "method": "浸轧或浸渍",
+      "conditions": {
+        "轧余率%": "70-80",
+        "工作液pH": "6.0-7.0",
+        "预烘": "100℃ × 2min",
+        "焙烘": "150℃ × 3min",
+        "浴比(浸渍)": "1:8-1:10"
+      },
+      "applicable_fabric": ["棉", "粘胶", "涤棉"],
+      "equipment": "轧车 / 溢流染色机 + 拉幅定型机",
+      "key_controls": ["固色剂与硅油相容性（先稀释后混）", "焙烘温度避免棉泛黄", "pH中性"],
+      "common_issues": ["阳离子固色剂与阴离子助剂沉淀", "棉高温泛黄", "柔软不匀"],
+      "source_type": "internal",
+      "source_ref": "内部工艺文件/PROC-COTTON-SOFT"
+    },
+    {
+      "process_id": "PROC-SILK-FUNC",
+      "name": "真丝增深/柔软整理工艺",
+      "method": "浸渍（低温）",
+      "conditions": {
+        "浴比": "1:10",
+        "工作液pH": "5.5-6.5（弱酸）",
+        "处理温度": "40-50℃ × 20min",
+        "烘干": "80-90℃ 低温烘干（避免高温伤丝）"
+      },
+      "applicable_fabric": ["真丝"],
+      "equipment": "常温溢流机 / 挂染设备",
+      "key_controls": ["低温处理保护蛋白纤维", "弱酸pH", "避免强机械力"],
+      "common_issues": ["高温致真丝泛黄脆化", "强力下降", "光泽损失"],
+      "source_type": "internal",
+      "source_ref": "内部工艺文件/PROC-SILK-FUNC"
+    },
+    {
+      "process_id": "PROC-POLY-WICK",
+      "name": "涤纶吸湿排汗整理工艺",
+      "method": "浸轧-焙烘",
+      "conditions": {
+        "轧余率%": "60-70",
+        "工作液pH": "6.0-7.0",
+        "预烘": "100℃ × 2min",
+        "焙烘": "160℃ × 60s"
+      },
+      "applicable_fabric": ["涤纶", "涤棉", "锦纶"],
+      "equipment": "轧车 + 拉幅定型机",
+      "key_controls": ["亲水整理剂均匀性", "与柔软剂配伍（亲水柔软优先）"],
+      "common_issues": ["疏水柔软剂抵消吸湿性", "耐洗下降"],
+      "source_type": "internal",
+      "source_ref": "内部工艺文件/PROC-POLY-WICK",
+      "notes": "吸湿排汗需配亲水柔软剂（TF-SOFT-3305），忌用疏水氨基硅油"
+    }
+  ]
+}

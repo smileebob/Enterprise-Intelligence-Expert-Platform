@@ -1,0 +1,77 @@
+# 化学领域插件（AI 化学家）——五要素齐全（技术方案 02 §2.4）
+domain_id: chemical
+name: AI 化学家
+version: 0.3.0
+status: online                  # draft / online / offline（MVP 两态直发+版本回滚）
+
+# ① 知识包：知识范围、六级分级规则与分区策略
+knowledge_binding:
+  collections:
+    - { name: chemical_internal, source_types: [internal, raw], permission_level: 2 }
+    - { name: chemical_external, source_types: [external],    permission_level: 1 }
+  default_partition_order: [internal, external]       # 分区召回顺序（服务端决定）
+  fusion_priority: [confirmed, internal, stated, external, ai_inferred]
+  compliance_override:
+    enabled: true                                     # CS-05 例外开关（硬规则，不得下沉 LLM）
+    category_tag: "compliance"
+  compliance_ext_ids: ["EXT-STD-005", "EXT-STD-006"]  # 打 compliance 标签的外部法规/标准条目
+  # 术语映射：结构化记录 → 检索主题签名（冲突检测对齐用）
+  topic_signatures:
+    无氟耐洗: [无氟, 耐洗, 保持率]
+    黄变: [黄变, 氨基硅油, 焙烘]
+    焙烘工艺: [焙烘, 温度, 时间, 专利]
+    柔软度: [柔软度, 嵌段硅油, 评测]
+    合规: [合规, PFAS, REACH, ZDHC, 全氟, C6]
+
+# ② 评估配置：六维定义 + 权重 + 领域标准引用（08 文档 v1.0 定稿）
+#    注：成本系数/扣分档位等公式常量版本化于 domains/chemical/evaluation/config.py（风险 R3）
+eval_config:
+  object_type: solution
+  standard_ref: std-2026Q4-chemical-v1
+  dimensions:
+    - { code: D1, name: 性能达成度,       default_weight: 30, scorer: chemical.d1_performance }
+    - { code: D2, name: 工艺适配性,       default_weight: 20, scorer: chemical.d2_process }
+    - { code: D3, name: 面料适配性与风险, default_weight: 15, scorer: chemical.d3_fabric }
+    - { code: D4, name: 历史验证充分度,   default_weight: 15, scorer: chemical.d4_validation }
+    - { code: D5, name: 成本与经济性,     default_weight: 12, scorer: chemical.d5_cost }
+    - { code: D6, name: 合规与可持续性,   default_weight: 8,  scorer: chemical.d6_compliance }
+  scenario_profiles:
+    默认:            { D1: 30, D2: 20, D3: 15, D4: 15, D5: 12, D6: 8 }
+    出口合规敏感:     { D1: 25, D2: 15, D3: 15, D4: 15, D5: 10, D6: 20 }
+    成本敏感:         { D1: 25, D2: 18, D3: 12, D4: 12, D5: 25, D6: 8 }
+    高端品牌性能优先: { D1: 40, D2: 15, D3: 15, D4: 15, D5: 7,  D6: 8 }
+    设备受限快交期:   { D1: 25, D2: 30, D3: 15, D4: 12, D5: 10, D6: 8 }
+
+# ③ 智能体配置：角色、澄清槽位、行为约束、路由关键词
+agent_config:
+  role_prompt_ref: prompts/chemist_system.md
+  clarify_slots: [面料成分, 目标性能, 工艺条件, 目标市场, 成本约束]
+  # 澄清必填策略（按问题类型；由插件声明，核心引擎不硬编码领域语义）
+  required_slots_by_mode:
+    selection: [面料成分, 目标性能]
+    diagnostic: [面料成分]
+    process: []
+    analysis: []
+    challenge: []
+  constraints: [内部优先, 强制引用, 无据不下结论, 冲突显式标注, 合规例外]
+  confidence_threshold: 0.6
+  # 问题路由：命中即内外部并行召回（技术方案 03 §3.1 检索流程）
+  routing_keywords:
+    parallel: [法规, 标准, 合规, 出口, 欧盟, REACH, ZDHC, PFAS, 专利, 文献, 机理, 趋势, 评测, 对比, 冲突]
+  # 槽位提取词典（离线规则通道；live 模式由大模型增强）
+  slot_dictionary:
+    面料成分: [涤纶, 涤棉, 涤氨, 锦纶, 棉, 真丝, 粘胶, 面料, 针织, 梭织]
+    目标性能: [防水, 无氟, 有机氟, 柔软, 耐洗, 抗静电, 增深, 吸湿排汗, 固色, 防油]
+    工艺条件: [浸轧, 浸渍, 一浴, 焙烘, 温度, 设备, 轧余率]
+    目标市场: [内销, 出口, 欧盟, 服装, 户外, 出口欧盟]
+    成本约束: [成本, 价格, 降本, 预算]
+
+# ④ 领域工具集：MCP 同构契约（02 §2.5），初赛进程内注册
+toolset_ref: tools/chemical_tools.yaml
+#   内含：search_products / search_formulas / search_experiments /
+#         search_external / score_solution / check_compliance
+
+# ⑤ 记忆策略：晋升规则与衰减参数
+memory_policy:
+  promotion: { min_distinct_users: 2, require_review: true }
+  decay:     { gt_1y: 0.8, gt_2y: 0.5, archive_below: 0.3 }

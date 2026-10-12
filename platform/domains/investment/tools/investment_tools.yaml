@@ -1,0 +1,41 @@
+# 招商领域工具集契约（轻量）
+tools:
+  - name: search_enterprises
+    description: 按产业方向/阶段/区域检索企业库（含画像与数据充分度）
+    permission: tool.investment.search
+    risk_level: normal
+    domain: investment
+    input_schema:
+      type: object
+      properties:
+        track: { type: string }
+        stage: { type: string }
+        region: { type: string }
+        query: { type: string }
+      required: []
+  - name: match_park_resources
+    description: 按企业需求匹配园区空间/政策/产业资源
+    permission: tool.investment.search
+    risk_level: normal
+    domain: investment
+    input_schema:
+      type: object
+      properties:
+        ent_id: { type: string }
+        needs: { type: array, items: { type: string } }
+      required: [ent_id]
+  # 外部系统预留插口：资质核实（当前实现为模拟数据源，见 domains/investment/toolset.py::_verify_item；
+  # 接真实工商/认证系统时替换实现即可，契约/权限/审计/来源标注链路不变。
+  # 注：只读核实类复用 tool.investment.search；如需独立授权点，新增 tool.investment.verify
+  # 并在授权矩阵（core/gateway/permissions.py）登记后随启动迁移授予响应角色。）
+  - name: verify_qualification
+    description: 企业资质核实（外部核实系统预留插口；当前为模拟数据源）
+    permission: tool.investment.search
+    risk_level: normal
+    domain: investment
+    input_schema:
+      type: object
+      properties:
+        ent_id: { type: string }
+        items: { type: array, items: { type: string } }
+      required: [ent_id]

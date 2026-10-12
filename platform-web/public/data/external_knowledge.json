@@ -1,0 +1,142 @@
+{
+  "_meta": {
+    "description": "外部专业知识（模拟）—— 公开专利、学术文献、行业标准。赛事模拟数据，专利号/DOI均为虚构，仅用于演示内外部知识融合与冲突消解。",
+    "is_mock": true,
+    "source_type": "external",
+    "domain": "chemical",
+    "record_count": 8,
+    "note": "外部知识融合优先级 P2（补充/佐证），禁止覆盖内部已确认事实（见业务规则 BR-01/BR-03）"
+  },
+  "external_knowledge": [
+    {
+      "ext_id": "EXT-PAT-001",
+      "type": "专利",
+      "title": "一种无氟防水整理剂及其制备方法（CN11XXXXXXA，模拟）",
+      "source": "某公开专利库",
+      "published_at": "2024-06",
+      "key_claims": [
+        "无氟防水整理剂以有机硅/聚氨酯为主体，配合交联剂成膜",
+        "推荐焙烘条件180℃×60s以实现充分交联",
+        "实施例称初始防水等级可达90，但对多次洗涤后的保持率未充分披露"
+      ],
+      "relevance": "无氟防水工艺参考；焙烘温度建议与内部工艺冲突（CS-03）",
+      "source_type": "external",
+      "source_ref": "外部专利库/EXT-PAT-001",
+      "confidence": 0.6,
+      "conflict_ref": "CS-03"
+    },
+    {
+      "ext_id": "EXT-PAP-002",
+      "type": "学术文献",
+      "title": "无氟（C0）防水整理剂的耐洗性局限研究（模拟期刊）",
+      "source": "某纺织学报（模拟）",
+      "published_at": "2023-09",
+      "key_claims": [
+        "综述指出：无氟防水剂由于缺乏长链氟碳的低表面能结构，耐洗性普遍弱于有机氟",
+        "多数无氟体系30次标准洗涤后防水保持率低于65%",
+        "提升耐洗需依赖高效交联与焙烘优化"
+      ],
+      "relevance": "与内部 EXP-2201（无氟50次保持85%）结论冲突（CS-01）——外部为行业普遍结论，内部为特定配方+交联剂实测",
+      "source_type": "external",
+      "source_ref": "外部文献库/EXT-PAP-002",
+      "confidence": 0.65,
+      "conflict_ref": "CS-01"
+    },
+    {
+      "ext_id": "EXT-PAP-003",
+      "type": "学术文献",
+      "title": "氨基改性硅油的热黄变机理与抑制（模拟期刊）",
+      "source": "某印染助剂研究（模拟）",
+      "published_at": "2022-11",
+      "key_claims": [
+        "氨基硅油中的伯/仲胺在高温焙烘下氧化生成发色基团，导致黄变",
+        "180℃以上黄变显著，评级常降至2-3级",
+        "可通过降低氨基含量、复配抗黄变剂或控制焙烘温度抑制"
+      ],
+      "relevance": "解释黄变机理；与内部 EXP-3301（160℃黄变4级轻微）在温度-黄变口径上存在差异（CS-02）",
+      "source_type": "external",
+      "source_ref": "外部文献库/EXT-PAP-003",
+      "confidence": 0.7,
+      "conflict_ref": "CS-02"
+    },
+    {
+      "ext_id": "EXT-STD-004",
+      "type": "行业标准",
+      "title": "AATCC 22 纺织品防水性测试（喷水法）",
+      "source": "AATCC（模拟引用）",
+      "published_at": "现行",
+      "key_claims": [
+        "以喷水后织物表面润湿面积评级，0-100分",
+        "常用于初始防水及洗涤后防水保持评估"
+      ],
+      "relevance": "防水等级测试方法标准，内部实验采用同法，方法一致",
+      "source_type": "external",
+      "source_ref": "外部标准库/EXT-STD-004",
+      "confidence": 0.9
+    },
+    {
+      "ext_id": "EXT-STD-005",
+      "type": "行业标准",
+      "title": "OEKO-TEX STANDARD 100 有害物质限制",
+      "source": "OEKO-TEX（模拟引用）",
+      "published_at": "现行",
+      "key_claims": [
+        "对纺织品中有害物质（含部分全氟化合物、甲醛、重金属等）设限值",
+        "按产品用途分四类，贴身/婴幼儿类限值更严"
+      ],
+      "relevance": "出口订单合规基线；产品合规声明需对标此标准核验",
+      "source_type": "external",
+      "source_ref": "外部标准库/EXT-STD-005",
+      "confidence": 0.9
+    },
+    {
+      "ext_id": "EXT-STD-006",
+      "type": "行业标准/法规",
+      "title": "ZDHC MRSL 与 REACH 对全氟化合物（PFAS）的限制",
+      "source": "ZDHC / 欧盟 REACH（模拟引用）",
+      "published_at": "2024-2025 持续更新",
+      "key_claims": [
+        "ZDHC MRSL 对 PFOA/PFOS 及部分短链氟（含C6相关物质）设限或列为受限",
+        "欧盟 REACH 拟限制全氟及多氟烷基物质（PFAS），C6短链氟防水剂在部分出口场景受限",
+        "无氟（C0）方案被视为规避PFAS限制的趋势方向"
+      ],
+      "relevance": "与内部资料『TF-WR-6612 C6短链环保』口径冲突（CS-05）——出口欧盟需以外部法规为准评估",
+      "source_type": "external",
+      "source_ref": "外部法规库/EXT-STD-006",
+      "confidence": 0.8,
+      "conflict_ref": "CS-05"
+    },
+    {
+      "ext_id": "EXT-RPT-007",
+      "type": "第三方评测",
+      "title": "某第三方机构嵌段硅油柔软剂横向评测（模拟）",
+      "source": "某检测/评测机构（模拟）",
+      "published_at": "2025-04",
+      "key_claims": [
+        "对市售多款嵌段硅油柔软剂做手感盲评",
+        "同类嵌段硅油柔软度综合评分约7分（10分制）",
+        "评测未采用统一预处理与洗涤条件"
+      ],
+      "relevance": "与内部 EXP-2210（TF-SS-2210 柔软度9.5）数值冲突（CS-04）——外部为跨品牌盲评、条件不统一",
+      "source_type": "external",
+      "source_ref": "外部评测库/EXT-RPT-007",
+      "confidence": 0.5,
+      "conflict_ref": "CS-04"
+    },
+    {
+      "ext_id": "EXT-PAP-008",
+      "type": "学术文献",
+      "title": "吸湿排汗整理中亲水柔软剂与疏水柔软剂的配伍（模拟）",
+      "source": "某染整技术期刊（模拟）",
+      "published_at": "2023-03",
+      "key_claims": [
+        "吸湿排汗整理应避免使用疏水性氨基硅油，以免抵消亲水效果",
+        "推荐亲水改性硅油或聚醚类柔软剂"
+      ],
+      "relevance": "佐证内部工艺 PROC-POLY-WICK 的配伍原则，内外部一致（正向融合示例）",
+      "source_type": "external",
+      "source_ref": "外部文献库/EXT-PAP-008",
+      "confidence": 0.75
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "description": "化学六维评估 · 三个算例金值输入（对照《附-六维评分参考实现.py》与 08 文档 §八）。这些输入可由 07 数据集字段逐项复核；平台以此做机器对拍（83.8 / 69.3 / 84.6 / 83.1，误差 ≤0.1）。is_mock=true。",
+    "is_mock": true,
+    "domain": "chemical"
+  },
+  "cases": [
+    {
+      "key": "demo-6608-eu",
+      "name": "算例1：涤纶无氟防水·出口欧盟",
+      "scenario": "出口合规敏感",
+      "object_ref": {
+        "products": ["TF-WR-6608"],
+        "formula": "FORM-6608-WR",
+        "process": "PROC-POLY-WR",
+        "target_market": "欧盟",
+        "demo_case": "demo-6608-eu"
+      },
+      "inputs": {
+        "reqs": [
+          {"name": "初始防水等级", "actual": 90, "target": 90, "higher_better": true, "evidence": 1.0, "refs": ["EXP-2201", "TF-WR-6608"]},
+          {"name": "50次耐洗防水", "actual": 80, "target": 80, "higher_better": true, "evidence": 1.0, "refs": ["EXP-2201"]},
+          {"name": "防油等级", "actual": 2, "target": 3, "higher_better": true, "evidence": 0.85, "refs": ["TF-WR-6608"]}
+        ],
+        "deductions": [
+          {"points": 10, "reason": "需配套额外助剂（交联剂 8g/L）"},
+          {"points": 15, "reason": "工艺窗口窄（焙烘温控 ±5℃）"}
+        ],
+        "evidence_refs": ["PROC-POLY-WR", "FORM-6608-WR"],
+        "fabric_match": "in",
+        "fabric_evidence": ["TF-WR-6608"],
+        "risks": [{"points": 15, "reason": "轻微黄变（强控温可规避）", "mitigated": true}],
+        "cases": [
+          {"case_id": "EXP-2201", "confidence": 0.9, "has_compare": false},
+          {"case_id": "EXP-2205", "confidence": 0.9, "has_compare": true}
+        ],
+        "n_cases": 2,
+        "avg_conf": 0.9,
+        "has_compare": true,
+        "materials": [["TF-WR-6608", 40], ["交联剂", 8], ["渗透剂JFC", 3]],
+        "extra_steps": 0,
+        "products": [{"product_id": "TF-WR-6608", "compliance_level": "clean", "market_restricted": false}],
+        "market": "eu"
+      },
+      "expect": {"total": 83.8, "d6": 100}
+    },
+    {
+      "key": "demo-6612-eu",
+      "name": "算例2：涤纶有机氟防水·出口欧盟（触发 CS-05）",
+      "scenario": "出口合规敏感",
+      "object_ref": {
+        "products": ["TF-WR-6612"],
+        "formula": "FORM-6612-WR",
+        "process": "PROC-POLY-WR",
+        "target_market": "欧盟",
+        "demo_case": "demo-6612-eu"
+      },
+      "inputs": {
+        "reqs": [
+          {"name": "初始防水等级", "actual": 100, "target": 90, "higher_better": true, "evidence": 1.0, "refs": ["EXP-6612"]},
+          {"name": "50次耐洗防水", "actual": 90, "target": 80, "higher_better": true, "evidence": 1.0, "refs": ["EXP-6612"]},
+          {"name": "防油等级", "actual": 5, "target": 3, "higher_better": true, "evidence": 1.0, "refs": ["EXP-6612"]}
+        ],
+        "deductions": [{"points": 8, "reason": "工艺窗口中（±10℃）"}],
+        "evidence_refs": ["PROC-POLY-WR", "FORM-6612-WR"],
+        "fabric_match": "in",
+        "fabric_evidence": ["TF-WR-6612"],
+        "risks": [],
+        "cases": [{"case_id": "EXP-6612", "confidence": 0.9, "has_compare": false}],
+        "n_cases": 1,
+        "avg_conf": 0.9,
+        "has_compare": false,
+        "materials": [["TF-WR-6612", 30], ["交联剂", 6], ["TF-WR-6608", 15]],
+        "extra_steps": 0,
+        "products": [{"product_id": "TF-WR-6612", "compliance_level": "restricted_substance", "market_restricted": true}],
+        "market": "eu"
+      },
+      "expect": {"total": 69.3, "d6": 30}
+    },
+    {
+      "key": "demo-2210-premium",
+      "name": "算例3：涤纶高端柔软·内销",
+      "scenario": "高端品牌性能优先",
+      "object_ref": {
+        "products": ["TF-SS-2210"],
+        "formula": "FORM-2210-POLY",
+        "process": "PROC-POLY-SOFT",
+        "target_market": "内销",
+        "demo_case": "demo-2210-premium"
+      },
+      "inputs": {
+        "reqs": [
+          {"name": "柔软度评分", "actual": 9.5, "target": 9.0, "higher_better": true, "evidence": 1.0, "refs": ["EXP-2210"]},
+          {"name": "50次洗涤柔软保持率", "actual": 88, "target": 85, "higher_better": true, "evidence": 1.0, "refs": ["EXP-2210"]}
+        ],
+        "deductions": [{"points": 8, "reason": "工艺窗口中（±10℃）"}],
+        "evidence_refs": ["PROC-POLY-SOFT", "FORM-2210-POLY"],
+        "fabric_match": "in",
+        "fabric_evidence": ["TF-SS-2210"],
+        "risks": [{"points": 10, "reason": "轻微控温要求", "mitigated": true}],
+        "cases": [{"case_id": "EXP-2210", "confidence": 0.92, "has_compare": false}],
+        "n_cases": 1,
+        "avg_conf": 0.92,
+        "has_compare": false,
+        "materials": [["TF-SS-2210", 40], ["TF-SOFT-2201", 10], ["渗透剂JFC", 2]],
+        "extra_steps": 0,
+        "products": [{"product_id": "TF-SS-2210", "compliance_level": "clean", "market_restricted": false}],
+        "market": "domestic"
+      },
+      "expect": {"total_premium": 84.6, "total_default": 83.1, "d6": 100}
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# 企业级领域专家 Agent 平台 · API 镜像（多阶段构建，非 root，固定版本）
+FROM python:3.12-slim AS builder
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+FROM python:3.12-slim
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+RUN useradd -m appuser
+WORKDIR /app
+COPY --from=builder /install /usr/local
+COPY app/ ./app/
+COPY core/ ./core/
+COPY adapters/ ./adapters/
+COPY domains/ ./domains/
+COPY data/ ./data/
+COPY scripts/ ./scripts/
+COPY alembic/ ./alembic/
+COPY alembic.ini main.py pyproject.toml .env.slowapi-disabled ./
+RUN mkdir -p var && chown -R appuser:appuser /app
+USER appuser
+EXPOSE 8000
+# 启动前迁移 + 多 worker（生产禁 --reload，规则 L-01）
+CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --timeout-graceful-shutdown 30"]

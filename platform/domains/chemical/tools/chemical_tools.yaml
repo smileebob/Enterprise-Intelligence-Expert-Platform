@@ -1,0 +1,70 @@
+# 化学领域工具集契约（MCP 同构，02 §2.5；初赛进程内注册，生产可桥接 MCP server）
+tools:
+  - name: search_products
+    description: 按面料/性能/类别关键词检索内部产品主数据
+    permission: tool.chemical.search
+    risk_level: normal
+    domain: chemical
+    input_schema:
+      type: object
+      properties:
+        query: { type: string }
+        fabric: { type: string }
+        category: { type: string }
+      required: [query]
+  - name: search_formulas
+    description: 按产品/用途检索内部工作液配方（配方配比为敏感字段，按角色脱敏）
+    permission: tool.chemical.search
+    risk_level: normal
+    domain: chemical
+    input_schema:
+      type: object
+      properties:
+        product_id: { type: string }
+        keyword: { type: string }
+      required: []
+  - name: search_experiments
+    description: 按产品/面料/性能关键词检索内部历史实验报告
+    permission: tool.chemical.search
+    risk_level: normal
+    domain: chemical
+    input_schema:
+      type: object
+      properties:
+        product_id: { type: string }
+        fabric: { type: string }
+        metric: { type: string }
+      required: []
+  - name: search_external
+    description: 检索外部专利/文献/标准（返回强制标注来源与获取时间）
+    permission: tool.chemical.search
+    risk_level: normal
+    domain: chemical
+    input_schema:
+      type: object
+      properties:
+        query: { type: string }
+        type: { type: string }
+      required: [query]
+  - name: score_solution
+    description: 对方案执行六维评估（调用评估引擎，含合规校验）
+    permission: tool.chemical.evaluate
+    risk_level: normal
+    domain: chemical
+    input_schema:
+      type: object
+      properties:
+        object_ref: { type: object }
+        scenario: { type: string }
+      required: [object_ref]
+  - name: check_compliance
+    description: 合规校验（目标市场法规 vs 产品合规等级，CS-05 合规例外）
+    permission: tool.chemical.evaluate
+    risk_level: normal
+    domain: chemical
+    input_schema:
+      type: object
+      properties:
+        product_ids: { type: array, items: { type: string } }
+        target_market: { type: string }
+      required: [product_ids]
