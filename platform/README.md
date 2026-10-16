@@ -158,6 +158,8 @@ docker-compose.yml      # web/api/worker/db/valkey + 可选 profiles
 
 > 可选 profile：MinIO（AGPL-3.0，仅演示可选）、Ollama（MIT）、Prometheus/Grafana（Apache-2.0/AGPL-3.0）。以官方仓库发布许可为准。
 
+> 本项目自身（AngentPlatform）以 **GPL-3.0** 开源发布，见仓库根 [LICENSE](../LICENSE)。
+
 ---
 
 ## 八、合规与口径
