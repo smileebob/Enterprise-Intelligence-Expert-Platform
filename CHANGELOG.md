@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. The format follows Keep a Changelog and the project uses semantic versioning for releases.
 
+## [Unreleased]
+
+### Changed
+
+- Upgraded FastAPI to 0.121 and Starlette to 0.49.1 (required by `sse-starlette>=3`).
+- Locked the official MCP Python SDK at **2.3.0** (`mcp-types==2.3.0`, latest protocol `2026-07-28`, default negotiated `2025-03-26`); the SDK is now installed in the main backend environment.
+- MCP server/client implementation is still pending; this entry only records the pinned SDK and framework compatibility.
+
 ## [1.1.0] - 2026-10-23
 
 ### Added

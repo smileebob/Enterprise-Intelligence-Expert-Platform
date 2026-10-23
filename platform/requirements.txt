@@ -1,9 +1,13 @@
 # 企业级领域专家 Agent 平台 · 后端依赖（基线：技术方案 01 §1.6 技术栈定版）
 # 生产运行
-fastapi>=0.115,<0.116
+fastapi>=0.121,<0.122
+starlette>=0.49.1,<0.50
 uvicorn[standard]>=0.30
 pydantic>=2.9
 pydantic-settings>=2.5
+# MCP sidecar/Server SDK（协议 2026-07-28；要求 sse-starlette>=3）
+mcp==2.3.0
+sse-starlette>=3.5,<3.6
 sqlalchemy>=2.0.35,<2.1
 alembic>=1.13
 httpx>=0.27,<0.28
