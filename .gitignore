@@ -40,3 +40,6 @@ TASKS.md
 # 运行采集载荷（05）
 platform/data/run_payloads/
 run_payloads/
+
+# MCP 隔离虚拟环境
+platform/.venv-mcp/
