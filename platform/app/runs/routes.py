@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 
 from fastapi import APIRouter, Depends, Header, Query, Request
@@ -25,6 +26,7 @@ from core.runs.output_reviews import (
     OutputReviewNotFound,
     OutputReviewService,
 )
+from core.runs.replay import FrozenReplayService, ReplayUnavailable, ReplayVersionMismatch
 from core.runs.service import RunAccessDenied, RunConflict, RunService
 
 router = APIRouter(tags=["runs"])
@@ -122,6 +124,28 @@ def decide_approval(
     except ApprovalConflict as exc:
         raise biz("APPROVAL_CONFLICT", str(exc), 409) from exc
     return ok(_approval_view(approval))
+
+
+class ReplayIn(BaseModel):
+    mode: str = Field(default="frozen", pattern="^frozen$")
+
+
+@router.post("/runs/{run_id}/replays", summary="frozen 回放（同步纯计算，零业务写入）")
+def replay_run(
+    run_id: str,
+    body: ReplayIn,
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        report = asyncio.run(FrozenReplayService(db).replay(run_id, actor))
+    except (KeyError, RunAccessDenied) as exc:
+        raise _not_found() from exc
+    except ReplayVersionMismatch as exc:
+        raise biz("REPLAY_VERSION_MISMATCH", str(exc), 409) from exc
+    except ReplayUnavailable as exc:
+        raise biz("REPLAY_UNAVAILABLE", str(exc), 409) from exc
+    return ok(report)
 
 
 @router.post("/runs/{run_id}/cancel", summary="取消运行（已发生的外部动作不回滚）")

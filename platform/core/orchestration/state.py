@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-from core.abstraction.dtos import ConflictRecord, Evidence
+from core.abstraction.dtos import ConflictClaims, ConflictRecord, Evidence
 
 
 @dataclass
@@ -148,7 +148,36 @@ class TurnState:
                 }
                 for e in self.evidence
             ],
-            "conflicts": [c.conflict_id for c in self.conflicts],  # 明细从库加载
+            "conflicts": [c.conflict_id for c in self.conflicts],
+            # 快照完整冲突（frozen 回放不能按 ID 读当前库）
+            "conflict_records": [
+                {
+                    "conflict_id": c.conflict_id,
+                    "domain_id": c.domain_id,
+                    "title": c.title,
+                    "topic": c.topic,
+                    "internal_claim": {
+                        "source_type": c.internal_claim.source_type,
+                        "refs": list(c.internal_claim.refs),
+                        "statement": c.internal_claim.statement,
+                        "confidence": c.internal_claim.confidence,
+                    },
+                    "external_claim": {
+                        "source_type": c.external_claim.source_type,
+                        "refs": list(c.external_claim.refs),
+                        "statement": c.external_claim.statement,
+                        "confidence": c.external_claim.confidence,
+                    },
+                    "conflict_type": c.conflict_type,
+                    "expected_resolution": c.expected_resolution,
+                    "demo_query": c.demo_query,
+                    "trap": c.trap,
+                    "status": c.status,
+                    "resolution": c.resolution,
+                    "meta": c.meta,
+                }
+                for c in self.conflicts
+            ],
             "eval_result": self.eval_result,
             "draft": None
             if self.draft is None
@@ -238,6 +267,36 @@ class TurnState:
                 scored_by=draft.get("scored_by", ""),
                 applied_constraint_ids=draft.get("applied_constraint_ids", []),
                 constraint_effects=draft.get("constraint_effects", []),
+            )
+        for raw in data.get("conflict_records") or []:
+            internal = raw.get("internal_claim") or {}
+            external = raw.get("external_claim") or {}
+            state.conflicts.append(
+                ConflictRecord(
+                    conflict_id=raw.get("conflict_id", ""),
+                    domain_id=raw.get("domain_id", ""),
+                    title=raw.get("title", ""),
+                    topic=raw.get("topic", ""),
+                    internal_claim=ConflictClaims(
+                        source_type=internal.get("source_type", ""),
+                        refs=list(internal.get("refs", [])),
+                        statement=internal.get("statement", ""),
+                        confidence=internal.get("confidence"),
+                    ),
+                    external_claim=ConflictClaims(
+                        source_type=external.get("source_type", ""),
+                        refs=list(external.get("refs", [])),
+                        statement=external.get("statement", ""),
+                        confidence=external.get("confidence"),
+                    ),
+                    conflict_type=raw.get("conflict_type", ""),
+                    expected_resolution=raw.get("expected_resolution") or {},
+                    demo_query=raw.get("demo_query", ""),
+                    trap=raw.get("trap", ""),
+                    status=raw.get("status", ""),
+                    resolution=raw.get("resolution"),
+                    meta=raw.get("meta") or {},
+                )
             )
         state.trace = [StepTrace(**{k: v for k, v in t.items() if k in StepTrace.__dataclass_fields__}) for t in data.get("trace", [])]
         return state

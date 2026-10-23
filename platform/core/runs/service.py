@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from adapters.payload_store import EncryptedPayloadStore, PayloadUnavailable
 from app.config import get_settings
 from core.gateway.permissions import role_permissions
-from core.runs.models import AgentRun, AgentRunEvent, RunPayload
+from core.runs.models import AgentRun, AgentRunCheckpoint, AgentRunEvent, RunPayload
 
 logger = logging.getLogger(__name__)
 
@@ -404,6 +404,41 @@ class RunService:
             "unsupported_schema_versions": unsupported,
             "legacy": False,
         }
+
+    def save_state_checkpoint(
+        self, run_id: str, state_dict: dict[str, Any], *, node: str, next_node: str
+    ) -> AgentRunCheckpoint:
+        """节点快照：完整 TurnState 加密落载荷，checkpoint 只存引用（05-B）。"""
+        run = self.get_run(run_id)
+        # 快照必须保留原始键序（composer 按 dict 顺序渲染），不能使用排序 JSON
+        payload = self.store.put(
+            json.dumps(state_dict, ensure_ascii=False, separators=(",", ":")).encode("utf-8"),
+            owner_id=run.owner_id,
+            domain_id=run.domain_id,
+            classification="sensitive",
+            sources=[("run", run_id)],
+            retention_days=self.settings.RUN_PAYLOAD_RETENTION_DAYS,
+        )
+        checkpoint = AgentRunCheckpoint(
+            checkpoint_id=f"CHK-{uuid.uuid4().hex[:16]}",
+            run_id=run_id,
+            after_seq=run.last_seq,
+            next_node=next_node,
+            state_ref=payload.opaque_id,
+            checkpoint_kind=node,
+        )
+        self.db.add(checkpoint)
+        self.db.commit()
+        return checkpoint
+
+    def latest_checkpoint(self, run_id: str, *, next_node: str | None = None) -> AgentRunCheckpoint | None:
+        stmt = select(AgentRunCheckpoint).where(AgentRunCheckpoint.run_id == run_id)
+        if next_node is not None:
+            stmt = stmt.where(AgentRunCheckpoint.next_node == next_node)
+        return self.db.execute(stmt.order_by(AgentRunCheckpoint.created_at.desc())).scalars().first()
+
+    def load_checkpoint_state(self, checkpoint: AgentRunCheckpoint) -> dict[str, Any]:
+        return self.store.load_json(checkpoint.state_ref)
 
     def cancel(self, run_id: str, actor) -> AgentRun:
         run = self.get_run(run_id)

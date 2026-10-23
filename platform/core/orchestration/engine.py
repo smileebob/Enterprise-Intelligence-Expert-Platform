@@ -77,6 +77,8 @@ class Orchestrator:
 
         self.db = db
         self.run_ctx = RunContext()
+        self.replay_mode = False
+        self.replay_capture: dict[str, Any] = {}
         self.gateway = RecordingModelGateway(gateway or get_model_gateway(), db, self.run_ctx)
         self.registry: Any
         if registry is not None:
@@ -263,6 +265,18 @@ class Orchestrator:
                     raise
                 else:
                     self._run_event(state, "node.completed", node=node, metadata={"summary": f"{node} 完成"})
+                    if state.run_id and node in ("evaluate", "output"):
+                        try:
+                            from core.runs.service import RunService
+
+                            RunService(self.db).save_state_checkpoint(
+                                state.run_id,
+                                state.to_dict(),
+                                node=node,
+                                next_node="generate" if node == "evaluate" else "",
+                            )
+                        except Exception:
+                            logger.warning("run checkpoint save failed", exc_info=True)
                 finally:
                     AGENT_NODE_DURATION.labels(node=node).observe(_time.perf_counter() - node_started)
                 if state.interrupted:
@@ -960,7 +974,7 @@ class Orchestrator:
         applied_ids, constraint_effects = apply_constraint_rules(
             draft, list(state.plan.get("active_rules", []))
         )
-        if applied_ids:
+        if applied_ids and not self.replay_mode:
             try:
                 GrowthService(self.db).mark_rules_used(applied_ids)
             except Exception:
@@ -1057,6 +1071,7 @@ class Orchestrator:
             state.evidence,
             hook_ctx,
             confidence_threshold=plugin.confidence_threshold,
+            persist_audit=not self.replay_mode,
         )
         self.db.commit()
         draft.annotations = list(dict.fromkeys(check.annotations + draft.annotations))
@@ -1070,6 +1085,14 @@ class Orchestrator:
 
         # 06-C：review/block 必须在任何正文 token 之前停下，等待人工审核
         approved_review = str(state.plan.get("output_review_approval") or "")
+        if self.replay_mode and check.action in ("review", "block"):
+            self.replay_capture = {
+                "blocked": True,
+                "action": check.action,
+                "reasons": list(check.review_reasons),
+                "text": check.text,
+            }
+            return
         if check.action in ("review", "block") and not approved_review:
             from core.runs.output_reviews import OutputReviewService
 
@@ -1107,6 +1130,38 @@ class Orchestrator:
             return
         if approved_review:
             draft.annotations.append(f"已通过人工审核（{approved_review}）")
+
+        if self.replay_mode:
+            # 冻结重放：只做纯计算，不写消息/摘要/运行事件/业务表
+            state.assistant_message_id = f"REPLAY-{uuid.uuid4().hex[:8]}"
+            state.plan["final_text"] = check.text
+            self.replay_capture = {
+                "blocked": False,
+                "action": check.action,
+                "text": check.text,
+                "draft_digest": _digest_json(
+                    {
+                        "summary": draft.summary,
+                        "sections": [section.to_dict() for section in draft.sections],
+                        "citations": draft.citations,
+                    }
+                ),
+            }
+            for item in state.evidence:
+                await emit(
+                    "citation",
+                    {
+                        "cid": item.citation_id,
+                        "chunk_id": item.chunk_id,
+                        "source_type": item.source_type,
+                        "source_ref": item.source_ref,
+                        "confidence": item.confidence,
+                        "record_id": (item.meta or {}).get("record_id", ""),
+                    },
+                )
+            for start in range(0, len(check.text), 24):
+                await emit("token", {"text": check.text[start : start + 24]})
+            return
 
         # 落库助手消息（含引用/冲突/降级标注）
         from core.guardrails.masking import mask_text_for_role

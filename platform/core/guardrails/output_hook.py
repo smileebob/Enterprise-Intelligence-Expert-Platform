@@ -98,6 +98,7 @@ class OutputGuard:
         ctx: HookContext,
         *,
         confidence_threshold: float = 0.6,
+        persist_audit: bool = True,
     ) -> OutputCheck:
         evidence_citation_ids = {e.citation_id for e in evidence if e.citation_id}
         evidence_record_ids = {str(e.meta.get("record_id", "")) for e in evidence}
@@ -170,19 +171,20 @@ class OutputGuard:
                 "review_reasons": check.review_reasons,
             },
         )
-        write_hook_audit(
-            self.db,
-            ctx,
-            decision,
-            action="hook.output." + str(decision.action),
-            detail={
-                "invalid_citations": check.invalid_citations,
-                "masked_fields": masked_fields,
-                "unverified_claims": check.unverified_claims,
-                "annotations": check.annotations,
-                "length": len(text),
-            },
-        )
+        if persist_audit:
+            write_hook_audit(
+                self.db,
+                ctx,
+                decision,
+                action="hook.output." + str(decision.action),
+                detail={
+                    "invalid_citations": check.invalid_citations,
+                    "masked_fields": masked_fields,
+                    "unverified_claims": check.unverified_claims,
+                    "annotations": check.annotations,
+                    "length": len(text),
+                },
+            )
         return check
 
     def validate_citations_only(self, draft: Draft, evidence: list[Evidence]) -> dict[str, Any]:
