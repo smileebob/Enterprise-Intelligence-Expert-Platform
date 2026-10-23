@@ -133,6 +133,7 @@ class GrowthService:
         return doc_id
 
     def _derive_correction_rule(self, feedback_id: str, domain_id: str, rating: str, text: str) -> str:
+        """原始反馈先落 pending 文本规则；管理员显式转为结构化规则后才可执行。"""
         rule_id = f"RULE-{uuid.uuid4().hex[:10]}"
         rule_text = f"[{'否决' if rating == FeedbackRating.REJECTED else '修正'}样本] {text.strip()[:200]}"
         self.db.add(
@@ -140,28 +141,125 @@ class GrowthService:
                 rule_id=rule_id,
                 domain_id=domain_id,
                 rule_text=rule_text,
+                rule_type="text_only",
                 source_feedback=feedback_id,
-                status="active",
+                status="pending",
             )
         )
         self.db.flush()
         return rule_id
 
-    def list_correction_rules(self, domain_id: str, limit: int = 20) -> list[dict[str, Any]]:
+    def list_correction_rules(
+        self, domain_id: str, limit: int = 20, status: str | None = "active"
+    ) -> list[dict[str, Any]]:
+        stmt = select(GrowthCorrectionRule).where(GrowthCorrectionRule.domain_id == domain_id)
+        if status:
+            stmt = stmt.where(GrowthCorrectionRule.status == status)
         rows = (
-            self.db.execute(
-                select(GrowthCorrectionRule)
-                .where(GrowthCorrectionRule.domain_id == domain_id, GrowthCorrectionRule.status == "active")
-                .order_by(GrowthCorrectionRule.created_at.desc())
-                .limit(limit)
-            )
+            self.db.execute(stmt.order_by(GrowthCorrectionRule.created_at.desc()).limit(limit))
             .scalars()
             .all()
         )
-        return [{"rule_id": r.rule_id, "rule_text": r.rule_text, "used_count": r.used_count} for r in rows]
+        return [
+            {
+                "rule_id": r.rule_id,
+                "rule_text": r.rule_text,
+                "rule_type": r.rule_type,
+                "target_fact": r.target_fact,
+                "scope": r.scope,
+                "status": r.status,
+                "approved_by": r.approved_by,
+                "used_count": r.used_count,
+            }
+            for r in rows
+        ]
+
+    def approve_rule(
+        self,
+        rule_id: str,
+        *,
+        rule_type: str,
+        target_fact: str,
+        rule_text: str,
+        scope: str,
+        actor: Actor | None,
+    ) -> dict[str, Any]:
+        """人工把 pending 反馈转为结构化规则并发布；禁止原文直接当指令执行。"""
+        allowed = {"text_only", "forbid_claim", "add_verification", "order_preference"}
+        if rule_type not in allowed:
+            raise ValueError(f"未知规则类型: {rule_type}")
+        if rule_type == "forbid_claim" and not target_fact.strip():
+            raise ValueError("forbid_claim 必须提供 target_fact")
+        row = self.db.get(GrowthCorrectionRule, rule_id)
+        if row is None:
+            raise KeyError(f"规则不存在: {rule_id}")
+        if row.status != "pending":
+            raise ValueError(f"规则状态为 {row.status}，不可再次审核")
+        row.rule_type = rule_type
+        row.target_fact = target_fact.strip()
+        row.rule_text = rule_text.strip() or row.rule_text
+        row.scope = scope.strip()
+        row.status = "active"
+        row.approved_by = actor.user_id if actor else None
+        from core.clock import utc_now
+
+        row.approved_at = utc_now()
+        audit_repo(self.db).append(
+            AuditEntry(
+                trace_id="",
+                actor_id=actor.user_id if actor else None,
+                action="growth.rule.approve",
+                resource=rule_id,
+                detail={"rule_type": rule_type, "target_fact": row.target_fact, "scope": scope},
+            )
+        )
+        self.db.commit()
+        return {
+            "rule_id": rule_id,
+            "status": row.status,
+            "rule_type": row.rule_type,
+            "target_fact": row.target_fact,
+        }
+
+    def reject_rule(self, rule_id: str, actor: Actor | None) -> dict[str, Any]:
+        row = self.db.get(GrowthCorrectionRule, rule_id)
+        if row is None:
+            raise KeyError(f"规则不存在: {rule_id}")
+        if row.status != "pending":
+            raise ValueError(f"规则状态为 {row.status}，不可再次审核")
+        row.status = "rejected"
+        audit_repo(self.db).append(
+            AuditEntry(
+                trace_id="",
+                actor_id=actor.user_id if actor else None,
+                action="growth.rule.reject",
+                resource=rule_id,
+                detail={},
+            )
+        )
+        self.db.commit()
+        return {"rule_id": rule_id, "status": "rejected"}
+
+    def active_rules(self, domain_id: str, limit: int = 10) -> list[dict[str, Any]]:
+        return self.list_correction_rules(domain_id, limit=limit, status="active")
 
     def active_rule_texts(self, domain_id: str, limit: int = 3) -> list[str]:
-        return [r["rule_text"] for r in self.list_correction_rules(domain_id, limit)]
+        return [r["rule_text"] for r in self.active_rules(domain_id, limit)]
+
+    def mark_rules_used(self, rule_ids: list[str]) -> None:
+        if not rule_ids:
+            return
+        from core.clock import utc_now
+
+        rows = (
+            self.db.execute(select(GrowthCorrectionRule).where(GrowthCorrectionRule.rule_id.in_(rule_ids)))
+            .scalars()
+            .all()
+        )
+        for row in rows:
+            row.used_count = (row.used_count or 0) + 1
+            row.approved_at = row.approved_at or utc_now()
+        self.db.commit()
 
     # ---------------- 案例审核（F2 审核队列） ----------------
     def review_queue(self, domain_id: str, limit: int = 50) -> list[dict[str, Any]]:
@@ -222,11 +320,38 @@ class GrowthService:
         return {"feedback_id": feedback_id, "status": new_status}
 
     # ---------------- 标准更新状态机（draft → active → archived） ----------------
-    def propose_standard_update(self, domain_id: str, actor: Actor | None, note: str = "") -> dict[str, Any]:
+    def propose_standard_update(
+        self,
+        domain_id: str,
+        actor: Actor | None,
+        note: str = "",
+        patch: dict[str, Any] | None = None,
+        rationale: str = "",
+    ) -> dict[str, Any]:
+        """标准草稿必须含显式 patch；权重/维度校验通过才落库（06-B §3.3）。"""
         repo = eval_repo(self.db)
         current = repo.get_active_standard(domain_id, "solution") or repo.get_active_standard(domain_id, "enterprise_profile")
         if current is None:
             raise KeyError(f"领域 {domain_id} 无现行标准")
+        weights = dict(current.dimension_weights)
+        scenario_profiles = dict(current.scenario_profiles)
+        if patch is not None:
+            candidate_weights = patch.get("dimension_weights")
+            if candidate_weights is not None:
+                if not isinstance(candidate_weights, dict) or not candidate_weights:
+                    raise ValueError("dimension_weights 必须为非空对象")
+                unknown = [code for code in candidate_weights if code not in weights]
+                if unknown:
+                    raise ValueError(f"未知评分维度: {'、'.join(unknown)}")
+                if any(not isinstance(value, (int, float)) or value < 0 for value in candidate_weights.values()):
+                    raise ValueError("维度权重必须为非负数")
+                if sum(candidate_weights.values()) != 100:
+                    raise ValueError("维度权重合计必须为 100")
+                weights = {code: int(value) for code, value in candidate_weights.items()}
+            if patch.get("scenario_profiles"):
+                scenario_profiles = dict(patch["scenario_profiles"])
+        if patch is not None and not (rationale or note).strip():
+            raise ValueError("标准变更必须提供理由")
         stats = self._feedback_stats(domain_id)
         next_v = self._next_version(current.version)
         stem = re.sub(r"-v\d+$", "", current.standard_id) or f"std-{current.year}-{domain_id}"
@@ -238,13 +363,19 @@ class GrowthService:
             object_type=current.object_type,
             sub_domain=current.sub_domain,
             standard_desc=current.standard_desc,
-            dimension_weights=current.dimension_weights,
+            dimension_weights=weights,
             scoring_rubric=current.scoring_rubric,
-            scenario_profiles=current.scenario_profiles,
+            scenario_profiles=scenario_profiles,
             sample_size=stats["total"],
             version=new_id,
             status="draft",
-            meta={"proposed_from": current.standard_id, "note": note, "feedback_stats": stats},
+            meta={
+                "proposed_from": current.standard_id,
+                "note": note,
+                "rationale": rationale or note,
+                "patch": patch or {},
+                "feedback_stats": stats,
+            },
         )
         repo.upsert_standard(draft)
         self.db.commit()
@@ -272,6 +403,9 @@ class GrowthService:
             raise KeyError(f"标准草稿不存在: {draft_id}")
         if draft.status != "draft":
             raise ValueError("仅 draft 状态可发布")
+        weights = draft.dimension_weights or {}
+        if not weights or any(value < 0 for value in weights.values()) or sum(weights.values()) != 100:
+            raise ValueError("标准草稿维度权重必须非负且合计为 100")
         from core.evaluation.models import EvalStandard
 
         for row in self.db.execute(

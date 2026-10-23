@@ -1,7 +1,7 @@
 [project]
 name = "angentplatform"
 version = "0.1.0"
-description = "企业级领域专家 Agent 平台（AI 化学家 / AI 产业招商专家）—— 赛事演示实现"
+description = "企业级领域专家 Agent 平台（AI 化学家 / AI 产业招商专家）—— 开源参考实现"
 requires-python = ">=3.11"
 
 [tool.ruff]

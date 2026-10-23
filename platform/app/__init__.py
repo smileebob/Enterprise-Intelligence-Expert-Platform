@@ -32,8 +32,8 @@ def create_app(config_name: str | None = None) -> FastAPI:
         title=settings.APP_NAME,
         version="0.1.0",
         description=(
-            "企业级领域专家 Agent 平台（赛事演示实现）：知识管道 KP-1 + 智能体编排 + 六维评估 "
-            "+ 四层记忆 + 工具权限网关 + 安全 Hook。全部演示数据为赛事模拟数据。"
+            "企业级领域专家 Agent 平台：知识管道 KP-1 + 智能体编排 + 六维评估 "
+            "+ 四层记忆 + 工具权限网关 + 安全 Hook。全部演示数据为虚构示例。"
         ),
         debug=settings.DEBUG,
     )
@@ -65,18 +65,22 @@ def create_app(config_name: str | None = None) -> FastAPI:
     from app.auth.routes import router as auth_router
     from app.chat.routes import router as chat_router
     from app.domains.routes import router as domains_router
+    from app.domains.routes_v2 import router as domains_v2_router
     from app.evaluation.routes import router as evaluation_router
     from app.governance.routes import router as governance_router
     from app.growth.routes import router as growth_router
     from app.knowledge.routes import router as knowledge_router
     from app.memory.routes import router as memory_router
+    from app.runs.routes import router as runs_router
 
     app.include_router(auth_router, prefix="/api/v1")
     app.include_router(chat_router, prefix="/api/v1")
     app.include_router(knowledge_router, prefix="/api/v1")
     app.include_router(evaluation_router, prefix="/api/v1")
     app.include_router(memory_router, prefix="/api/v1")
+    app.include_router(runs_router, prefix="/api/v1")
     app.include_router(domains_router, prefix="/api/v1")
+    app.include_router(domains_v2_router, prefix="/api/v2")
     app.include_router(governance_router, prefix="/api/v1")
     app.include_router(growth_router, prefix="/api/v1")
 

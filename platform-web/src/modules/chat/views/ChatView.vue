@@ -30,6 +30,31 @@ const quickQueries = [
 ]
 
 const currentMessages = computed<ChatMessageItem[]>(() => store.messages)
+const isApproval = computed(() => store.clarify?.kind === 'tool_confirm')
+const isOutputReview = computed(() => store.clarify?.kind === 'output_review')
+const approvalArgs = computed<Array<[string, string]>>(() =>
+  Object.entries(store.clarify?.card?.args_preview || {}),
+)
+
+async function decideApproval(action: 'approve' | 'reject') {
+  const approvalId = store.clarify?.approval_id
+  if (!approvalId) return
+  await request.post(`/tool-approvals/${approvalId}/decide`, { action })
+  ElMessage.success(action === 'approve' ? '已批准，继续执行' : '已拒绝，继续生成不含该动作的方案')
+  await store.resume('', approvalId)
+}
+
+async function decideOutputReview(action: 'approve' | 'reject') {
+  const reviewId = store.clarify?.review_id
+  if (!reviewId) return
+  await request.post(`/output-reviews/${reviewId}/decide`, { action })
+  if (action === 'approve') {
+    ElMessage.success('已批准，发送审核后的正文')
+    await store.resume('', '', reviewId)
+  } else {
+    ElMessage.warning('已拒绝输出，正文不会发送')
+  }
+}
 
 onMounted(async () => {
   await store.loadSessions()
@@ -47,6 +72,7 @@ watch(
 
 async function sendText(text: string) {
   const value = text.trim()
+  if (isOutputReview.value) return
   if (!value || store.streaming) return
   if (!store.currentSessionId) {
     await store.newSession(store.domainId)
@@ -231,10 +257,37 @@ function feedbackLabel(feedback: string | null): string {
         </div>
       </div>
 
+      <!-- 输出审核卡片（06-C：批准前不发送正文；批准绑定草稿摘要） -->
+      <div v-if="store.clarify && isOutputReview" class="mx-4 mb-2">
+        <el-alert type="warning" :closable="false" show-icon>
+          <template #title>输出触发人工审核，批准前不会发送正文</template>
+          <div v-for="reason in store.clarify.reasons || []" :key="reason" class="text-xs mt-1">· {{ reason }}</div>
+          <div class="mt-2 flex gap-2">
+            <el-button size="small" type="success" :disabled="store.streaming" @click="decideOutputReview('approve')">批准并发送</el-button>
+            <el-button size="small" type="danger" plain :disabled="store.streaming" @click="decideOutputReview('reject')">拒绝</el-button>
+          </div>
+        </el-alert>
+      </div>
+
+      <!-- 危险工具审批卡片（06-A2：一次性、参数绑定、不可用 confirmed 绕过） -->
+      <div v-else-if="store.clarify && isApproval" class="mx-4 mb-2">
+        <el-alert type="warning" :closable="false" show-icon>
+          <template #title>危险操作需要一次性审批：{{ store.clarify.tool }}</template>
+          <div class="text-xs mt-1">{{ store.clarify.question }}</div>
+          <div class="text-xs mt-1 font-mono">
+            <div v-for="[key, value] in approvalArgs" :key="key">{{ key }} = {{ value }}</div>
+          </div>
+          <div class="mt-2 flex gap-2">
+            <el-button size="small" type="success" :disabled="store.streaming" @click="decideApproval('approve')">批准并执行</el-button>
+            <el-button size="small" type="danger" plain :disabled="store.streaming" @click="decideApproval('reject')">拒绝</el-button>
+          </div>
+        </el-alert>
+      </div>
+
       <!-- 澄清追问卡片 -->
-      <div v-if="store.clarify" class="mx-4 mb-2">
+      <div v-else-if="store.clarify" class="mx-4 mb-2">
         <el-alert type="info" :closable="false" show-icon>
-          <template #title>为给出可落地方案，请补充：{{ store.clarify.missing_slots.join('、') }}</template>
+          <template #title>为给出可落地方案，请补充：{{ (store.clarify.missing_slots || []).join('、') }}</template>
           <div class="text-xs mt-1">{{ store.clarify.question }}</div>
         </el-alert>
       </div>
@@ -251,10 +304,10 @@ function feedbackLabel(feedback: string | null): string {
             :rows="2"
             resize="none"
             placeholder="描述客户需求，例如：涤纶面料，要求柔软手感好且耐洗50次不明显下降（Enter 发送）"
-            @keydown.enter.exact.prevent="sendText(store.clarify ? `补充：${input}` : input)"
+            @keydown.enter.exact.prevent="sendText(store.clarify && !isApproval ? `补充：${input}` : input)"
           />
-          <el-button type="primary" class="h-auto" :loading="store.streaming" @click="sendText(store.clarify ? `补充：${input}` : input)">
-            {{ store.clarify ? '补充信息' : '发送' }}
+          <el-button type="primary" class="h-auto" :loading="store.streaming" :disabled="isOutputReview" @click="sendText(store.clarify && !isApproval ? `补充：${input}` : input)">
+            {{ store.clarify && !isApproval ? '补充信息' : '发送' }}
           </el-button>
         </div>
       </div>

@@ -2,7 +2,7 @@
 domain_id: investment
 name: AI 产业招商专家
 version: 0.1.0
-status: draft                  # 初赛以 draft 交付，可一键 publish 转 online 演示
+status: draft                  # 默认以 draft 提供，可一键 publish 转 online 演示
 
 # ① 知识包
 knowledge_binding:
@@ -24,7 +24,7 @@ eval_config:
     - { code: E5, name: 成长动能,     default_weight: 15, scorer: investment.e5_growth }
     - { code: E6, name: 落地匹配度,   default_weight: 15, scorer: investment.e6_fit }
   scenario_profiles:
-    # 赛道权重表（产品 02 §4.2；由领域标准层配置，不改代码）
+    # 领域权重表（产品 02 §4.2；由领域标准层配置，不改代码）
     默认:     { E1: 20, E2: 20, E3: 15, E4: 15, E5: 15, E6: 15 }
     创新药:   { E1: 30, E2: 20, E3: 15, E4: 15, E5: 10, E6: 10 }
     基因细胞: { E1: 30, E2: 25, E3: 15, E4: 10, E5: 10, E6: 10 }

@@ -53,7 +53,7 @@ def build_ingest_package(db: Session, payload: dict[str, Any], source_name: str)
         six_dim = profile.get("six_dim", {})
         content = (
             f"企业[{eid}] {ent.get('name', '')}（{', '.join(ent.get('aliases', []))}）："
-            f"赛道 {ent.get('track', '')}；阶段 {ent.get('stage', '')}；区域 {ent.get('region', '')}。"
+            f"领域 {ent.get('track', '')}；阶段 {ent.get('stage', '')}；区域 {ent.get('region', '')}。"
             f"技术方向：{profile.get('tech_direction', {})}。融资：{profile.get('funding_stage', '')}。"
             f"研发需求：{profile.get('rd_needs', {})}。扩张动态：{profile.get('expansion_signals', {})}。"
             f"六维画像：{six_dim}。数据充分度：{profile.get('data_completeness', 0)}。"

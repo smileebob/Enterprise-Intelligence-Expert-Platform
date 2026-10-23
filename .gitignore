@@ -34,6 +34,9 @@ Thumbs.db
 
 # 本地/内部资料（不随仓库发布）
 .qoder/
-传化比赛文档/
 python/
 TASKS.md
+
+# 运行采集载荷（05）
+platform/data/run_payloads/
+run_payloads/

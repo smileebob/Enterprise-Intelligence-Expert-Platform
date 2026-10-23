@@ -21,6 +21,7 @@ python-multipart>=0.0.9
 celery>=5.4,<5.5
 redis>=5.0
 psycopg[binary]>=3.2
+cryptography>=42
 
 # 开发与质量
 pytest>=8.3

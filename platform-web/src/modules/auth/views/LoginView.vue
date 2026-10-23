@@ -46,7 +46,7 @@ function pick(account: (typeof demoAccounts)[number]) {
         </div>
         <h1 class="text-lg font-600">企业级领域专家 Agent 平台</h1>
         <p class="text-xs text-gray-400 mt-1">多模态知识底座 + 自成长智能体 + 权限化工具网关 + 企业级记忆</p>
-        <p class="text-xs text-orange-500 mt-1">赛事演示环境 · 全部数据为模拟数据（is_mock）</p>
+        <p class="text-xs text-orange-500 mt-1">演示环境 · 全部数据为虚构示例（is_mock）</p>
       </div>
 
       <el-form label-position="top" @submit.prevent="submit">

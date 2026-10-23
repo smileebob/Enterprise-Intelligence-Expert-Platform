@@ -87,9 +87,16 @@ class SqlMemoryRepository:
         return [_mem_to_dto(r) for r in rows]
 
     def similar_items(
-        self, owner_id: str, layer: str, embedding: list[float], threshold: float = 0.9
+        self,
+        owner_id: str,
+        layer: str,
+        embedding: list[float],
+        threshold: float = 0.9,
+        domain_id: str | None = None,
     ) -> list[MemoryItemRecord]:
-        candidates = self.list_items(layer=layer, owner_id=owner_id, status="active", limit=200)
+        candidates = self.list_items(
+            layer=layer, owner_id=owner_id, domain_id=domain_id, status="active", limit=200
+        )
         matched: list[tuple[float, MemoryItemRecord]] = []
         for item in candidates:
             if item.embedding:

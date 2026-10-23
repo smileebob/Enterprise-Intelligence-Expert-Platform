@@ -48,6 +48,26 @@ class ChatMessage(Base):
     )
 
 
+class ChatSessionSummary(Base):
+    """会话摘要（04 §4）：确定性槽位摘要，下一轮真实消费；CAS 覆盖避免丢新消息。"""
+
+    __tablename__ = "chat_session_summary"
+
+    summary_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    session_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    owner_id: Mapped[str] = mapped_column(String(64), index=True)
+    domain_id: Mapped[str] = mapped_column(String(64), index=True)
+    version: Mapped[int] = mapped_column(default=1)
+    covered_message_ids: Mapped[list] = mapped_column(json_col(), default=list)
+    structured_slots: Mapped[dict] = mapped_column(json_col(), default=dict)
+    summary_text: Mapped[str] = mapped_column(Text, default="")
+    source: Mapped[str] = mapped_column(String(24), default="deterministic")
+    invalidated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, server_default=func.now()
+    )
+
+
 class AgentCheckpoint(Base):
     """编排检查点：interrupt/resume 与断点续跑（PostgresSaver 同构，落业务库）。"""
 

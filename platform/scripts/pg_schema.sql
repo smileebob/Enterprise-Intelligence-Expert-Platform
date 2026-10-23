@@ -1,6 +1,6 @@
 -- 企业级领域专家 Agent 平台 · PostgreSQL 16 + pgvector 参考 DDL（对照技术方案 04 §4.2）
 -- 说明：实际建表由 `alembic upgrade head` 完成；本脚本供 DBA 审查/手工初始化参考，幂等。
--- 全部演示数据为赛事模拟数据（is_mock）。
+-- 全部演示数据为虚构示例（is_mock）。
 
 CREATE EXTENSION IF NOT EXISTS vector;
 

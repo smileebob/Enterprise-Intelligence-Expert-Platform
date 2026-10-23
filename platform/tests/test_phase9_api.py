@@ -292,20 +292,53 @@ class TestGovernanceApi:
         assert expert["permissions"] == ["chat.use", "retrieval.search"]
 
     def test_domain_assembly_validate_and_publish(self, client, seeded, admin_headers):
-        # 非法配置 → 400
+        # v1 写接口已升级 → 409，客户端必须迁移到 /api/v2（If-Match + Idempotency-Key）
         resp = client.post("/api/v1/domains", json={"config": {"domain_id": "x", "name": "X"}}, headers=admin_headers)
+        assert resp.status_code == 409
+        assert resp.json()["code"] == "API_UPGRADE_REQUIRED"
+
+        # 非法配置 → 400（v2）
+        resp = client.post(
+            "/api/v2/domains",
+            json={"config": {"domain_id": "x", "name": "X"}},
+            headers={**admin_headers, "Idempotency-Key": "idem-invalid-config"},
+        )
         assert resp.status_code == 400
         assert resp.json()["code"] == "VALIDATION_ERROR"
-        assert "缺少" in resp.json()["message"]
-        # 合法配置（招商插件五要素）
+
+        current = client.get("/api/v2/domains/investment", headers=admin_headers)
+        assert current.status_code == 200
+        config_rev = current.json()["data"]["config_rev"]
+
+        # 合法配置（招商插件五要素）→ 新草稿（不干扰在线配置）
         import yaml
 
         config = yaml.safe_load(Path("domains/investment/domain.yaml").read_text(encoding="utf-8"))
-        resp = client.post("/api/v1/domains", json={"config": config}, headers=admin_headers)
-        assert resp.status_code == 201
+        resp = client.put(
+            "/api/v2/domains/investment/draft",
+            json={"config": config},
+            headers={
+                **admin_headers,
+                "If-Match": f'"{config_rev}"',
+                "Idempotency-Key": "idem-invest-draft",
+            },
+        )
+        assert resp.status_code == 200, resp.text
         assert resp.json()["data"]["validation"] == "PASS"
-        resp = client.post("/api/v1/domains/investment/publish", headers=admin_headers)
-        assert resp.status_code == 200
+        draft_rev = resp.json()["data"]["draft_revision_id"]
+        config_rev = resp.json()["data"]["config_rev"]
+
+        # 发布指定草稿
+        resp = client.post(
+            "/api/v2/domains/investment/publish",
+            json={"revision_id": draft_rev},
+            headers={
+                **admin_headers,
+                "If-Match": f'"{config_rev}"',
+                "Idempotency-Key": "idem-invest-publish",
+            },
+        )
+        assert resp.status_code == 200, resp.text
         assert resp.json()["data"]["status"] == "online"
         resp = client.get("/api/v1/domains/investment", headers=admin_headers)
         assert resp.status_code == 200

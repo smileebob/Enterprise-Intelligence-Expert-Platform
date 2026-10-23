@@ -194,7 +194,13 @@ class SqlKnowledgeRepositoryBase:
         scored.sort(key=lambda s: s.score, reverse=True)
         return scored
 
-    def chunks_by_refs(self, refs: list[str], domain_id: str, permission_max: int | None = None) -> list[ScoredChunk]:
+    def chunks_by_refs(
+        self,
+        refs: list[str],
+        domain_id: str,
+        permission_max: int | None = None,
+        status: list[str] | None = None,
+    ) -> list[ScoredChunk]:
         if not refs:
             return []
         stmt = (
@@ -205,6 +211,8 @@ class SqlKnowledgeRepositoryBase:
         )
         if permission_max is not None:
             stmt = stmt.where(KbChunk.permission_level <= permission_max)
+        if status:
+            stmt = stmt.where(KbChunk.status.in_(status))
         rows = self.db.execute(stmt).scalars().all()
         return [ScoredChunk(chunk=_chunk_to_dto(r), score=1.0) for r in rows]
 

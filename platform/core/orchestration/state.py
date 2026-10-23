@@ -67,6 +67,8 @@ class Draft:
     degrade_level: str = "L0"
     annotations: list[str] = field(default_factory=list)  # 输出 Hook 追加（合规/低置信标注）
     scored_by: str = ""
+    applied_constraint_ids: list[str] = field(default_factory=list)  # 06-B 实际执行的纠错规则
+    constraint_effects: list[dict[str, Any]] = field(default_factory=list)
 
     def all_claims(self) -> list[Claim]:
         claims: list[Claim] = []
@@ -92,6 +94,7 @@ class TurnState:
 
     session_id: str = ""
     turn_id: str = ""
+    run_id: str = ""  # 05-A 采集运行的关联 ID（空=未采集）
     user_id: str = ""
     role_id: str = ""
     domain_id: str = "chemical"
@@ -121,6 +124,7 @@ class TurnState:
         return {
             "session_id": self.session_id,
             "turn_id": self.turn_id,
+            "run_id": self.run_id,
             "user_id": self.user_id,
             "role_id": self.role_id,
             "domain_id": self.domain_id,
@@ -158,6 +162,8 @@ class TurnState:
                 "degrade_level": self.draft.degrade_level,
                 "annotations": self.draft.annotations,
                 "scored_by": self.draft.scored_by,
+                "applied_constraint_ids": self.draft.applied_constraint_ids,
+                "constraint_effects": self.draft.constraint_effects,
             },
             "self_check": self.self_check,
             "replan_count": self.replan_count,
@@ -177,6 +183,7 @@ class TurnState:
         for key in (
             "session_id",
             "turn_id",
+            "run_id",
             "user_id",
             "role_id",
             "domain_id",
@@ -229,6 +236,8 @@ class TurnState:
                 degrade_level=draft.get("degrade_level", "L0"),
                 annotations=draft.get("annotations", []),
                 scored_by=draft.get("scored_by", ""),
+                applied_constraint_ids=draft.get("applied_constraint_ids", []),
+                constraint_effects=draft.get("constraint_effects", []),
             )
         state.trace = [StepTrace(**{k: v for k, v in t.items() if k in StepTrace.__dataclass_fields__}) for t in data.get("trace", [])]
         return state

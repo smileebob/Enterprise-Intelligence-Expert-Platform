@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.common.errors import biz
 from app.common.responses import ok
 from app.db import get_db
-from app.deps import require_permissions
+from app.deps import assert_domain_access, require_permissions
 from core.abstraction.dtos import Actor
 from core.abstraction.enums import MemoryLayer
 from core.memory.service import MemoryService
@@ -60,14 +60,14 @@ def export_mine(
 
 
 @router.put("/memory/mine/{memory_id}", summary="本人记忆更正")
-def update_mine(
+async def update_mine(
     memory_id: str,
     body: MemoryUpdateIn,
     actor: Actor = Depends(require_permissions("memory.mine.write")),
     db: Session = Depends(get_db),
 ) -> dict:
     try:
-        item = MemoryService(db).update_mine(actor.user_id, memory_id, body.content)
+        item = await MemoryService(db).update_mine(actor.user_id, memory_id, body.content)
     except KeyError as exc:
         raise biz("MEMORY_NOT_FOUND", "记忆不存在或无权访问", 404) from exc
     return ok(_item_view(item))
@@ -92,6 +92,7 @@ def list_enterprise(
     actor: Actor = Depends(require_permissions("memory.read")),
     db: Session = Depends(get_db),
 ) -> dict:
+    assert_domain_access(actor, domain_id, db=db, require_online=False)
     items = MemoryService(db).repo.list_items(layer=MemoryLayer.ENTERPRISE, domain_id=domain_id, status="active", limit=100)
     return ok([_item_view(item) for item in items])
 
@@ -102,6 +103,7 @@ def promotion_candidates(
     actor: Actor = Depends(require_permissions("memory.enterprise.manage")),
     db: Session = Depends(get_db),
 ) -> dict:
+    assert_domain_access(actor, domain_id, db=db, require_online=False)
     return ok(MemoryService(db).promotion_candidates(domain_id))
 
 
@@ -112,8 +114,15 @@ def promote(
     actor: Actor = Depends(require_permissions("memory.enterprise.manage")),
     db: Session = Depends(get_db),
 ) -> dict:
+    service = MemoryService(db)
+    existing = service.repo.get_item(memory_id)
+    if existing is None:
+        raise biz("MEMORY_NOT_FOUND", "记忆不存在", 404)
+    assert_domain_access(actor, existing.domain_id or "chemical", db=db, require_online=False)
     try:
-        item = MemoryService(db).promote(memory_id, body.basis, actor)
+        item = service.promote(memory_id, body.basis, actor)
     except KeyError as exc:
         raise biz("MEMORY_NOT_FOUND", "记忆不存在", 404) from exc
+    except ValueError as exc:
+        raise biz("PROMOTION_REJECTED", str(exc), 409) from exc
     return ok(_item_view(item))

@@ -1,8 +1,8 @@
 # 测试设计 — 验收修复轮（fix round，F-02/F-03/F-04/F-05/F-06/F-07/F-08/F-10 关联）
 
 > 设计人：fastapi-test-designer ｜ 日期：2026-10-12 ｜ 版本：v1.0
-> 基线：`platform/` 现状代码；判据口径以 `传化比赛文档/平台技术方案/drafts/修复记录-回归验收.md` 为准（未修改既有判据/金值/数据）
-> 本文件仅为测试设计（不包含测试实现代码）；实现由 fastapi-test-engineer 承载，建议落盘单文件：`platform/tests/test_phase11_fix_round.py`
+> 基线：`platform/` 现状代码；判据口径以项目既有验收基线为准（未修改既有判据/金值/数据）
+> 本文件仅为测试设计（不包含测试实现代码），建议落盘单文件：`platform/tests/test_phase11_fix_round.py`
 
 ---
 
@@ -279,6 +279,6 @@ application.dependency_overrides[get_db] = lambda: db_session
 
 ## 6. 交付物
 
-- 本设计文档：`D:\work\外包\传化比赛\angentplatform\platform\tests\test-design-fix-round.md`
-- 建议实现文件（待 fastapi-test-engineer 落盘）：`D:\work\外包\传化比赛\angentplatform\platform\tests\test_phase11_fix_round.py`
+- 本设计文档：`platform/tests/test-design-fix-round.md`
+- 建议实现文件：`platform/tests/test_phase11_fix_round.py`
 - 实现约束：pytest + TestClient + respx/unittest.mock；命名 `test_should_期望_when_条件`；fixture 内构造数据；禁裸 sleep；不修改业务代码；不修改既有判据/金值与任何既有测试断言。

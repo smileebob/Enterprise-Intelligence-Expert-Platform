@@ -149,6 +149,11 @@ def d6_compliance(inputs: dict[str, Any]) -> dict[str, Any]:
         "score": round(clamp(base), 1),
         "evidence_refs": inputs.get("evidence_refs", []),
         "deductions": ([{"points": 100 - base, "reason": "命中法规限制（C6/PFAS）"}] if triggered else []),
-        "detail": {"levels": levels, "market": market, "triggered": triggered},
+        "detail": {
+            "levels": levels,
+            "market": market,
+            "triggered": triggered,
+            "hard_cap": COMPLIANCE_RESTRICTED_CAP if triggered else None,
+        },
         "compliance_flags": compliance_flags,
     }

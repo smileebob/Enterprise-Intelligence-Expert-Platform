@@ -17,8 +17,9 @@ from sqlalchemy.orm import Session
 
 from app.common.errors import BusinessError, biz
 from app.common.responses import ok
+from app.config import get_settings
 from app.db import get_db
-from app.deps import require_permissions
+from app.deps import assert_domain_access, require_permissions
 from core.abstraction.dtos import Actor, MemoryCandidate
 from core.abstraction.enums import FeedbackRating, HookStage, MemoryLayer
 from core.abstraction.errors import ToolDeniedError
@@ -43,13 +44,53 @@ class MessageIn(BaseModel):
 
 
 class ResumeIn(BaseModel):
-    value: Any = None
+    """澄清/确认回复：有界文本 + 可选审批 ID（不接受任意 JSON 写入）。"""
+
+    value: str = Field(default="", max_length=4000)
+    approval_id: str | None = Field(default=None, max_length=64)
+    review_id: str | None = Field(default=None, max_length=64)
 
 
 class FeedbackIn(BaseModel):
     rating: FeedbackRating
     correction: str = Field(default="", max_length=2000)
     comment: str = Field(default="", max_length=2000)
+
+
+def _guarded_input(db: Session, text: str, ctx: HookContext) -> str:
+    """入口文本统一审核：注入拦截（400）+ PII 脱敏；空文本原样返回。"""
+    if not text:
+        return text
+    decision = InputGuard(db).check(text, ctx)
+    if decision.blocked:
+        raise BusinessError(decision.code, decision.message, 400)
+    return decision.payload.get("text", text)
+
+
+def _start_run(db: Session, session, actor: Actor):
+    """为回合创建采集运行（run.started + manifest）；失败不影响既有业务表。"""
+    from core.admin.models import DomInstance
+    from core.runs.service import RunManifest, RunService
+    from core.runtime import get_db_domain_registry
+
+    settings = get_settings()
+    plugin = get_db_domain_registry(db).get(session.domain_id)
+    hooks = getattr(plugin, "hooks", None) if plugin is not None else None
+    instance = db.get(DomInstance, session.domain_id)
+    manifest = RunManifest(
+        code_version=getattr(hooks, "CODE_VERSION", "") if hooks is not None else "",
+        plugin_revision=getattr(instance, "config_rev", 0) or 0,
+        config_rev=getattr(instance, "config_rev", 0) or 0,
+        model_mode=settings.DEMO_MODE,
+        model_alias=settings.LLM_MODEL if settings.DEMO_MODE == "live" else "offline-rule",
+        event_schema_version=settings.RUN_EVENT_SCHEMA_VERSION,
+    )
+    return RunService(db).create_run(
+        session_id=session.session_id,
+        owner_id=actor.user_id,
+        domain_id=session.domain_id,
+        manifest=manifest,
+    )
 
 
 def _sse_frame(event: str, data: dict[str, Any]) -> str:
@@ -115,11 +156,10 @@ def create_session(
     actor: Actor = Depends(require_permissions("chat.use")),
     db: Session = Depends(get_db),
 ) -> dict:
-    from core.runtime import get_domain_registry
+    from core.runtime import get_db_domain_registry
 
-    plugin = get_domain_registry().get(body.domain_id)
-    if plugin is None:
-        raise biz("DOMAIN_NOT_FOUND", f"领域实例未装配: {body.domain_id}", 404)
+    assert_domain_access(actor, body.domain_id, db=db)
+    plugin = get_db_domain_registry(db).get(body.domain_id)
     store = ChatSessionStore(db)
     session = store.create_session(body.domain_id, actor.user_id, title=body.title or f"{plugin.name}会话")
     return ok({"session_id": session.session_id, "domain_id": session.domain_id, "title": session.title})
@@ -158,20 +198,24 @@ def send_message(
     session = store.get_session(session_id)
     if session is None or session.user_id != actor.user_id:
         raise biz("SESSION_NOT_FOUND", "会话不存在", 404)
+    assert_domain_access(actor, session.domain_id, db=db)
 
     # ① 输入 Hook（路由依赖层）：注入检测拦截 / PII 脱敏 / 审计
     hook_ctx = HookContext(stage=HookStage.INPUT, actor=actor, domain_id=session.domain_id, session_id=session_id)
-    decision = InputGuard(db).check(body.text, hook_ctx)
-    if decision.blocked:
-        raise BusinessError(decision.code, decision.message, 400)
-    masked_text = decision.payload.get("text", body.text)
+    masked_text = _guarded_input(db, body.text, hook_ctx)
 
     user_message = store.add_message(session_id, "user", masked_text)
+    run = _start_run(db, session, actor)
     orchestrator = Orchestrator(db)
 
     async def runner(emit):
         return await orchestrator.run_turn(
-            session, masked_text, actor, message_id=user_message.message_id, emit=emit
+            session,
+            masked_text,
+            actor,
+            message_id=user_message.message_id,
+            emit=emit,
+            run_id=run.run_id,
         )
 
     return _stream_response(orchestrator, runner)
@@ -189,11 +233,38 @@ def resume_session(
     session = store.get_session(session_id)
     if session is None or session.user_id != actor.user_id:
         raise biz("SESSION_NOT_FOUND", "会话不存在", 404)
-    store.add_message(session_id, "user", str(body.value))
+    assert_domain_access(actor, session.domain_id, db=db)
+
+    if not body.value.strip() and not body.approval_id and not body.review_id:
+        raise biz("VALIDATION_ERROR", "恢复请求需提供文本、审批 ID 或审核 ID", 400)
+
+    # 恢复回复与首轮消息同等的输入审核（注入拦截 + PII 脱敏）后才落库
+    hook_ctx = HookContext(stage=HookStage.INPUT, actor=actor, domain_id=session.domain_id, session_id=session_id)
+    masked_value = _guarded_input(db, body.value, hook_ctx) if body.value else ""
+
+    store.add_message(session_id, "user", masked_value or f"[审批 {body.approval_id} 恢复执行]")
+    from core.runs.service import RunService
+
+    runs = RunService(db)
+    waiting_review = runs.latest_run_for_session(session_id, status="waiting_review")
+    if waiting_review is not None and not body.review_id:
+        raise biz("OUTPUT_REVIEW_REQUIRED", "输出待审核，请先批准审核记录", 409)
+    waiting = waiting_review or runs.latest_run_for_session(session_id, status="waiting_approval")
+    if waiting is None:
+        waiting = runs.latest_run_for_session(session_id, status="waiting_input")
+    run = waiting if waiting is not None else _start_run(db, session, actor)
     orchestrator = Orchestrator(db)
 
     async def runner(emit):
-        return await orchestrator.resume(session_id, body.value, actor, emit=emit)
+        return await orchestrator.resume(
+            session_id,
+            masked_value,
+            actor,
+            emit=emit,
+            run_id=run.run_id,
+            approval_id=body.approval_id or "",
+            review_id=body.review_id or "",
+        )
 
     return _stream_response(orchestrator, runner)
 
@@ -242,7 +313,22 @@ async def message_feedback(
     if message is None:
         raise biz("MESSAGE_NOT_FOUND", "消息不存在", 404)
     session = store.get_session(message.session_id)
-    domain_id = session.domain_id if session else "chemical"
+    if session is None or session.user_id != actor.user_id:
+        raise biz("SESSION_NOT_FOUND", "会话不存在", 404)
+    assert_domain_access(actor, session.domain_id, db=db)
+    if message.role != "assistant":
+        raise biz("INVALID_FEEDBACK_TARGET", "仅可对助手回复提交反馈", 400)
+    domain_id = session.domain_id
+
+    hook_ctx = HookContext(
+        stage=HookStage.INPUT,
+        actor=actor,
+        domain_id=domain_id,
+        session_id=message.session_id,
+        trace_id=message.trace_id or "",
+    )
+    correction = _guarded_input(db, body.correction, hook_ctx)
+    comment = _guarded_input(db, body.comment, hook_ctx)
 
     result = GrowthService(db).record_feedback(
         user_id=actor.user_id,
@@ -250,8 +336,8 @@ async def message_feedback(
         rating=body.rating,
         session_id=message.session_id,
         message_id=message_id,
-        correction=body.correction,
-        comment=body.comment,
+        correction=correction,
+        comment=comment,
         trace_id=message.trace_id,
         message_content=message.content if body.rating == FeedbackRating.ADOPTED else "",
         citations=message.citations,
@@ -266,8 +352,8 @@ async def message_feedback(
     content = None
     if body.rating == FeedbackRating.ADOPTED:
         content = f"用户采纳方案：{message.content[:120]}"
-    elif body.correction:
-        content = f"用户修正意见：{body.correction[:200]}"
+    elif correction:
+        content = f"用户修正意见：{correction[:200]}"
     if content:
         memory = MemoryService(db)
         write_ctx = HookContext(

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "传化功能化学（模拟）工艺数据 —— 纺织印染后整理工艺条件。赛事模拟数据。",
+    "description": "示例企业（模拟）工艺数据 —— 纺织印染后整理工艺条件。演示模拟数据。",
     "is_mock": true,
     "source_type": "internal",
     "domain": "chemical",

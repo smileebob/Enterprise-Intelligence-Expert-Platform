@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "传化功能化学（模拟）产品主数据 —— 纺织印染助剂。本文件为赛事模拟数据，非真实企业产品。",
+    "description": "示例企业（模拟）产品主数据 —— 纺织印染助剂。本文件为演示模拟数据，非真实企业产品。",
     "is_mock": true,
     "source_type": "internal",
     "domain": "chemical",

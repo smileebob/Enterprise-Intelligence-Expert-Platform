@@ -42,13 +42,29 @@ def require_permissions(*required: str):
     """权限点依赖工厂：角色缺少任一权限点即 403。"""
 
     def checker(actor: Actor = Depends(get_current_actor), db: Session = Depends(get_db)) -> Actor:
-        granted = role_permissions(db, actor.role_id)
+        # 安全边界实时校验：跨进程撤权在下一请求立即生效，不依赖进程缓存 TTL
+        granted = role_permissions(db, actor.role_id, fresh=True)
         missing = [perm for perm in required if perm not in granted]
         if missing:
             raise BusinessError("PERM_DENIED", f"缺少权限：{'、'.join(missing)}", 403)
         return actor
 
     return checker
+
+
+def assert_domain_access(
+    actor: Actor, domain_id: str, *, db: Session, require_online: bool = True
+) -> None:
+    """领域准入：主体域范围 → DB 实例存在 → DB 在线状态（跨进程权威，不用进程内插件状态）。"""
+    from core.admin.models import DomInstance
+
+    if domain_id not in (actor.domain_scope or []):
+        raise BusinessError("DOMAIN_FORBIDDEN", "无权访问该领域", 403)
+    row = db.get(DomInstance, domain_id)
+    if row is None:
+        raise BusinessError("DOMAIN_NOT_FOUND", "领域实例未装配", 404)
+    if require_online and row.status != "online":
+        raise BusinessError("DOMAIN_OFFLINE", "领域未上线", 409)
 
 
 def idempotency_key(

@@ -32,7 +32,7 @@ function logout() {
         <div class="w-8 h-8 rounded bg-blue-600 text-white flex items-center justify-center font-700">智</div>
         <div>
           <div class="text-sm font-600 leading-4">企业级领域专家 Agent 平台</div>
-          <div class="text-[11px] text-gray-400 leading-4">通用底座 + 可插拔领域插件 · 赛事演示（模拟数据）</div>
+          <div class="text-[11px] text-gray-400 leading-4">通用底座 + 可插拔领域插件 · 开源参考实现（模拟数据）</div>
         </div>
       </div>
       <div class="flex items-center gap-2">

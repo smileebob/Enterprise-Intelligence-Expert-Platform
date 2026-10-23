@@ -21,7 +21,16 @@ export const useChatStore = defineStore('chat', () => {
   const steps = ref<StepItem[]>([])
   const citations = ref<Citation[]>([])
   const evalResult = ref<EvalResult | null>(null)
-  const clarify = ref<{ question: string; missing_slots: string[] } | null>(null)
+  const clarify = ref<{
+    question: string
+    missing_slots?: string[]
+    kind?: string
+    approval_id?: string
+    review_id?: string
+    reasons?: string[]
+    tool?: string
+    card?: { tool: string; args_preview: Record<string, string>; risk: string }
+  } | null>(null)
   const annotations = ref<string[]>([])
   const degradeLevel = ref<string>('L0')
   const errorMessage = ref<string>('')
@@ -135,12 +144,12 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  async function resume(value: string) {
+  async function resume(value: string, approvalId = '', reviewId = '') {
     if (!currentSessionId.value || streaming.value) return
     streaming.value = true
     clarify.value = null
     try {
-      await chatApi.resumeSession(currentSessionId.value, value, handleEvent)
+      await chatApi.resumeSession(currentSessionId.value, value, handleEvent, approvalId, reviewId)
     } finally {
       streaming.value = false
       await refreshMessages()

@@ -4,13 +4,22 @@ import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import 'element-plus/es/components/message/style/css'
 import { useUserStore } from '@/shared/stores/user'
-import { request } from '@/shared/api/request'
+import { newIdempotencyKey, request, requestV2 } from '@/shared/api/request'
 
 interface DomainItem {
   domain_id: string
   name: string
   status: string
   version: string
+  config_rev: number
+  active_revision_id?: string | null
+  draft_revision_id?: string | null
+}
+
+interface RevisionItem {
+  revision_id: string
+  config_rev: number
+  change_kind: string
 }
 
 const userStore = useUserStore()
@@ -19,7 +28,7 @@ const roles = ref<Array<{ role_id: string; name: string; permissions: string[] }
 const tools = ref<Array<{ name: string; description: string; permission: string; risk_level: string }>>([])
 
 async function load() {
-  domains.value = await request.get<DomainItem[]>('/domains')
+  domains.value = await requestV2.get<DomainItem[]>('/domains')
   if (userStore.hasPerm('role.manage')) {
     roles.value = await request.get<typeof roles.value>('/admin/roles')
     const data = await request.get<{ tools: typeof tools.value }>('/admin/tools')
@@ -29,26 +38,50 @@ async function load() {
 
 onMounted(load)
 
-async function publish(domainId: string) {
-  await request.post(`/domains/${domainId}/publish`)
-  ElMessage.success(`${domainId} 已上线（底座代码零改动）`)
-  await load()
-}
-
-async function rollback(domainId: string) {
-  try {
-    await request.post(`/domains/${domainId}/rollback`)
-    ElMessage.success('已回滚到上一版本配置')
-  } catch {
-    ElMessage.warning('暂无可回滚的上一版本')
+function writeHeaders(row: DomainItem) {
+  return {
+    'If-Match': `"${row.config_rev}"`,
+    'Idempotency-Key': newIdempotencyKey(),
   }
-  await load()
 }
 
-async function offline(domainId: string) {
-  await request.post(`/domains/${domainId}/offline`)
-  ElMessage.success('已下线')
-  await load()
+async function publish(row: DomainItem) {
+  try {
+    await requestV2.post(`/domains/${row.domain_id}/publish`, {}, { headers: writeHeaders(row) })
+    ElMessage.success(`${row.domain_id} 已上线（底座代码零改动）`)
+  } finally {
+    await load()
+  }
+}
+
+async function rollback(row: DomainItem) {
+  try {
+    const revisions = await requestV2.get<RevisionItem[]>(`/domains/${row.domain_id}/revisions`)
+    const target = revisions.find((item) => item.revision_id !== row.active_revision_id)
+    if (!target) {
+      ElMessage.warning('暂无可回滚的历史版本')
+      return
+    }
+    await requestV2.post(
+      `/domains/${row.domain_id}/rollback`,
+      { revision_id: target.revision_id },
+      { headers: writeHeaders(row) },
+    )
+    ElMessage.success(`已回滚到 revision ${target.config_rev}`)
+  } catch {
+    ElMessage.warning('回滚未完成，请刷新后重试')
+  } finally {
+    await load()
+  }
+}
+
+async function offline(row: DomainItem) {
+  try {
+    await requestV2.post(`/domains/${row.domain_id}/offline`, {}, { headers: writeHeaders(row) })
+    ElMessage.success('已下线')
+  } finally {
+    await load()
+  }
 }
 </script>
 
@@ -69,13 +102,13 @@ async function offline(domainId: string) {
         </el-table-column>
         <el-table-column label="操作" width="260">
           <template #default="{ row }">
-            <el-button v-if="userStore.hasPerm('domain.publish') && row.status !== 'online'" size="small" type="success" text @click="publish(String(row.domain_id))">
+            <el-button v-if="userStore.hasPerm('domain.publish') && (row.status !== 'online' || row.draft_revision_id)" size="small" type="success" text @click="publish(row)">
               上线
             </el-button>
-            <el-button v-if="userStore.hasPerm('domain.publish')" size="small" text @click="rollback(String(row.domain_id))">
+            <el-button v-if="userStore.hasPerm('domain.publish')" size="small" text @click="rollback(row)">
               回滚
             </el-button>
-            <el-button v-if="userStore.hasPerm('domain.publish') && row.status === 'online'" size="small" type="danger" text @click="offline(String(row.domain_id))">
+            <el-button v-if="userStore.hasPerm('domain.publish') && row.status === 'online'" size="small" type="danger" text @click="offline(row)">
               下线
             </el-button>
           </template>

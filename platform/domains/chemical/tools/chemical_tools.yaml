@@ -1,4 +1,4 @@
-# 化学领域工具集契约（MCP 同构，02 §2.5；初赛进程内注册，生产可桥接 MCP server）
+# 化学领域工具集契约（MCP 同构，02 §2.5；当前进程内注册，生产可桥接 MCP server）
 tools:
   - name: search_products
     description: 按面料/性能/类别关键词检索内部产品主数据

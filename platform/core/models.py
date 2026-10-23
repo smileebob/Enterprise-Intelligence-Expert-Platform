@@ -20,7 +20,21 @@ from core.knowledge.models import (  # noqa: F401
     KbRelation,
 )
 from core.memory.models import MemEvent, MemItem  # noqa: F401
-from core.orchestration.models import AgentCheckpoint, ChatMessage, ChatSession  # noqa: F401
+from core.orchestration.models import (  # noqa: F401
+    AgentCheckpoint,
+    ChatMessage,
+    ChatSession,
+    ChatSessionSummary,
+)
+from core.runs.models import (  # noqa: F401
+    AgentRun,
+    AgentRunCheckpoint,
+    AgentRunEvent,
+    AgentRunOutbox,
+    OutputReview,
+    RunPayload,
+    RunPayloadSource,
+)
 from domains.chemical.models import (  # noqa: F401
     ChemCustomerNeed,
     ChemExperiment,

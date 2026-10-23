@@ -41,8 +41,13 @@ class GrowthCorrectionRule(Base):
     rule_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     domain_id: Mapped[str] = mapped_column(String(64), index=True)
     rule_text: Mapped[str] = mapped_column(Text)
+    rule_type: Mapped[str] = mapped_column(String(32), default="text_only")  # text_only/forbid_claim/add_verification
+    target_fact: Mapped[str] = mapped_column(Text, default="")
+    scope: Mapped[str] = mapped_column(String(64), default="")
     source_feedback: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    status: Mapped[str] = mapped_column(String(16), default="active")
+    status: Mapped[str] = mapped_column(String(16), default="pending", index=True)
+    approved_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     used_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, server_default=func.now()

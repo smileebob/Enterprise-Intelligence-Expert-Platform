@@ -151,7 +151,7 @@ def main() -> int:
         print(f"      {key}: {value}")
     print("=" * 72)
     print("[PASS] 初始化完成" if passed else "[FAIL] 冒烟校验未通过")
-    print("提示：全部演示数据为赛事模拟数据（is_mock）。")
+    print("提示：全部演示数据为虚构示例（is_mock）。")
     print("启动：uvicorn main:app --port 8000 （演示账号见 README）")
     return 0 if passed else 1
 

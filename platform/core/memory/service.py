@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -60,7 +60,15 @@ class MemoryService:
     async def recall(self, ctx: RecallCtx) -> list[MemoryItemRecord]:
         items: list[MemoryItemRecord] = []
         if ctx.actor:
-            items.extend(self._recall_layer(MemoryLayer.USER, owner_id=ctx.actor.user_id, ctx=ctx, limit=ctx.k_user))
+            items.extend(
+                self._recall_layer(
+                    MemoryLayer.USER,
+                    owner_id=ctx.actor.user_id,
+                    ctx=ctx,
+                    limit=ctx.k_user,
+                    domain_id=ctx.domain_id or None,
+                )
+            )
         enterprise = [
             item
             for item in self.repo.list_items(layer=MemoryLayer.ENTERPRISE, domain_id=ctx.domain_id or None, status="active", limit=50)
@@ -75,8 +83,13 @@ class MemoryService:
         self.db.commit()
         return items
 
-    def _recall_layer(self, layer: str, owner_id: str, ctx: RecallCtx, limit: int) -> list[MemoryItemRecord]:
-        candidates = self.repo.list_items(layer=layer, owner_id=owner_id, status="active", limit=100)
+    def _recall_layer(
+        self, layer: str, owner_id: str, ctx: RecallCtx, limit: int, domain_id: str | None = None
+    ) -> list[MemoryItemRecord]:
+        """个人记忆召回同时限定 owner + domain，避免跨领域串用。"""
+        candidates = self.repo.list_items(
+            layer=layer, owner_id=owner_id, domain_id=domain_id, status="active", limit=100
+        )
         return self._rank_and_take(candidates, ctx, limit)
 
     def _rank_and_take(self, candidates: list[MemoryItemRecord], ctx: RecallCtx, limit: int) -> list[MemoryItemRecord]:
@@ -118,7 +131,13 @@ class MemoryService:
 
         # 相似记忆合并（>0.9 合并更新：reuse_count+1）
         if embedding and candidate.layer == MemoryLayer.USER:
-            similar = self.repo.similar_items(candidate.owner_id, candidate.layer, embedding, SIMILARITY_MERGE_THRESHOLD)
+            similar = self.repo.similar_items(
+                candidate.owner_id,
+                candidate.layer,
+                embedding,
+                SIMILARITY_MERGE_THRESHOLD,
+                domain_id=candidate.domain_id,
+            )
             if similar:
                 existing = similar[0]
                 existing.reuse_count += 1
@@ -150,44 +169,83 @@ class MemoryService:
         return WriteResult(accepted=True, memory_id=memory_id, message="记忆已写入")
 
     # ---------------- 晋升（个人→企业，BR-06） ----------------
+    @staticmethod
+    def _normalized_key(content: str | None) -> str:
+        return " ".join((content or "").split()).lower()[:200]
+
+    def _verified_group(self, item: MemoryItemRecord) -> list[MemoryItemRecord]:
+        """同领域、同规范化事实的个人记忆分组（用于独立主体验证判定）。"""
+        key = self._normalized_key(item.content)
+        if not key:
+            return []
+        same_domain = self.repo.list_items(
+            layer=MemoryLayer.USER, domain_id=item.domain_id, status="active", limit=500
+        )
+        return [row for row in same_domain if self._normalized_key(row.content) == key]
+
     def promote(self, memory_id: str, basis: str, actor: Actor | None) -> MemoryItemRecord:
+        """晋升：≥2 名不同主体同向验证后，生成新的企业级记忆（不覆盖原个人条目）。"""
         item = self.repo.get_item(memory_id)
         if item is None:
             raise KeyError(f"记忆不存在: {memory_id}")
-        promoted = MemoryItemRecord(**{**item.__dict__})
-        promoted.layer = MemoryLayer.ENTERPRISE
-        promoted.permission_scope = "domain"
-        promoted.promoted_from = memory_id
-        promoted.promotion_basis = basis
-        promoted.source_type = "confirmed"
-        promoted.confidence = min(1.0, max(promoted.confidence, 0.8))
-        promoted.meta = {**(item.meta or {}), "promotion_basis": basis}
+        if item.layer != MemoryLayer.USER:
+            raise ValueError("仅个人记忆可晋升为企业级")
+        group = self._verified_group(item)
+        owners = sorted({row.owner_id for row in group})
+        if len(owners) < 2:
+            raise ValueError("晋升需至少两名不同授权主体的同向验证")
+        if not (basis or "").strip():
+            raise ValueError("晋升需提供审核依据")
+        new_id = f"MEM-{uuid.uuid4().hex[:12]}"
+        promoted = replace(
+            item,
+            memory_id=new_id,
+            layer=MemoryLayer.ENTERPRISE,
+            permission_scope="domain",
+            promoted_from=memory_id,
+            promotion_basis=basis,
+            source_type="confirmed",
+            confidence=min(1.0, max(item.confidence, 0.8)),
+            derived_from=[row.memory_id for row in group],
+            meta={
+                **(item.meta or {}),
+                "promotion_basis": basis,
+                "verified_by": owners,
+            },
+        )
         self.repo.upsert_item(promoted)
-        self.repo.add_event(memory_id, "promote", {"basis": basis, "to": MemoryLayer.ENTERPRISE}, actor.user_id if actor else None)
+        self.repo.add_event(
+            new_id,
+            "promote",
+            {"basis": basis, "from": memory_id, "verified_by": owners, "to": MemoryLayer.ENTERPRISE},
+            actor.user_id if actor else None,
+        )
         self.db.commit()
         return promoted
 
     def promotion_candidates(self, domain_id: str, min_distinct_users: int = 2) -> list[dict[str, Any]]:
-        """晋升候选（F5：≥2 名不同用户同向验证 → 自动候选；仅单人单次 → 留在用户级）。"""
-        items = self.repo.list_items(layer=MemoryLayer.USER, domain_id=domain_id, status="active", limit=200)
+        """晋升候选：仅按不同主体数判定；单人多次复用/召回不构成多人验证。"""
+        items = self.repo.list_items(layer=MemoryLayer.USER, domain_id=domain_id, status="active", limit=500)
         grouped: dict[str, list[MemoryItemRecord]] = {}
         for item in items:
-            key = (item.content or "").strip()[:80]
-            grouped.setdefault(key, []).append(item)
+            key = self._normalized_key(item.content)
+            if key:
+                grouped.setdefault(key, []).append(item)
         candidates: list[dict[str, Any]] = []
         for key, group in grouped.items():
             owners = {item.owner_id for item in group}
+            if len(owners) < min_distinct_users:
+                continue
             total_reuse = sum(item.reuse_count for item in group)
-            if len(owners) >= min_distinct_users or total_reuse >= min_distinct_users:
-                candidates.append(
-                    {
-                        "content": key,
-                        "distinct_users": len(owners),
-                        "reuse_count": total_reuse,
-                        "memory_ids": [item.memory_id for item in group],
-                        "basis": f"{len(owners)} 名用户同向验证 / 复用 {total_reuse} 次",
-                    }
-                )
+            candidates.append(
+                {
+                    "content": key,
+                    "distinct_users": len(owners),
+                    "reuse_count": total_reuse,
+                    "memory_ids": [item.memory_id for item in group],
+                    "basis": f"{len(owners)} 名不同用户同向验证",
+                }
+            )
         return candidates
 
     # ---------------- 衰减与压缩（BR-07，Celery 周期任务） ----------------
@@ -256,21 +314,43 @@ class MemoryService:
     def list_mine(self, user_id: str) -> list[MemoryItemRecord]:
         return self.repo.list_items(layer=MemoryLayer.USER, owner_id=user_id, status=None, limit=200)
 
-    def update_mine(self, user_id: str, memory_id: str, content: str) -> MemoryItemRecord:
+    async def update_mine(self, user_id: str, memory_id: str, content: str) -> MemoryItemRecord:
+        """更正本人记忆：重算向量并递增版本，旧向量不再可命中；仅本人 USER 层可改。"""
         item = self.repo.get_item(memory_id)
-        if item is None or item.owner_id != user_id:
+        if item is None or item.owner_id != user_id or item.layer != MemoryLayer.USER:
             raise KeyError("记忆不存在或无权访问")
-        updated = MemoryItemRecord(**{**item.__dict__})
-        updated.content = content
+        embedding: list[float] | None = None
+        try:
+            vectors = await self.gateway.embed([content])
+            embedding = vectors[0] if vectors else None
+        except Exception:
+            logger.warning("memory re-embed failed, clear stale vector", exc_info=True)
+        meta = dict(item.meta or {})
+        version = int(meta.get("version", 1)) + 1
+        meta.update({"version": version, "corrected_by": user_id})
+        updated = replace(item, content=content, embedding=embedding, meta=meta)
         self.repo.upsert_item(updated)
-        self.repo.add_event(memory_id, "update", {"new_content": content[:200]}, user_id)
+        self.repo.add_event(
+            memory_id,
+            "update",
+            {"version": version, "reembedded": embedding is not None, "content_length": len(content)},
+            user_id,
+        )
         self.db.commit()
         return updated
 
     def delete_mine(self, user_id: str, memory_id: str) -> None:
+        """删除本人记忆：审计不保留原文；以其为来源的派生条目同步失效。"""
         item = self.repo.get_item(memory_id)
         if item is None or item.owner_id != user_id:
             raise KeyError("记忆不存在或无权访问")
-        self.repo.add_event(memory_id, "delete", {"before": item.content[:200]}, user_id)
+        self.repo.add_event(memory_id, "delete", {"content_length": len(item.content or "")}, user_id)
         self.repo.delete_item(memory_id)
+        for derived in self.repo.list_items(status="active", limit=1000):
+            if memory_id in (derived.derived_from or []):
+                invalidated = replace(derived, status="deleted")
+                self.repo.upsert_item(invalidated)
+                self.repo.add_event(
+                    derived.memory_id, "invalidate", {"source_deleted": memory_id}, user_id
+                )
         self.db.commit()

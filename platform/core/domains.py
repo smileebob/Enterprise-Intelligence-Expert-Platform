@@ -13,6 +13,42 @@ from typing import Any
 
 import yaml
 
+from core.orchestration.hooks import OPTIONAL_CAPABILITIES, REQUIRED_CAPABILITIES, has_capability
+
+# 受信插件钩子白名单：用户提交的配置不能指定任意 import 路径（01 §4）
+HOOK_MODULE_ALLOWLIST: dict[str, str] = {
+    "chemical": "domains.chemical.hooks",
+    "investment": "domains.investment.hooks",
+}
+
+
+class DomainPluginError(RuntimeError):
+    """插件声明或实现不合法：阻止激活，而不是静默降级。"""
+
+
+def load_domain_hooks(domain_id: str) -> Any:
+    """按白名单加载钩子并校验能力声明；未列入白名单视为不支持可选能力（hooks=None）。"""
+    module_path = HOOK_MODULE_ALLOWLIST.get(domain_id)
+    if module_path is None:
+        return None
+    try:
+        hooks = importlib.import_module(module_path)
+    except Exception as exc:  # noqa: BLE001 - 统一转插件错误，保留原因链
+        raise DomainPluginError(f"领域 {domain_id} 钩子加载失败: {exc}") from exc
+    capabilities = getattr(hooks, "CAPABILITIES", None)
+    if not isinstance(capabilities, frozenset) or not capabilities:
+        raise DomainPluginError(f"领域 {domain_id} 钩子未声明 CAPABILITIES")
+    unknown = capabilities - REQUIRED_CAPABILITIES - OPTIONAL_CAPABILITIES
+    if unknown:
+        raise DomainPluginError(f"领域 {domain_id} 声明了未知能力: {'、'.join(sorted(unknown))}")
+    missing_required = REQUIRED_CAPABILITIES - capabilities
+    if missing_required:
+        raise DomainPluginError(f"领域 {domain_id} 缺少必备能力: {'、'.join(sorted(missing_required))}")
+    for capability in capabilities:
+        if not has_capability(hooks, capability):
+            raise DomainPluginError(f"领域 {domain_id} 声明的能力无实现: {capability}")
+    return hooks
+
 
 @dataclass
 class DomainPlugin:
@@ -26,6 +62,7 @@ class DomainPlugin:
     agent_config: dict[str, Any] = field(default_factory=dict)
     toolset_ref: str = ""
     memory_policy: dict[str, Any] = field(default_factory=dict)
+    hooks: Any = None  # 领域钩子模块（受信白名单加载；None=未声明可选能力）
 
     # ---------- 知识绑定 ----------
     @property
@@ -134,6 +171,7 @@ class DomainRegistry:
                     toolset_ref=config.get("toolset_ref", ""),
                     memory_policy=config.get("memory_policy", {}),
                 )
+                plugin.hooks = load_domain_hooks(plugin.domain_id)
                 plugins[plugin.domain_id] = plugin
         registry = cls(plugins)
         registry._mount_toolsets()
@@ -163,4 +201,6 @@ class DomainRegistry:
         return [p for p in self._plugins.values() if p.status == "online"]
 
     def register(self, plugin: DomainPlugin) -> None:
+        if plugin.hooks is None:
+            plugin.hooks = load_domain_hooks(plugin.domain_id)
         self._plugins[plugin.domain_id] = plugin

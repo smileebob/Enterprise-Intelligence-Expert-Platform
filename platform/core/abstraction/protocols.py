@@ -1,7 +1,7 @@
 """M0 六个抽象接口（技术方案 02 §2.1–§2.3）。
 
 上层（编排/融合/评估/Hook/记忆语义）与领域插件一律不直接触碰具体存储与模型 SDK，
-只依赖这些接口；初赛适配器（sqlite/pgvector/文件/OpenAI 兼容）与生产适配器可整体替换。
+只依赖这些接口；开发/演示适配器（sqlite/pgvector/文件/OpenAI 兼容）与生产适配器可整体替换。
 """
 
 from __future__ import annotations

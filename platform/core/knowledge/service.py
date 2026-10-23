@@ -77,6 +77,14 @@ class KnowledgeService:
             external_hits = self._search_partition(query, query_vec, domain_id, "external", k_ext, permission_max)
             external_hits = await self._maybe_rerank(query, external_hits)
 
+        # 已审核案例受控预算：仅 ready + 授权范围内（06-B）
+        confirmed_hits: list[ScoredChunk] = []
+        if settings.RETRIEVAL_K_CONFIRMED > 0:
+            confirmed_hits = self._search_partition(
+                query, query_vec, domain_id, "confirmed", settings.RETRIEVAL_K_CONFIRMED, permission_max
+            )
+            confirmed_hits = await self._maybe_rerank(query, confirmed_hits)
+
         # 应用层关联遍历（FR-1-05）：由命中的产品展开其配方/工艺/实验关联块
         related = self._expand_relations(domain_id, internal_hits, permission_max)
 
@@ -86,10 +94,14 @@ class KnowledgeService:
             market=market or detect_market(query, (need or {}).get("target_market")),
             need=need,
             query=query,
-            fetch_missing=lambda refs: self.repo.chunks_by_refs(refs, domain_id, permission_max=permission_max),
-            products=self._collect_products(domain_id, internal_hits + external_hits + related, need),
+            fetch_missing=lambda refs: self.repo.chunks_by_refs(
+                refs, domain_id, permission_max=permission_max, status=["ready"]
+            ),
+            products=self._collect_products(
+                domain_id, internal_hits + external_hits + confirmed_hits + related, need
+            ),
         )
-        fused = fuse_evidence(internal_hits + external_hits + related, all_conflicts, ctx)
+        fused = fuse_evidence(internal_hits + external_hits + confirmed_hits + related, all_conflicts, ctx)
 
         if top_k:
             fused.evidence = fused.evidence[:top_k]
@@ -180,7 +192,7 @@ class KnowledgeService:
 
         if not targets:
             return []
-        fetched = self.repo.chunks_by_refs(targets, domain_id, permission_max=permission_max)
+        fetched = self.repo.chunks_by_refs(targets, domain_id, permission_max=permission_max, status=["ready"])
         result: list[ScoredChunk] = []
         for chunk in fetched:
             if chunk.chunk_id in present_ids:
@@ -194,6 +206,20 @@ class KnowledgeService:
             if len(result) >= max_related:
                 break
         return result
+
+    def authorized_chunks_by_refs(self, refs: list[str], domain_id: str, actor) -> list[ScoredChunk]:
+        """受控补证门面：领域 + 主体数据上限 + ready 状态同时下推仓储。
+
+        供工具结果回填等绕过常规检索的路径使用；缺少授权主体即拒绝。
+        """
+        if actor is None:
+            raise ValueError("补证缺少授权主体")
+        return self.repo.chunks_by_refs(
+            refs,
+            domain_id,
+            permission_max=actor.permission_max,
+            status=["ready"],
+        )
 
     async def embed_query(self, query: str) -> list[float] | None:
         try:

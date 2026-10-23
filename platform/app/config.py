@@ -58,6 +58,19 @@ class BaseConfig(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:8080"]
     RATE_LIMIT_DEFAULT: str = "2000/hour"
     RATE_LIMIT_LOGIN: str = "10/minute"
+    PERMISSION_CACHE_TTL_SECONDS: int = 30  # 权限缓存上限；安全边界仍以 DB 实时校验为准
+    TOOL_ARGS_MAX_BYTES: int = 32768
+
+    # 运行采集与受控载荷（05）
+    RUN_EVENT_SCHEMA_VERSION: str = "1"
+    RUN_PAYLOAD_RETENTION_DAYS: int = 7
+    RUN_EVENT_PAGE_MAX: int = 100
+    APPROVAL_TTL_SECONDS: int = 300
+
+    # 长上下文与工具输出治理（04）
+    TOOL_OUTPUT_INLINE_BYTES: int = 16384
+    CONTEXT_MAX_BYTES: int = 65536
+    ORCH_HISTORY_MAX_BYTES: int = 16384
 
     # 可观测
     METRICS_ENABLED: bool = True
@@ -67,6 +80,7 @@ class BaseConfig(BaseSettings):
     HYBRID_LEXICAL_WEIGHT: float = 0.4
     RETRIEVAL_K_INTERNAL: int = 6
     RETRIEVAL_K_EXTERNAL: int = 6
+    RETRIEVAL_K_CONFIRMED: int = 2  # 已审核案例受控预算（06-B）
     RETRIEVAL_SUFFICIENT_MIN: int = 4
     ORCH_MAX_REPLAN: int = 2
     ORCH_HISTORY_WINDOW: int = 10  # 会话滑窗：注入编排上下文的最近消息条数（多轮指代继承）

@@ -1,6 +1,6 @@
 """双方言列类型：向量列（PostgreSQL+pgvector ↔ SQLite 文本承载）。
 
-初赛/生产用 PostgreSQL 的 VECTOR(n)（HNSW 索引）；本地开发与测试用 SQLite 时以
+生产环境用 PostgreSQL 的 VECTOR(n)（HNSW 索引）；本地开发与测试用 SQLite 时以
 JSON 文本承载，向量相似度在上层适配器内计算（M0 适配层职责）。
 """
 

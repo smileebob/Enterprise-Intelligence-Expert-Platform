@@ -14,7 +14,7 @@ from core.abstraction.enums import HookAction
 from core.guardrails.hooks import HookContext, HookDecision, write_hook_audit
 from core.guardrails.masking import detect_pii, mask_pii
 
-# 注入检测规则集（模拟赛题场景的确定性防线）
+# 注入检测规则集（演示场景的确定性防线）
 INJECTION_PATTERNS: list[tuple[str, str]] = [
     (r"(?i)(ignore\s+(all\s+)?(previous|above)\s+instructions?)", "忽略指令注入"),
     (r"(忽略|无视|绕过)(以上|上面|之前|前面)?(的)?(所有)?(指令|规则|约束|提示词)", "忽略指令注入"),

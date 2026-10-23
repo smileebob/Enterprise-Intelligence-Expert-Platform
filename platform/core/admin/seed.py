@@ -77,10 +77,14 @@ def seed_agents(db: Session) -> int:
 
 
 def seed_domains(db: Session) -> int:
-    """写入两个领域实例装配（化学 online / 招商 draft→可一键 online）。"""
+    """只创建缺失的领域实例（不覆盖管理员变更）；初始配置落为 revision。"""
     from pathlib import Path
 
     import yaml
+
+    from core.admin.models import DomRevision
+    from core.admin.revisions import content_hash
+    from core.domains import load_domain_hooks
 
     count = 0
     for domain_id, status in (("chemical", "online"), ("investment", "draft")):
@@ -89,16 +93,59 @@ def seed_domains(db: Session) -> int:
             continue
         config = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
         row = db.get(DomInstance, domain_id)
-        if row is None:
-            row = DomInstance(domain_id=domain_id, name=config.get("name", domain_id))
-            db.add(row)
-            count += 1
-        row.name = config.get("name", domain_id)
-        row.status = status
-        row.config = config
-        row.version = str(config.get("version", "0.1.0"))
-        row.created_by = "seed"
-        row.config_history = row.config_history or []
+        if row is not None:
+            # 旧库升级兜底：有配置无 revision 指针 → 补建初始修订
+            if row.config_rev == 0 and not row.active_revision_id and not row.draft_revision_id and row.config:
+                row.config_rev = 1
+                rev_id = f"REV-{domain_id}-init"
+                db.add(
+                    DomRevision(
+                        revision_id=rev_id,
+                        domain_id=domain_id,
+                        config_rev=1,
+                        config=row.config,
+                        code_version="",
+                        content_hash=content_hash(row.config),
+                        change_kind="publish" if row.status == "online" else "draft",
+                        created_by="seed",
+                    )
+                )
+                if row.status == "online":
+                    row.active_revision_id = rev_id
+                else:
+                    row.draft_revision_id = rev_id
+            continue
+        row = DomInstance(
+            domain_id=domain_id,
+            name=config.get("name", domain_id),
+            status=status,
+            config=config,
+            version=str(config.get("version", "0.1.0")),
+            config_rev=1,
+            created_by="seed",
+            config_history=[],
+        )
+        db.add(row)
+        db.flush()
+        hooks = load_domain_hooks(domain_id)
+        rev_id = f"REV-{domain_id}-init"
+        db.add(
+            DomRevision(
+                revision_id=rev_id,
+                domain_id=domain_id,
+                config_rev=1,
+                config=config,
+                code_version=getattr(hooks, "CODE_VERSION", "") if hooks is not None else "",
+                content_hash=content_hash(config),
+                change_kind="publish" if status == "online" else "draft",
+                created_by="seed",
+            )
+        )
+        if status == "online":
+            row.active_revision_id = rev_id
+        else:
+            row.draft_revision_id = rev_id
+        count += 1
     db.commit()
     logger.info("seed domains: +%d", count)
     return count

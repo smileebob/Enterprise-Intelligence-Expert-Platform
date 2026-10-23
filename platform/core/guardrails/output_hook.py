@@ -28,6 +28,9 @@ class OutputCheck:
     masked_fields: list[str] = field(default_factory=list)
     invalid_citations: list[str] = field(default_factory=list)
     unverified_claims: int = 0
+    action: str = "allow"  # allow / annotate / review / block
+    review_reasons: list[str] = field(default_factory=list)
+    policy_version: str = "output-policy-v1"
 
     @classmethod
     def build(cls, text: str) -> OutputCheck:
@@ -115,21 +118,31 @@ class OutputGuard:
         check.invalid_citations = sorted(set(invalid))
         if check.invalid_citations:
             check.annotations.append(f"检出 {len(check.invalid_citations)} 条无效引用，已剔除")
+            check.review_reasons.append("存在无效引用，需人工审核")
+            check.action = "review"
 
-        # 2) 冲突标注完备性（双方引用可见性）
+        # 2) 冲突标注完备性（双方引用可见性）：只验并集不算通过
         for conflict in draft.conflicts:
-            refs = set(conflict.internal_claim.refs) | set(conflict.external_claim.refs)
-            if not (refs & evidence_record_ids):
-                check.annotations.append(f"冲突 {conflict.conflict_id} 未携带可引用证据，请人工核验")
+            internal_ok = bool(set(conflict.internal_claim.refs) & evidence_record_ids)
+            external_ok = bool(set(conflict.external_claim.refs) & evidence_record_ids)
+            if not (internal_ok and external_ok):
+                reason = f"冲突 {conflict.conflict_id} 仅一方携带可见证据"
+                check.annotations.append(f"{reason}，需人工审核")
+                check.review_reasons.append(reason)
+                check.action = "review"
 
         # 3) 合规强制提示（CS-05）
         compliance_blocks = _render_compliance(draft)
 
-        # 4) 置信度门槛（BR-10）
+        # 4) 置信度门槛（BR-10）：0/缺失为 unknown，不伪造高分
         if draft.confidence and draft.confidence < confidence_threshold:
             check.annotations.append(
                 f"{MANUAL_REVIEW_NOTE}（置信度 {draft.confidence:.2f} 低于领域阈值 {confidence_threshold:.2f}）"
             )
+            check.action = "annotate"
+        elif not draft.confidence:
+            check.annotations.append(f"{MANUAL_REVIEW_NOTE}（置信度未知）")
+            check.action = "annotate"
 
         # 5) 组装文本（正文 + 冲突 + 合规）
         parts: list[str] = [render_draft(draft)]
@@ -153,6 +166,8 @@ class OutputGuard:
                 "invalid_citations": check.invalid_citations,
                 "masked_fields": masked_fields,
                 "unverified_claims": check.unverified_claims,
+                "review_action": check.action,
+                "review_reasons": check.review_reasons,
             },
         )
         write_hook_audit(

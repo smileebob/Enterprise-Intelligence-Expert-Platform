@@ -66,7 +66,7 @@ agent_config:
     目标市场: [内销, 出口, 欧盟, 服装, 户外, 出口欧盟]
     成本约束: [成本, 价格, 降本, 预算]
 
-# ④ 领域工具集：MCP 同构契约（02 §2.5），初赛进程内注册
+# ④ 领域工具集：MCP 同构契约（02 §2.5），当前进程内注册
 toolset_ref: tools/chemical_tools.yaml
 #   内含：search_products / search_formulas / search_experiments /
 #         search_external / score_solution / check_compliance

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "AI 产业招商专家（副领域）赛事模拟数据：生物医药企业/画像/园区资源/政策。is_mock=true，与主领域数据集同构标注。",
+    "description": "AI 产业招商专家（轻量领域）演示模拟数据：生物医药企业/画像/园区资源/政策。is_mock=true，与主领域数据集同构标注。",
     "is_mock": true,
     "domain": "investment",
     "record_count": 13
@@ -164,7 +164,7 @@
     {
       "policy_id": "POL-02",
       "title": "高端人才引进补贴办法（模拟）",
-      "applicability": {"适配": ["全部赛道"], "条件": "全职引进博士/领军人才"},
+      "applicability": {"适配": ["全部领域"], "条件": "全职引进博士/领军人才"},
       "issuing_body": "某区人社局（模拟）",
       "valid_until": "2026-12-31",
       "source_type": "external",

@@ -52,7 +52,13 @@ def seeded_investment(db_session, registry):
 
 @pytest.fixture()
 def actor_expert():
-    return Actor(user_id="u-expert", username="expert", role_id=Roles.EXPERT, permission_max=2)
+    return Actor(
+        user_id="u-expert",
+        username="expert",
+        role_id=Roles.EXPERT,
+        permission_max=2,
+        domain_scope=["chemical", "investment"],
+    )
 
 
 def _ctx(db_session, actor: Actor) -> ToolCtx:

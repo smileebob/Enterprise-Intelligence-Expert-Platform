@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest a scoped improvement
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or operational problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the smallest useful change and affected modules.
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Security / data / compatibility risks
+      description: Authorization, privacy, migration, API compatibility.
+    validations:
+      required: false

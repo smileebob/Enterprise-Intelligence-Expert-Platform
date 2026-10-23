@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "传化功能化学（模拟）配方数据 —— 助剂工作液配方与原料配比。赛事模拟数据，非真实配方。",
+    "description": "示例企业（模拟）配方数据 —— 助剂工作液配方与原料配比。演示模拟数据，非真实配方。",
     "is_mock": true,
     "source_type": "internal",
     "domain": "chemical",

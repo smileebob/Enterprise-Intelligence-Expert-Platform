@@ -18,7 +18,7 @@ from app.common.errors import biz
 from app.common.responses import ok
 from app.config import get_settings
 from app.db import get_db
-from app.deps import idempotency_key, require_permissions
+from app.deps import assert_domain_access, idempotency_key, require_permissions
 from core.abstraction.dtos import Actor
 from core.growth.service import GrowthService
 from core.knowledge.models import KbIngestTask
@@ -65,6 +65,7 @@ def ingest_document(
         adapter = get_ingest_adapter(body.domain_id)
     except KeyError as exc:
         raise biz("VALIDATION_ERROR", f"领域未装配入库适配器：{body.domain_id}", 400) from exc
+    assert_domain_access(actor, body.domain_id, db=db, require_online=False)
     checker = getattr(adapter, "supported_sources", None)
     if callable(checker):
         supported = tuple(checker())
@@ -133,6 +134,7 @@ def ingest_status(
     task = db.get(KbIngestTask, task_id)
     if task is None:
         raise biz("DOCUMENT_NOT_FOUND", "文档任务不存在", 404)
+    assert_domain_access(actor, task.domain_id, db=db, require_online=False)
     return ok(
         {
             "task_id": task.task_id,
@@ -155,6 +157,7 @@ async def retrieval_search(
     actor: Actor = Depends(require_permissions("retrieval.search")),
     db: Session = Depends(get_db),
 ) -> dict:
+    assert_domain_access(actor, body.domain_id, db=db)
     service = KnowledgeService(db)
     fused = await service.retrieve(
         body.query,
@@ -196,6 +199,7 @@ def list_conflicts(
     actor: Actor = Depends(require_permissions("knowledge.read")),
     db: Session = Depends(get_db),
 ) -> dict:
+    assert_domain_access(actor, domain_id, db=db, require_online=False)
     conflicts = KnowledgeService(db).list_conflicts(domain_id, status)
     return ok(
         [
@@ -226,6 +230,7 @@ def resolve_conflict(
     conflict = service.get_conflict(conflict_id)
     if conflict is None:
         raise biz("CONFLICT_NOT_FOUND", "冲突记录不存在", 404)
+    assert_domain_access(actor, conflict.domain_id, db=db, require_online=False)
     service.resolve_conflict(
         conflict_id,
         {"resolution": body.resolution, "note": body.note, "resolved_by": actor.user_id},
@@ -239,6 +244,7 @@ def review_queue(
     actor: Actor = Depends(require_permissions("knowledge.write")),
     db: Session = Depends(get_db),
 ) -> dict:
+    assert_domain_access(actor, domain_id, db=db, require_online=False)
     return ok(GrowthService(db).review_queue(domain_id))
 
 
@@ -249,4 +255,10 @@ def review_case(
     actor: Actor = Depends(require_permissions("knowledge.write")),
     db: Session = Depends(get_db),
 ) -> dict:
+    from core.growth.models import GrowthFeedback
+
+    feedback = db.get(GrowthFeedback, feedback_id)
+    if feedback is None:
+        raise biz("FEEDBACK_NOT_FOUND", "反馈不存在", 404)
+    assert_domain_access(actor, feedback.domain_id, db=db, require_online=False)
     return ok(GrowthService(db).review_case(feedback_id, body.action, actor))

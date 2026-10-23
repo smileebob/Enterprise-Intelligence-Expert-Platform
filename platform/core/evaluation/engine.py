@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 
 from core.abstraction.dtos import Actor
 from core.abstraction.errors import LlmUnavailableError
-from core.domains import DomainPlugin, DomainRegistry
+from core.domains import DomainPlugin
 from core.runtime import eval_repo, get_domain_registry, get_model_gateway
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class CalibrationResponse(BaseModel):
 
 
 class EvaluationEngine:
-    def __init__(self, db: Session, gateway=None, registry: DomainRegistry | None = None):
+    def __init__(self, db: Session, gateway=None, registry: Any | None = None):
         self.db = db
         self.gateway = gateway or get_model_gateway()
         self.registry = registry or get_domain_registry()
@@ -77,12 +77,18 @@ class EvaluationEngine:
         dimensions, compliance_flags, risk_flags, dim_guardrails = self._run_scorers(plugin, inputs)
 
         weights, standard_id, standard_version = self._weights_for(plugin, scenario)
-        total = round(sum(dimensions[code]["score"] * weights.get(code, 0) / 100 for code in dimensions), 1)
+        baseline_total = round(
+            sum(dimensions[code]["score"] * weights.get(code, 0) / 100 for code in dimensions), 1
+        )
 
-        calibration = await self._calibrate(request, plugin, dimensions, total)
+        calibration = await self._calibrate(request, plugin, dimensions, baseline_total)
         from core.metrics import EVAL_CALIBRATION
 
         EVAL_CALIBRATION.labels(applied=str(bool(calibration.get("applied"))).lower()).inc()
+
+        # 固定顺序：校准 → 维度硬约束（D6 等）→ 加权总分（06-C §4.2）
+        self._apply_hard_caps(dimensions)
+        total = round(sum(dimensions[code]["score"] * weights.get(code, 0) / 100 for code in dimensions), 1)
 
         confidence = self._confidence(inputs, request)
         guardrails = self._guardrails(inputs, dim_guardrails, calibration)
@@ -95,6 +101,7 @@ class EvaluationEngine:
             "standard_id": standard_id,
             "standard_version": standard_version,
             "scenario": scenario,
+            "baseline_total": baseline_total,
             "total_score": total,
             "confidence": confidence,
             "dimensions": dimensions,
@@ -170,6 +177,15 @@ class EvaluationEngine:
                 )
         return dimensions, compliance_flags, risk_flags, dim_guardrails
 
+    @staticmethod
+    def _apply_hard_caps(dimensions: dict[str, Any]) -> None:
+        """领域打分器可声明 detail.hard_cap（如 D6 合规上限）；校准后必须重新执行。"""
+        for dim in dimensions.values():
+            cap = (dim.get("detail") or {}).get("hard_cap")
+            if isinstance(cap, (int, float)) and dim.get("score", 0.0) > float(cap):
+                dim["score"] = round(float(cap), 1)
+                dim["hard_cap_applied"] = float(cap)
+
     def _weights_for(self, plugin: DomainPlugin, scenario: str) -> tuple[dict[str, int], str, str]:
         standard = self.repo.get_active_standard(plugin.domain_id, plugin.eval_config.get("object_type", "solution"))
         if standard is not None and standard.scenario_profiles.get(scenario):
@@ -224,14 +240,43 @@ class EvaluationEngine:
             logger.warning("calibration response invalid, rejected", exc_info=True)
             return {"applied": False, "reason": "校准响应不合规（Schema 校验拒绝）", "items": [], "degrade_level": chat.degrade_level}
 
-        applied_items = []
+        # 整批验证：任一维度/增量/理由/引用不合法 → 整批拒绝，不做部分应用
+        rejected: list[dict[str, Any]] = []
         needs_human = False
+        available_all = set().union(
+            *(set(dim.get("evidence_refs") or []) for dim in dimensions.values())
+        )
         for item in parsed.calibrations:
+            reason_invalid = ""
             if item.dim not in dimensions:
-                continue
+                reason_invalid = "维度不存在"
+            elif not str(item.rationale or "").strip():
+                reason_invalid = "rationale 为空"
+            elif not item.citations:
+                reason_invalid = "缺少引用"
+            else:
+                invalid_refs = [cid for cid in item.citations if cid not in available_all]
+                if invalid_refs:
+                    reason_invalid = f"引用不属于本次可用证据: {','.join(invalid_refs[:3])}"
+            if reason_invalid:
+                rejected.append({"dim": item.dim, "reason": reason_invalid})
             if abs(item.delta) > 15:
                 needs_human = True
-                continue
+            if item.delta == 0:
+                rejected.append({"dim": item.dim, "reason": "delta 为 0"})
+        if rejected or needs_human:
+            return {
+                "applied": False,
+                "trigger": reason,
+                "items": [],
+                "rejected_items": rejected,
+                "needs_human_calibration": needs_human,
+                "reason": "校准响应不合规，整批未应用",
+                "degrade_level": chat.degrade_level,
+            }
+
+        applied_items = []
+        for item in parsed.calibrations:
             delta = max(-10, min(10, item.delta))  # ±10 强制限幅
             dimensions[item.dim]["score"] = round(max(0.0, min(100.0, dimensions[item.dim]["score"] + delta)), 1)
             dimensions[item.dim]["calibrated_delta"] = delta
@@ -241,7 +286,7 @@ class EvaluationEngine:
             "applied": bool(applied_items),
             "trigger": reason,
             "items": applied_items,
-            "needs_human_calibration": needs_human,
+            "needs_human_calibration": False,
             "degrade_level": chat.degrade_level,
         }
 

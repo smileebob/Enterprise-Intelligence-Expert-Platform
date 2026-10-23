@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "传化功能化学（模拟）历史实验/试样报告 —— 内部验证证据。赛事模拟数据。含冲突场景引用的关键实验。",
+    "description": "示例企业（模拟）历史实验/试样报告 —— 内部验证证据。演示模拟数据。含冲突场景引用的关键实验。",
     "is_mock": true,
     "source_type": "internal",
     "domain": "chemical",

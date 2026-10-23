@@ -70,6 +70,19 @@ export const request = {
   },
 }
 
+/** /api/v2 门面（与 v1 共用拦截器/JWT/统一解包）。 */
+export const requestV2 = {
+  get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    return instance.get(url, { ...config, baseURL: '/api/v2' }) as unknown as Promise<T>
+  },
+  post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+    return instance.post(url, data, { ...config, baseURL: '/api/v2' }) as unknown as Promise<T>
+  },
+  put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+    return instance.put(url, data, { ...config, baseURL: '/api/v2' }) as unknown as Promise<T>
+  },
+}
+
 /** 幂等键：写接口（入库/评估）必带（规则 B-01） */
 export function newIdempotencyKey(): string {
   return crypto.randomUUID ? crypto.randomUUID() : `idem-${Date.now()}-${Math.random()}`

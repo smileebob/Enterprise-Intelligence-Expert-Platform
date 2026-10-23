@@ -6,9 +6,12 @@
 
 from __future__ import annotations
 
+import time
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from core.abstraction.enums import Roles
 from core.admin.models import GovPermission, GovRolePermission
 
@@ -37,6 +40,14 @@ PERMISSIONS: list[dict[str, str]] = [
     {"perm_id": "audit.read", "resource": "audit", "action": "read", "scope": "all", "description": "审计查询"},
     {"perm_id": "growth.feedback", "resource": "growth", "action": "feedback", "scope": "domain", "description": "提交反馈"},
     {"perm_id": "growth.export", "resource": "growth", "action": "export", "scope": "domain", "description": "标注数据导出"},
+    {"perm_id": "run.view_own", "resource": "run", "action": "view_own", "scope": "owner", "description": "查看本人运行"},
+    {"perm_id": "run.inspect", "resource": "run", "action": "inspect", "scope": "domain", "description": "查看领域内运行时间线"},
+    {"perm_id": "run.replay", "resource": "run", "action": "replay", "scope": "domain", "description": "冻结回放（05-B）"},
+    {"perm_id": "run.fork", "resource": "run", "action": "fork", "scope": "domain", "description": "运行分叉（05-C）"},
+    {"perm_id": "run.cancel", "resource": "run", "action": "cancel", "scope": "owner", "description": "取消运行"},
+    {"perm_id": "run.payload.read", "resource": "run_payload", "action": "read", "scope": "domain", "description": "读取受控载荷"},
+    {"perm_id": "tool.approve", "resource": "tool", "action": "approve", "scope": "domain", "description": "危险工具一次性审批"},
+    {"perm_id": "output.review", "resource": "output", "action": "review", "scope": "domain", "description": "输出人工审核"},
 ]
 
 ROLES: list[dict[str, str]] = [
@@ -63,6 +74,8 @@ ROLE_GRANTS: dict[str, list[str]] = {
         "tool.investment.search",
         "domain.view",
         "growth.feedback",
+        "run.view_own",
+        "run.cancel",
     ],
     Roles.KB_ADMIN: [
         "chat.use",
@@ -78,6 +91,10 @@ ROLE_GRANTS: dict[str, list[str]] = {
         "domain.view",
         "growth.export",
         "growth.feedback",
+        "run.view_own",
+        "run.inspect",
+        "tool.approve",
+        "output.review",
     ],
     Roles.PLATFORM_ADMIN: [
         "chat.use",
@@ -91,12 +108,18 @@ ROLE_GRANTS: dict[str, list[str]] = {
         "domain.assemble",
         "domain.publish",
         "role.manage",
+        "run.view_own",
+        "run.inspect",
+        "run.cancel",
+        "tool.approve",
+        "output.review",
     ],
     Roles.SEC_AUDITOR: [
         "knowledge.read",
         "knowledge.audit",
         "audit.read",
         "domain.view",
+        "run.inspect",
     ],
     Roles.AGENT: [
         "chat.use",
@@ -108,6 +131,7 @@ ROLE_GRANTS: dict[str, list[str]] = {
         "tool.chemical.search",
         "tool.chemical.evaluate",
         "tool.investment.search",
+        "run.view_own",
     ],
 }
 
@@ -120,19 +144,25 @@ ROLE_PERMISSION_MAX: dict[str, int] = {
     Roles.AGENT: 2,
 }
 
-_cache: dict[str, set[str]] = {}
+# role_id -> (monotonic 写入时刻, 权限快照)；TTL 到期后回源 DB
+_cache: dict[str, tuple[float, frozenset[str]]] = {}
 
 
-def role_permissions(db: Session, role_id: str) -> set[str]:
-    """角色权限点集合（DB 为准，进程内 60s 缓存）。"""
-    if role_id in _cache:
-        return _cache[role_id]
+def role_permissions(db: Session, role_id: str, *, fresh: bool = False) -> set[str]:
+    """角色权限点集合（DB 为唯一权威；空集合代表真正无权限，不回退默认授权）。
+
+    fresh=True 用于安全边界（准入/工具执行）：绕过进程缓存直接读 DB，保证跨进程撤权即时生效。
+    """
+    now = time.monotonic()
+    cached = None if fresh else _cache.get(role_id)
+    if cached is not None and now - cached[0] < get_settings().PERMISSION_CACHE_TTL_SECONDS:
+        return set(cached[1])
     rows = db.execute(
         select(GovRolePermission.perm_id).where(GovRolePermission.role_id == role_id)
     ).scalars().all()
-    perms = set(rows) if rows else set(ROLE_GRANTS.get(role_id, []))
-    _cache[role_id] = perms
-    return perms
+    perms = frozenset(rows)
+    _cache[role_id] = (now, perms)
+    return set(perms)
 
 
 def invalidate_permission_cache() -> None:
@@ -151,18 +181,16 @@ def ensure_permission_tables(db: Session) -> None:
     db.flush()
 
     from core.admin.models import GovRole
+
+    created_roles: list[str] = []
     for role in ROLES:
         if db.get(GovRole, role["role_id"]) is None:
             db.add(GovRole(role_id=role["role_id"], name=role["name"], description=role["description"]))
+            created_roles.append(role["role_id"])
     db.flush()
-    for role_id, grants in ROLE_GRANTS.items():
-        # 仅在该角色尚无任何授权行时做引导写入（避免覆盖管理员的后续调整）
-        existing_count = (
-            db.execute(select(GovRolePermission).where(GovRolePermission.role_id == role_id)).scalars().all()
-        )
-        if existing_count:
-            continue
-        for perm_id in grants:
+    for role_id in created_roles:
+        # 仅对本次新建角色做引导授权；已有角色即使授权为空也不回填（空集=真正无权限）
+        for perm_id in ROLE_GRANTS.get(role_id, []):
             db.add(GovRolePermission(role_id=role_id, perm_id=perm_id))
     db.commit()
     invalidate_permission_cache()

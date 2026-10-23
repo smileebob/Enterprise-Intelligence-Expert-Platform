@@ -9,6 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from adapters.blob_local import LocalBlobRepository
@@ -47,6 +48,68 @@ def get_domain_registry():
                 continue
         _singletons["domain_registry"] = registry
     return _singletons["domain_registry"]
+
+
+class DbDomainRegistry:
+    """以 DB 生效 revision 为权威的领域解析器（02 §5）。
+
+    每次准入读取实例指针（轻量查询）；同一 (config_rev, revision, status) 复用解析结果，
+    另一进程发布后下一回合自然读到新配置。文件注册表仅负责工具集注册与代码资产。
+    """
+
+    def __init__(self, db: Session):
+        self.db = db
+        self._cache: dict[str, tuple[tuple[Any, ...], Any]] = {}
+
+    def get(self, domain_id: str):
+        from core.admin.models import DomInstance, DomRevision
+        from core.domains import DomainPlugin, load_domain_hooks
+
+        row = self.db.get(DomInstance, domain_id)
+        if row is None:
+            return None
+        revision_id = row.active_revision_id or row.draft_revision_id
+        revision = self.db.get(DomRevision, revision_id) if revision_id else None
+        config = dict(revision.config) if revision is not None else dict(row.config or {})
+        code_version = revision.code_version if revision is not None else ""
+        key = (row.config_rev, revision_id or "", row.status, code_version)
+        cached = self._cache.get(domain_id)
+        if cached is not None and cached[0] == key:
+            return cached[1]
+        plugin = DomainPlugin(
+            domain_id=row.domain_id,
+            name=row.name,
+            version=row.version,
+            status=row.status,
+            base_dir=Path("domains") / row.domain_id,
+            knowledge_binding=config.get("knowledge_binding", {}),
+            eval_config=config.get("eval_config", {}),
+            agent_config=config.get("agent_config", {}),
+            toolset_ref=config.get("toolset_ref", ""),
+            memory_policy=config.get("memory_policy", {}),
+            hooks=load_domain_hooks(row.domain_id),
+        )
+        self._cache[domain_id] = (key, plugin)
+        return plugin
+
+    def require(self, domain_id: str):
+        plugin = self.get(domain_id)
+        if plugin is None:
+            raise KeyError(f"领域实例未装配: {domain_id}")
+        return plugin
+
+    def all(self) -> list[Any]:
+        from core.admin.models import DomInstance
+
+        rows = self.db.execute(select(DomInstance.domain_id)).scalars().all()
+        return [plugin for plugin in (self.get(domain_id) for domain_id in rows) if plugin is not None]
+
+    def online(self) -> list[Any]:
+        return [plugin for plugin in self.all() if plugin.status == "online"]
+
+
+def get_db_domain_registry(db: Session) -> DbDomainRegistry:
+    return DbDomainRegistry(db)
 
 
 # ---------------- 请求级仓储工厂 ----------------

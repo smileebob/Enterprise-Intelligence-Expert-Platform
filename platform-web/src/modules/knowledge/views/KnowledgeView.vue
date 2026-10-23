@@ -106,7 +106,7 @@ async function reviewCase(feedbackId: string, action: 'approve' | 'reject') {
     <div class="panel">
       <div class="panel-title flex items-center justify-between">
         <span>知识入库（模拟数据集 · 结构感知切分 + 六级打标 + 向量化）</span>
-        <el-tag size="small" type="warning" effect="plain">赛事模拟数据（is_mock）</el-tag>
+        <el-tag size="small" type="warning" effect="plain">演示模拟数据（is_mock）</el-tag>
       </div>
       <div class="p-3 flex flex-wrap gap-2">
         <el-button

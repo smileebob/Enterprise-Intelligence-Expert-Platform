@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: platform/requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Ruff
+        run: python -m ruff check .
+      - name: Bandit (high/medium gate)
+        run: python -m bandit -r app core adapters domains -ll
+      - name: Tests with coverage gate
+        run: python -m pytest tests --cov=app --cov=core --cov=adapters --cov=domains --cov-report=term-missing --cov-fail-under=60
+      # 既有 mypy 问题已登记（非本批引入），暂不设为阻断门禁；清理后改为强制
+      - name: Mypy (non-blocking baseline)
+        continue-on-error: true
+        run: python -m mypy app core adapters domains
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: platform-web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build

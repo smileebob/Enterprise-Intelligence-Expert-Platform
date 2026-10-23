@@ -78,7 +78,9 @@ async def evaluate(
             return ok(existing)
         raise biz("IDEMPOTENT_DUPLICATE", "重复请求，请勿重复提交", 409)
 
-    engine = EvaluationEngine(db)
+    from core.runtime import get_db_domain_registry
+
+    engine = EvaluationEngine(db, registry=get_db_domain_registry(db))
     try:
         result = await engine.evaluate(
             {

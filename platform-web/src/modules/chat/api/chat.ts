@@ -82,6 +82,16 @@ export function sendMessage(sessionId: string, text: string, onEvent: (event: Ss
   return postSse(`/api/v1/chat/sessions/${sessionId}/messages`, { text }, onEvent)
 }
 
-export function resumeSession(sessionId: string, value: string, onEvent: (event: SseEvent) => void) {
-  return postSse(`/api/v1/chat/sessions/${sessionId}/resume`, { value }, onEvent)
+export function resumeSession(
+  sessionId: string,
+  value: string,
+  onEvent: (event: SseEvent) => void,
+  approvalId = '',
+  reviewId = '',
+) {
+  return postSse(
+    `/api/v1/chat/sessions/${sessionId}/resume`,
+    { value, approval_id: approvalId || null, review_id: reviewId || null },
+    onEvent,
+  )
 }

@@ -6,6 +6,8 @@ invoke() 是所有工具调用的唯一入口：Hook③（权限校验/危险拦
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import time
 from dataclasses import dataclass, field
@@ -13,12 +15,14 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from core.abstraction.dtos import Actor, ToolResult
 from core.abstraction.enums import HookAction, RiskLevel
 from core.abstraction.errors import ToolDeniedError
-from core.cache import cache_get, cache_set, ckey
+from core.cache import cache_incr, ckey
 from core.gateway.permissions import role_permissions
 from core.gateway.registry import ToolDefinition, parse_rate_limit, tool_registry
+from core.gateway.validation import validate_tool_args
 from core.guardrails.hooks import HookContext, HookDecision, write_hook_audit
 from core.guardrails.masking import mask_text_for_role
 
@@ -36,6 +40,10 @@ class ToolCtx:
     session_id: str = ""
     domain_id: str = ""
     trace_id: str = ""
+    run_id: str = ""
+    node: str = "tool"
+    invocation_index: int = 0
+    approval_id: str = ""
     gateway: Any = None  # ModelGateway
     registry: Any = None  # DomainRegistry
     extra: dict[str, Any] = field(default_factory=dict)
@@ -74,6 +82,15 @@ class ToolGateway:
         *,
         confirmed: bool = False,
     ) -> ToolResult:
+        from core.runs.approvals import (
+            ApprovalConflict,
+            ApprovalExpired,
+            ApprovalNotFound,
+            ApprovalService,
+        )
+        from core.runs.effects import EffectLedger
+        from core.runs.outbox import OutboxService
+
         definition: ToolDefinition | None = self.tools.get(name)
         hook_ctx = HookContext(
             stage="tool",
@@ -88,24 +105,114 @@ class ToolGateway:
 
         spec = definition.spec
         role_id = ctx.actor.role_id if ctx.actor else ""
-        # ① 权限校验（RBAC：角色 × 领域 × 工具）
-        if spec.permission not in role_permissions(self.db, role_id):
+        # ⓪ 领域边界：工具声明域 == 执行域；主体域范围覆盖执行域（空范围=无准入）
+        if spec.domain and ctx.domain_id and spec.domain != ctx.domain_id:
+            self._deny(hook_ctx, "DOMAIN_MISMATCH", f"工具 {name} 不属于领域 {ctx.domain_id}", "domain")
+        if ctx.actor is not None and ctx.domain_id and ctx.domain_id not in (ctx.actor.domain_scope or []):
+            self._deny(hook_ctx, "DOMAIN_FORBIDDEN", "无权在该领域执行工具", "domain_scope")
+
+        # ⓪' 参数契约：dict 结构 + 体积上限 + JSON Schema 子集校验
+        if not isinstance(args, dict):
+            self._deny(hook_ctx, "INVALID_TOOL_ARGS", f"工具 {name} 参数必须为对象", "args_type")
+        raw_size = len(json.dumps(args, ensure_ascii=False, default=str).encode("utf-8"))
+        if raw_size > get_settings().TOOL_ARGS_MAX_BYTES:
+            self._deny(hook_ctx, "INVALID_TOOL_ARGS", f"工具 {name} 参数体积超过上限", "args_size")
+        arg_errors = validate_tool_args(args, spec.input_schema)
+        if arg_errors:
+            self._deny(hook_ctx, "INVALID_TOOL_ARGS", f"工具 {name} 参数不合法：{'；'.join(arg_errors)}", "args_schema")
+
+        # ① 权限校验（RBAC：角色 × 领域 × 工具；安全边界实时读 DB，跨进程撤权即时生效）
+        if ctx.actor is not None:
+            from core.admin.models import GovUser
+
+            user = self.db.get(GovUser, ctx.actor.user_id)
+            if user is None or user.status != "active":
+                self._deny(hook_ctx, "AUTH_INVALID", "账号不可用", "account_status")
+        if spec.permission not in role_permissions(self.db, role_id, fresh=True):
             decision = HookDecision(action=HookAction.BLOCK, code="PERM_DENIED", message=f"无权限调用工具 {name}")
             write_hook_audit(self.db, hook_ctx, decision, action="hook.tool.block", detail={"reason": "permission"})
             self.db.commit()
             raise ToolDeniedError(f"无权限调用工具 {name}")
 
-        # ② 危险操作二次确认（interrupt 对接）
-        if spec.risk_level == RiskLevel.DANGEROUS and not confirmed:
-            decision = HookDecision(
-                action=HookAction.CONFIRM,
-                code="TOOL_CONFIRM_REQUIRED",
-                message=f"危险操作需要二次确认：{spec.description}",
-                extra={"card": {"tool": name, "args_preview": args, "risk": "dangerous"}},
+        # ② 危险操作一次性审批（06-A2）：confirmed=true 不再是授权凭证
+        dangerous_effect = None
+        if spec.risk_level == RiskLevel.DANGEROUS:
+            effect_key = str(
+                ctx.extra.get("effect_key")
+                or f"{ctx.run_id or ctx.trace_id or 'run'}:tool:{ctx.invocation_index}:{name}"
             )
-            write_hook_audit(self.db, hook_ctx, decision, action="hook.tool.confirm", detail={"args": args})
-            self.db.commit()
-            return ToolResult(ok=False, message=decision.message, meta={"confirm_required": True, "card": decision.extra["card"]})
+            preview = self._mask_args(args, role_id)
+            if not ctx.approval_id:
+                approval = ApprovalService(self.db).create_or_get(
+                    run_id=ctx.run_id or ctx.trace_id or "",
+                    owner_id=ctx.actor.user_id if ctx.actor else "anonymous",
+                    domain_id=ctx.domain_id,
+                    session_id=ctx.session_id,
+                    effect_key=effect_key,
+                    tool_name=name,
+                    tool_version="1",
+                    args=args,
+                    preview=preview,
+                    actor_role=role_id,
+                )
+                decision = HookDecision(
+                    action=HookAction.CONFIRM,
+                    code="TOOL_CONFIRM_REQUIRED",
+                    message=f"危险操作需要审批：{spec.description}",
+                    extra={"card": {"tool": name, "args_preview": preview, "risk": "dangerous"}},
+                )
+                write_hook_audit(
+                    self.db,
+                    hook_ctx,
+                    decision,
+                    action="approval.requested",
+                    detail={"approval_id": approval.approval_id, "effect_key": effect_key},
+                )
+                self.db.commit()
+                return ToolResult(
+                    ok=False,
+                    message=decision.message,
+                    meta={
+                        "confirm_required": True,
+                        "approval_id": approval.approval_id,
+                        "effect_key": effect_key,
+                        "card": decision.extra["card"],
+                    },
+                )
+            try:
+                ledger = EffectLedger(self.db)
+                effect = ledger.get(effect_key)
+                if effect is not None and effect.status in ("dispatched", "succeeded"):
+                    raise ApprovalConflict("该 effect 已派发，不能重复执行")
+                ApprovalService(self.db).consume(
+                    ctx.approval_id,
+                    effect_key=effect_key,
+                    tool_name=name,
+                    args=args,
+                    actor=ctx.actor,
+                )
+                dangerous_effect = ledger.prepare(
+                    effect_key,
+                    run_id=ctx.run_id or ctx.trace_id or "",
+                    node=ctx.node,
+                    invocation_index=ctx.invocation_index,
+                    operation=name,
+                    request_digest=hashlib.sha256(
+                        json.dumps(args, ensure_ascii=False, sort_keys=True, default=str).encode("utf-8")
+                    ).hexdigest(),
+                    approval_id=ctx.approval_id,
+                )
+                ledger.mark(dangerous_effect, "dispatched")
+                OutboxService(self.db).enqueue(
+                    run_id=ctx.run_id or ctx.trace_id or "",
+                    effect_key=effect_key,
+                    operation=name,
+                )
+                # 审批消费 + effect dispatched + 恢复派发 outbox 同事务提交
+                self.db.commit()
+            except (ApprovalConflict, ApprovalExpired, ApprovalNotFound) as exc:
+                self.db.rollback()
+                self._deny(hook_ctx, "APPROVAL_REJECTED", str(exc), "approval")
 
         # ③ 限流（按工具 × 主体，服务端速率）
         allowed, retry_after = await self._check_rate_limit(spec.name, spec.rate_limit, ctx)
@@ -126,10 +233,18 @@ class ToolGateway:
                 self.db, hook_ctx, decision, action="hook.tool.error",
                 detail={"duration_ms": duration_ms, "error": str(exc)},
             )
+            if dangerous_effect is not None:
+                EffectLedger(self.db).mark(dangerous_effect, "failed")
             self.db.commit()
             logger.warning("tool %s failed", name, exc_info=True)
             raise
         duration_ms = round((time.perf_counter() - started) * 1000, 1)
+        if dangerous_effect is not None:
+            EffectLedger(self.db).mark(
+                dangerous_effect,
+                "succeeded" if (isinstance(result, ToolResult) and result.ok) else "failed",
+                result_ref=str((result.meta or {}).get("source_ref", "")) if isinstance(result, ToolResult) else None,
+            )
 
         # ⑤ 结果来源标注（FR-5-04）+ 全量审计（参数摘要脱敏）
         if isinstance(result, ToolResult) and not result.meta.get("fetched_at"):
@@ -156,15 +271,21 @@ class ToolGateway:
         self.db.commit()
         return result
 
+    def _deny(self, hook_ctx: HookContext, code: str, message: str, reason: str) -> None:
+        decision = HookDecision(action=HookAction.BLOCK, code=code, message=message)
+        write_hook_audit(self.db, hook_ctx, decision, action="hook.tool.block", detail={"reason": reason})
+        self.db.commit()
+        raise ToolDeniedError(message, code=code)
+
     async def _check_rate_limit(self, tool_name: str, rule: str | None, ctx: ToolCtx) -> tuple[bool, int]:
         limit, window = parse_rate_limit(rule) or DEFAULT_RATE_LIMIT
         actor_id = ctx.actor.user_id if ctx.actor else "anonymous"
         window_index = int(time.time()) // window
         key = ckey("tool", "rl", tool_name, actor_id, str(window_index))
-        current = await cache_get(key) or 0
-        if current >= limit:
+        # 原子计数（Redis 脚本/内存锁内读改写）：并发下不超配额；内存模式仅单进程有效
+        current = await cache_incr(key, ttl=window + 1)
+        if current > limit:
             return False, window - int(time.time()) % window
-        await cache_set(key, current + 1, ttl=window + 1)
         return True, 0
 
     def _mask_args(self, args: dict[str, Any], role_id: str) -> dict[str, Any]:

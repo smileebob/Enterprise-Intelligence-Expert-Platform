@@ -1,6 +1,6 @@
 """回归与对照报告（技术方案 07 §7.3/§7.4/§7.6）：8 问回归 + CS-01~05 + 反朴素 RAG 对照。
 
-输出报告到 _tmp/regression_report.md（仓库根 _tmp 目录），供评审材料引用。
+输出报告到 _tmp/regression_report.md（仓库根 _tmp 目录），供回归分析引用。
 用法（platform/ 目录下）： ./.venv/Scripts/python.exe scripts/run_regression.py
 """
 

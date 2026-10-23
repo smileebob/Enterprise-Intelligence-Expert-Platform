@@ -163,7 +163,7 @@ class TestInvestmentDomainSmoke:
         orchestrator = Orchestrator(db_session, gateway=OfflineModelGateway(), registry=registry)
         actor = Actor(user_id="u-expert", role_id=Roles.EXPERT, permission_max=2, domain_scope=["investment"])
         outcome, cited = _run_query(
-            orchestrator, db_session, "帮我找 AI制药 赛道的高潜企业", actor, domain_id="investment"
+            orchestrator, db_session, "帮我找 AI制药 领域的高潜企业", actor, domain_id="investment"
         )
         assert not outcome.interrupted
         assert "高潜企业画像" in outcome.text

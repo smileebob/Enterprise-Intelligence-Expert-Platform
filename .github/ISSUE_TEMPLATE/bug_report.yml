@@ -1,0 +1,49 @@
+name: Bug report
+description: Report a reproducible problem using fictional data only
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, customer data or security exploit details. Security issues go through SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      placeholder: e.g. v1.1.0 or commit hash
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Backend API
+        - Orchestration / retrieval
+        - Evaluation
+        - Frontend
+        - Deployment
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Use fictional demo data. Include commands.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Remove tokens, personal data and absolute paths.
+    validations:
+      required: false

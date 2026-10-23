@@ -1,7 +1,7 @@
-# 企业级领域专家 Agent 平台 · Docker Compose（初赛一键起栈，零云依赖）
+# 企业级领域专家 Agent 平台 · Docker Compose（一键起栈，零云依赖）
 # 默认 5 容器：web / api / worker / db(PG16+pgvector) / valkey
 # 可选 profiles：minio（多模态原件）/ ollama（本地模型）/ observability（Prometheus+Grafana）
-# 全部演示数据为赛事模拟数据（is_mock）。密钥只经环境变量注入。
+# 全部演示数据为虚构示例（is_mock）。密钥只经环境变量注入。
 
 name: angentplatform
 

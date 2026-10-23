@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "企业级领域专家 Agent 平台 · 前端（赛事演示；全部数据为模拟数据）",
+  "description": "企业级领域专家 Agent 平台 · 前端（开源参考实现；全部数据为虚构示例）",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

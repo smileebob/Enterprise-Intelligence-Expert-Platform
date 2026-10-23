@@ -33,6 +33,20 @@ class GuardedInMemoryBackend(InMemoryBackend):
         async with self._lock:
             self._store.pop(key, None)
 
+    async def incr(self, key: str, ttl: int) -> int:
+        """原子自增（单进程内存模式：锁内读改写）。"""
+        async with self._lock:
+            current = self._get(key)
+            count = 0
+            if current is not None:
+                try:
+                    count = int(current.data.decode("utf-8"))
+                except (TypeError, ValueError):
+                    count = 0
+            count += 1
+            self._store[key] = Value(str(count).encode("utf-8"), self._now + ttl)
+            return count
+
 
 def init_cache(settings) -> None:
     """缓存后端集中初始化（在 create_app 内调用；重复调用幂等）。"""
@@ -102,6 +116,23 @@ async def cache_add(key: str, value: Any, ttl: int) -> bool:
         result = await backend.redis.set(key, _encode(value), nx=True, ex=ttl)
         return bool(result)
     return await backend.add(key, _encode(value), expire=ttl)
+
+
+_INCR_LUA = """
+local current = redis.call('INCR', KEYS[1])
+if current == 1 then
+  redis.call('EXPIRE', KEYS[1], ARGV[1])
+end
+return current
+"""
+
+
+async def cache_incr(key: str, ttl: int) -> int:
+    """原子计数（固定窗口限流）：Redis 单脚本原子自增 + 首次设置过期。"""
+    backend = _backend()
+    if isinstance(backend, RedisBackend):  # pragma: no cover - 依赖外部 Valkey
+        return int(await backend.redis.eval(_INCR_LUA, 1, key, ttl))
+    return await backend.incr(key, ttl)
 
 
 async def cache_delete(key: str) -> None:
