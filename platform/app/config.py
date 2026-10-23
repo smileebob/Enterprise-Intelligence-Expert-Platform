@@ -61,6 +61,26 @@ class BaseConfig(BaseSettings):
     PERMISSION_CACHE_TTL_SECONDS: int = 30  # 权限缓存上限；安全边界仍以 DB 实时校验为准
     TOOL_ARGS_MAX_BYTES: int = 32768
 
+    # MCP 受控客户端接入（03）
+    MCP_ENABLED: bool = False
+    MCP_RESOURCE_URL: str = "http://127.0.0.1:8000/mcp"
+    MCP_TOKEN_TTL_SECONDS: int = 900
+    MCP_ALLOWED_HOSTS: list[str] = [
+        "127.0.0.1",
+        "127.0.0.1:*",
+        "localhost",
+        "localhost:*",
+        "testserver",
+    ]
+    MCP_ALLOWED_ORIGINS: list[str] = [
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+        "http://127.0.0.1:6274",
+        "http://localhost:6274",
+    ]
+
     # 运行采集与受控载荷（05）
     RUN_EVENT_SCHEMA_VERSION: str = "1"
     RUN_PAYLOAD_RETENTION_DAYS: int = 7

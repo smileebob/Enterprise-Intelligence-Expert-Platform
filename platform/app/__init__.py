@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,9 +29,23 @@ def create_app(config_name: str | None = None) -> FastAPI:
     settings = get_settings(config_name)
     setup_logging(settings.LOG_LEVEL, settings.LOG_FORMAT)
 
+    mcp_mount = None
+    if settings.MCP_ENABLED:
+        from app.mcp.server import build_mcp_mount
+
+        mcp_mount = build_mcp_mount()
+
+    lifespan = None
+    if mcp_mount is not None:
+        @asynccontextmanager
+        async def lifespan(_: FastAPI):
+            async with mcp_mount.lifespan_app.router.lifespan_context(mcp_mount.lifespan_app):
+                yield
+
     app = FastAPI(
         title=settings.APP_NAME,
         version="0.1.0",
+        lifespan=lifespan,
         description=(
             "企业级领域专家 Agent 平台：知识管道 KP-1 + 智能体编排 + 六维评估 "
             "+ 四层记忆 + 工具权限网关 + 安全 Hook。全部演示数据为虚构示例。"
@@ -70,6 +85,7 @@ def create_app(config_name: str | None = None) -> FastAPI:
     from app.governance.routes import router as governance_router
     from app.growth.routes import router as growth_router
     from app.knowledge.routes import router as knowledge_router
+    from app.mcp.routes import router as mcp_router
     from app.memory.routes import router as memory_router
     from app.runs.routes import router as runs_router
 
@@ -79,10 +95,14 @@ def create_app(config_name: str | None = None) -> FastAPI:
     app.include_router(evaluation_router, prefix="/api/v1")
     app.include_router(memory_router, prefix="/api/v1")
     app.include_router(runs_router, prefix="/api/v1")
+    app.include_router(mcp_router, prefix="/api/v1")
     app.include_router(domains_router, prefix="/api/v1")
     app.include_router(domains_v2_router, prefix="/api/v2")
     app.include_router(governance_router, prefix="/api/v1")
     app.include_router(growth_router, prefix="/api/v1")
+
+    if mcp_mount is not None:
+        app.mount("/mcp", mcp_mount.asgi)
 
     if settings.METRICS_ENABLED:
         try:

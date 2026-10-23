@@ -171,3 +171,24 @@ docker-compose.yml      # web/api/worker/db/valkey + 可选 profiles
 - 敏感字段（配方配比 / 报价 / 客户联系方式）按角色动态脱敏（BR-08），界面 / API / 日志三处口径一致；
 - 个人记忆支持查阅 / 更正 / 删除 / 可携带（PIPL 最小集），仅本人可访问并全程留痕；
 - 完整合规与数据说明见 [doc/05-合规与数据说明.md](../doc/05-合规与数据说明.md)。
+
+## MCP 受控客户端接入（可选，默认关闭）
+
+MCP Server 采用 Streamable HTTP，仅暴露只读工具，逐次经 ToolGateway 做角色/领域/Schema/限流与审计校验。
+
+```bash
+# 启动（受控客户端模式；生产需换成实际资源地址并配置允许的 Host/Origin）
+MCP_ENABLED=true MCP_RESOURCE_URL=http://127.0.0.1:8000/mcp uvicorn main:app --port 8000
+
+# 1) 用普通登录 token 换取 MCP 专用短期 token
+curl -X POST http://127.0.0.1:8000/api/v1/mcp/tokens -H "Authorization: Bearer <login-token>"
+
+# 2) 官方 Inspector 握手/发现/调用
+npx --yes @modelcontextprotocol/inspector --cli --transport http \
+  --server-url http://127.0.0.1:8000/mcp/ \
+  --header "Authorization: Bearer <mcp-token>" --method tools/list
+```
+
+- 只读工具：`search_products`、`search_experiments`、`search_external`、`search_enterprises`、`match_park_resources`。
+- 不做 token passthrough；不使用现有用户 JWT 作为 MCP 凭证；危险/写入工具不通过 MCP 暴露。
+- 当前是**受控客户端接入**，不是任意 MCP host 的 OAuth 兼容实现；公共 OAuth 发现/第三方 host 兼容仍在实施。

@@ -4,6 +4,11 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+### Added
+
+- Controlled-client MCP server over Streamable HTTP with dedicated audience tokens, Origin/Host checks, read-only tools, and per-call ToolGateway authorization.
+- Official MCP Inspector handshake evidence (initialize / tools/list / tools/call) plus 401/403 rejection paths and automated MCP tests.
+
 ### Changed
 
 - Upgraded FastAPI to 0.121 and Starlette to 0.49.1 (required by `sse-starlette>=3`).

@@ -44,6 +44,7 @@ ERROR_CODES: dict[str, tuple[int, str]] = {
     "APPROVAL_CONFLICT": (409, "审批状态冲突"),
     "APPROVAL_EXPIRED": (410, "审批已过期"),
     "RULE_NOT_FOUND": (404, "规则不存在"),
+    "MCP_DISABLED": (404, "MCP 接入未启用"),
     "OUTPUT_REVIEW_REQUIRED": (409, "输出待人工审核"),
     "OUTPUT_REVIEW_NOT_FOUND": (404, "输出审核不存在"),
     "OUTPUT_REVIEW_CONFLICT": (409, "输出审核状态冲突"),

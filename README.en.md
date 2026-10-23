@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
 [![Vue](https://img.shields.io/badge/Vue-3.5-42B883.svg)](https://vuejs.org/)
-[![Tests](https://img.shields.io/badge/tests-243%20passed-brightgreen.svg)](#testing--quality)
+[![Tests](https://img.shields.io/badge/tests-249%20passed-brightgreen.svg)](#testing--quality)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://docs.docker.com/compose/)
 
 [中文](README.md) ｜ **English**
@@ -106,7 +106,7 @@ Compared with general-purpose agent builders, this project treats four things as
 
 | Metric | Value |
 |---|---|
-| Automated tests | **243 passing** (unit / contract / integration / acceptance; re-run 2026-10-23) |
+| Automated tests | **249 passing** (unit / contract / integration / acceptance; re-run 2026-10-23) |
 | Code coverage | **87.56%** (gate: 60%) |
 | Citation hit rate (8-question regression) | **1.000** (threshold ≥0.85) |
 | Internal/external conflict scenarios (CS-01~05) | **All pass**; vs. naive RAG control **5/5 vs 0/5** |
@@ -222,7 +222,7 @@ Enterprise discovery, profiling, resource matching, and promotion strategy for a
 
 ```bash
 cd platform
-pytest                                                        # 243 tests: unit / contract / integration / acceptance
+pytest                                                        # 249 tests: unit / contract / integration / acceptance
 pytest --cov=app --cov=core --cov-fail-under=60               # coverage gate (current 87.56%)
 ruff check .                                                  # static checks
 bandit -r app core adapters domains -ll                       # security scan (0 high)
@@ -251,7 +251,7 @@ npm run build       # no chunk > 500KB
 
 **Roadmap** (plans live in [tech-plan/README.md](tech-plan/README.md))
 
-- **Execution replay & fork**: 05-A append-only events, encrypted payloads and inspect are implemented; frozen replay and forking from any node are still in progress (tech-plan 05);
+- **Execution replay & fork**: 05-A append-only events, encrypted payloads, inspect, cancel/replay and run diff are implemented; frozen replay and fork are still in progress (tech-plan 05);
 - **Semantic review adapter layer**: pluggable semantic review for input/output hooks beyond deterministic rules;
 - **MCP interoperability**: bridge the @tool registry into a real MCP server / client (plan 03);
 - **Domain plugin hooks**: move all domain-specific orchestration logic into plugins (plan 01);
