@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
 [![Vue](https://img.shields.io/badge/Vue-3.5-42B883.svg)](https://vuejs.org/)
-[![Tests](https://img.shields.io/badge/tests-258%20passed-brightgreen.svg)](#testing--quality)
+[![Tests](https://img.shields.io/badge/tests-267%20passed-brightgreen.svg)](#testing--quality)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://docs.docker.com/compose/)
 
 [中文](README.md) ｜ **English**
@@ -106,8 +106,8 @@ Compared with general-purpose agent builders, this project treats four things as
 
 | Metric | Value |
 |---|---|
-| Automated tests | **258 passing** (unit / contract / integration / acceptance; re-run 2026-10-23) |
-| Code coverage | **87.61%** (gate: 60%) |
+| Automated tests | **267 passing** (unit / contract / integration / acceptance; re-run 2026-10-23) |
+| Code coverage | **87.25%** (gate: 60%) |
 | Citation hit rate (8-question regression) | **1.000** (threshold ≥0.85) |
 | Internal/external conflict scenarios (CS-01~05) | **All pass**; vs. naive RAG control **5/5 vs 0/5** |
 | Six-dimension golden comparison | **83.8 / 69.3 / 84.6 / 83.1 (tolerance ≤0.1)** |
@@ -222,8 +222,8 @@ Enterprise discovery, profiling, resource matching, and promotion strategy for a
 
 ```bash
 cd platform
-pytest                                                        # 258 tests: unit / contract / integration / acceptance
-pytest --cov=app --cov=core --cov-fail-under=60               # coverage gate (current 87.61%)
+pytest                                                        # 267 tests: unit / contract / integration / acceptance
+pytest --cov=app --cov=core --cov-fail-under=60               # coverage gate (current 87.25%)
 ruff check .                                                  # static checks
 bandit -r app core adapters domains -ll                       # security scan (0 high)
 python scripts/run_regression.py                              # 8-question regression + CS-01~05 + naive-RAG comparison

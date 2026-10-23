@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
+from typing import Any
+
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.common.errors import biz
@@ -54,6 +58,53 @@ def issue_mcp_token(
             "tools": READ_ONLY_TOOLS,
         }
     )
+
+
+class RemoteToolCallIn(BaseModel):
+    tool: str = Field(min_length=1, max_length=128)
+    args: dict[str, Any] = Field(default_factory=dict)
+
+
+@router.get("/mcp/client/servers", summary="外部 MCP 白名单服务器")
+def mcp_client_servers(
+    actor: Actor = Depends(require_permissions("mcp.client.call")),
+) -> dict:
+    from app.mcp.client import MCPClientService
+
+    return ok(MCPClientService().list_servers())
+
+
+@router.get("/mcp/client/{server_id}/tools", summary="外部 MCP 工具发现（不落本地注册表）")
+def mcp_client_tools(
+    server_id: str,
+    actor: Actor = Depends(require_permissions("mcp.client.call")),
+) -> dict:
+    from app.mcp.client import McpClientError, McpClientRejected, MCPClientService
+
+    try:
+        tools = asyncio.run(MCPClientService().list_tools(server_id))
+    except McpClientRejected as exc:
+        raise biz("MCP_CLIENT_REJECTED", str(exc), 400) from exc
+    except McpClientError as exc:
+        raise biz("MCP_CLIENT_UNAVAILABLE", str(exc), 409) from exc
+    return ok(tools)
+
+
+@router.post("/mcp/client/{server_id}/tools/call", summary="调用外部 MCP 只读工具（结果有界）")
+def mcp_client_call(
+    server_id: str,
+    body: RemoteToolCallIn,
+    actor: Actor = Depends(require_permissions("mcp.client.call")),
+) -> dict:
+    from app.mcp.client import McpClientError, McpClientRejected, MCPClientService
+
+    try:
+        result = asyncio.run(MCPClientService().call_tool(server_id, body.tool, body.args))
+    except McpClientRejected as exc:
+        raise biz("MCP_CLIENT_REJECTED", str(exc), 400) from exc
+    except McpClientError as exc:
+        raise biz("MCP_CLIENT_UNAVAILABLE", str(exc), 409) from exc
+    return ok(result)
 
 
 @router.get("/mcp/info", summary="MCP 受控接入信息")

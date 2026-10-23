@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
 [![Vue](https://img.shields.io/badge/Vue-3.5-42B883.svg)](https://vuejs.org/)
-[![Tests](https://img.shields.io/badge/tests-258%20passed-brightgreen.svg)](#十一测试与质量)
+[![Tests](https://img.shields.io/badge/tests-267%20passed-brightgreen.svg)](#十一测试与质量)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://docs.docker.com/compose/)
 
 **中文** ｜ [English](README.en.md)
@@ -112,8 +112,8 @@ AngentPlatform 把这些能力做成**平台级机制**，而不是某个业务�
 
 | 指标 | 数值 |
 |---|---|
-| 自动化测试 | **258 项全绿**（单元 / 契约 / 集成 / 验收；2026-10-23 复跑） |
-| 代码覆盖率 | **87.61%**（门禁 60%） |
+| 自动化测试 | **267 项全绿**（单元 / 契约 / 集成 / 验收；2026-10-23 复跑） |
+| 代码覆盖率 | **87.25%**（门禁 60%） |
 | 8 问回归引用命中率 | **1.000**（达标线 ≥0.85） |
 | 内外部冲突场景（CS-01~05） | **全过**；反朴素 RAG 对照 **5/5 vs 0/5** |
 | 六维评估金值对拍 | **83.8 / 69.3 / 84.6 / 83.1（误差 ≤0.1）** |
@@ -256,8 +256,8 @@ cd ../platform-web && npm install && npm run dev    # http://localhost:5173
 
 ```bash
 cd platform
-pytest                                                        # 258 项：单元 / 契约 / 集成 / 验收
-pytest --cov=app --cov=core --cov-fail-under=60               # 覆盖率门禁（当前 87.61%）
+pytest                                                        # 267 项：单元 / 契约 / 集成 / 验收
+pytest --cov=app --cov=core --cov-fail-under=60               # 覆盖率门禁（当前 87.25%）
 ruff check .                                                  # 静态检查
 bandit -r app core adapters domains -ll                       # 安全扫描（高危 0）
 python scripts/run_regression.py                              # 8 问回归 + CS-01~05 + 反朴素 RAG 对照
@@ -289,7 +289,7 @@ npm run build       # 生产构建无 >500KB chunk
 
 - **执行回放与分叉**：已落地 append-only 事件、加密载荷、inspect、取消/补帧/diff、frozen（generate/output 纯计算、零业务写入）与 live_eval 分叉（只读工具、零业务写入）；sandbox fork 与完整节点重算仍在实施；
 - **语义审核适配层**：在确定性规则之外，为输入 / 输出 Hook 增加可插拔的语义审核适配（本地规则与可选模型评审）；
-- **MCP 互操作**：已实现受控客户端只读 MCP Server（Streamable HTTP，专用 audience token，Inspector 握手通过）；公共 OAuth host 兼容与 MCP Client 仍在实施（方案 03）；
+- **MCP 互操作**：受控只读 MCP Server（Streamable HTTP、专用 audience token、Inspector 握手）与管理员白名单 MCP Client（SSRF/DNS 校验、只读调用、结果有界）已实现；公共 OAuth host 兼容仍在实施；
 - **领域插件钩子**：把编排层的领域特定逻辑（工具规划、评估对象装配、领域持久化）全部下沉到插件（方案 01）；
 - **多模态与真实数据连接器**：图片 / 仪器图谱解析、工商 / 专利 / 投融资数据接入。
 

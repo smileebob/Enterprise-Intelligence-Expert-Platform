@@ -48,6 +48,7 @@ PERMISSIONS: list[dict[str, str]] = [
     {"perm_id": "run.payload.read", "resource": "run_payload", "action": "read", "scope": "domain", "description": "读取受控载荷"},
     {"perm_id": "tool.approve", "resource": "tool", "action": "approve", "scope": "domain", "description": "危险工具一次性审批"},
     {"perm_id": "output.review", "resource": "output", "action": "review", "scope": "domain", "description": "输出人工审核"},
+    {"perm_id": "mcp.client.call", "resource": "mcp_client", "action": "call", "scope": "all", "description": "调用受控外部 MCP 只读工具"},
 ]
 
 ROLES: list[dict[str, str]] = [
@@ -117,6 +118,7 @@ ROLE_GRANTS: dict[str, list[str]] = {
         "run.cancel",
         "tool.approve",
         "output.review",
+        "mcp.client.call",
     ],
     Roles.SEC_AUDITOR: [
         "knowledge.read",

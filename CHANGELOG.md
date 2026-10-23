@@ -9,6 +9,7 @@ All notable changes to this project are documented here. The format follows Keep
 - Frozen replay for generate/output nodes: per-node encrypted state snapshots, pure recomputation, zero business writes, version/payload blockers.
 - `live_eval` fork: child run with whitelisted input patch, read-only tool sandbox, no inherited dangerous approvals, zero business writes.
 - Controlled-client MCP server over Streamable HTTP with dedicated audience tokens, Origin/Host checks, read-only tools, and per-call ToolGateway authorization.
+- Admin-allowlisted MCP client with SSRF/DNS validation, environment-backed credentials, no auto-registration of remote tools, and bounded read-only results.
 - Official MCP Inspector handshake evidence (initialize / tools/list / tools/call) plus 401/403 rejection paths and automated MCP tests.
 
 ### Changed

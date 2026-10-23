@@ -65,6 +65,9 @@ class BaseConfig(BaseSettings):
     MCP_ENABLED: bool = False
     MCP_RESOURCE_URL: str = "http://127.0.0.1:8000/mcp"
     MCP_TOKEN_TTL_SECONDS: int = 900
+    # MCP Client：仅管理员配置的服务器；JSON 数组，凭证走环境变量名
+    MCP_CLIENT_SERVERS_JSON: str = "[]"
+    MCP_CLIENT_TIMEOUT_S: float = 10.0
     MCP_ALLOWED_HOSTS: list[str] = [
         "127.0.0.1",
         "127.0.0.1:*",
