@@ -47,6 +47,7 @@ ERROR_CODES: dict[str, tuple[int, str]] = {
     "MCP_DISABLED": (404, "MCP 接入未启用"),
     "REPLAY_UNAVAILABLE": (409, "回放所需快照不可用"),
     "REPLAY_VERSION_MISMATCH": (409, "回放代码版本不匹配"),
+    "FORK_UNAVAILABLE": (409, "运行不可分叉或缺少快照"),
     "OUTPUT_REVIEW_REQUIRED": (409, "输出待人工审核"),
     "OUTPUT_REVIEW_NOT_FOUND": (404, "输出审核不存在"),
     "OUTPUT_REVIEW_CONFLICT": (409, "输出审核状态冲突"),

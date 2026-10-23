@@ -30,6 +30,18 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_RATE_LIMIT = (60, 60)  # 每工具每分钟 60 次
 
+# fork/sandbox 只允许只读工具；score_solution 等有落库副作用，拒绝
+SANDBOX_ALLOWED_TOOLS = {
+    "search_products",
+    "search_formulas",
+    "search_experiments",
+    "search_external",
+    "search_enterprises",
+    "match_park_resources",
+    "verify_qualification",
+    "check_compliance",
+}
+
 
 @dataclass
 class ToolCtx:
@@ -105,6 +117,8 @@ class ToolGateway:
 
         spec = definition.spec
         role_id = ctx.actor.role_id if ctx.actor else ""
+        if ctx.extra.get("sandbox") and name not in SANDBOX_ALLOWED_TOOLS:
+            self._deny(hook_ctx, "SANDBOX_WRITE_BLOCKED", f"分叉试验禁止调用有副作用工具 {name}", "sandbox")
         # ⓪ 领域边界：工具声明域 == 执行域；主体域范围覆盖执行域（空范围=无准入）
         if spec.domain and ctx.domain_id and spec.domain != ctx.domain_id:
             self._deny(hook_ctx, "DOMAIN_MISMATCH", f"工具 {name} 不属于领域 {ctx.domain_id}", "domain")

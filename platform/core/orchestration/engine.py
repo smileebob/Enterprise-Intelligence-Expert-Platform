@@ -78,6 +78,7 @@ class Orchestrator:
         self.db = db
         self.run_ctx = RunContext()
         self.replay_mode = False
+        self.write_suppressed = False  # fork/sandbox：禁止业务写入，仍可记录运行事件
         self.replay_capture: dict[str, Any] = {}
         self.gateway = RecordingModelGateway(gateway or get_model_gateway(), db, self.run_ctx)
         self.registry: Any
@@ -662,7 +663,10 @@ class Orchestrator:
             approval_id=str(state.plan.get("approval_id", "")),
             gateway=self.gateway,
             registry=self.registry,
-            extra={"market": state.need.market if state.need else ""},
+            extra={
+                "market": state.need.market if state.need else "",
+                "sandbox": self.write_suppressed,
+            },
         )
         evidence_view = EvidenceView(need=self._need_view(state.need), evidence=tuple(state.evidence))
         for intent in intents:
@@ -866,7 +870,7 @@ class Orchestrator:
         if spec is None or not spec.object_ref:
             state.plan["evaluate"] = False
             return
-        if has_capability(hooks, "persist_outcome"):
+        if has_capability(hooks, "persist_outcome") and not self.write_suppressed:
             from core.runs.effects import EffectLedger
 
             execution = ExecutionContext(
@@ -905,7 +909,7 @@ class Orchestrator:
                 },
                 actor=actor,
                 idempotency_key=None,
-                persist=True,
+                persist=not self.write_suppressed,
             )
         except Exception:
             logger.warning("evaluation failed, continue without score", exc_info=True)
@@ -974,7 +978,7 @@ class Orchestrator:
         applied_ids, constraint_effects = apply_constraint_rules(
             draft, list(state.plan.get("active_rules", []))
         )
-        if applied_ids and not self.replay_mode:
+        if applied_ids and not self.replay_mode and not self.write_suppressed:
             try:
                 GrowthService(self.db).mark_rules_used(applied_ids)
             except Exception:
@@ -1131,9 +1135,9 @@ class Orchestrator:
         if approved_review:
             draft.annotations.append(f"已通过人工审核（{approved_review}）")
 
-        if self.replay_mode:
-            # 冻结重放：只做纯计算，不写消息/摘要/运行事件/业务表
-            state.assistant_message_id = f"REPLAY-{uuid.uuid4().hex[:8]}"
+        if self.replay_mode or self.write_suppressed:
+            # 冻结重放/分叉：只做纯计算，不写消息/摘要/业务表；fork 仍记录运行事件
+            state.assistant_message_id = f"{'REPLAY' if self.replay_mode else 'FORK'}-{uuid.uuid4().hex[:8]}"
             state.plan["final_text"] = check.text
             self.replay_capture = {
                 "blocked": False,
@@ -1158,6 +1162,20 @@ class Orchestrator:
                         "confidence": item.confidence,
                         "record_id": (item.meta or {}).get("record_id", ""),
                     },
+                )
+            if self.write_suppressed:
+                self._run_event(
+                    state,
+                    "output.ready",
+                    node="output",
+                    metadata={
+                        "text_digest": _digest_json(check.text),
+                        "citations": len(draft.citations),
+                        "fork_mode": True,
+                        "summary": "分叉试验输出（未写业务表）",
+                    },
+                    payload={"text": check.text, "annotations": draft.annotations},
+                    classification="sensitive",
                 )
             for start in range(0, len(check.text), 24):
                 await emit("token", {"text": check.text[start : start + 24]})

@@ -21,6 +21,7 @@ from core.runs.approvals import (
     ApprovalNotFound,
     ApprovalService,
 )
+from core.runs.fork import ForkInputRejected, ForkUnavailable, LiveEvalForkService
 from core.runs.output_reviews import (
     OutputReviewConflict,
     OutputReviewNotFound,
@@ -128,6 +129,36 @@ def decide_approval(
 
 class ReplayIn(BaseModel):
     mode: str = Field(default="frozen", pattern="^frozen$")
+
+
+class ForkIn(BaseModel):
+    mode: str = Field(default="live_eval", pattern="^live_eval$")
+    user_msg: str = Field(min_length=1, max_length=4000)
+    checkpoint_id: str | None = Field(default=None, max_length=64)
+
+
+@router.post("/runs/{run_id}/forks", summary="live_eval 分叉（只读工具、零业务写入）")
+def fork_run(
+    run_id: str,
+    body: ForkIn,
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        report = asyncio.run(
+            LiveEvalForkService(db).fork(
+                run_id, actor, user_msg=body.user_msg, checkpoint_id=body.checkpoint_id
+            )
+        )
+    except (KeyError, RunAccessDenied) as exc:
+        raise _not_found() from exc
+    except ForkUnavailable as exc:
+        raise biz("FORK_UNAVAILABLE", str(exc), 409) from exc
+    except ForkInputRejected as exc:
+        raise biz(exc.code, str(exc), 400) from exc
+    except ValueError as exc:
+        raise biz("VALIDATION_ERROR", str(exc), 400) from exc
+    return ok(report)
 
 
 @router.post("/runs/{run_id}/replays", summary="frozen 回放（同步纯计算，零业务写入）")
