@@ -19,6 +19,7 @@ from core.orchestration.hooks import OPTIONAL_CAPABILITIES, REQUIRED_CAPABILITIE
 HOOK_MODULE_ALLOWLIST: dict[str, str] = {
     "chemical": "domains.chemical.hooks",
     "investment": "domains.investment.hooks",
+    "gov_office": "domains.gov_office.hooks",
 }
 
 

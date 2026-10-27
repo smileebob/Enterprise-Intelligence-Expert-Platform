@@ -536,8 +536,8 @@ class TestSeedStandards:
         # given：fresh 库
         # when
         count = seed_standards(db_session)
-        # then：两个领域各一条 active 标准，内容与插件 domain.yaml eval_config 一致
-        assert count == 2
+        # then：三个领域各一条 active 标准，内容与插件 domain.yaml eval_config 一致
+        assert count == 3
         repo = eval_repo(db_session)
         chemical = repo.get_standard("std-2026Q4-chemical-v1")
         plugin = registry.get("chemical")
@@ -555,15 +555,26 @@ class TestSeedStandards:
         assert investment is not None
         assert investment.object_type == "enterprise_profile"
         assert investment.dimension_weights == {"E1": 20, "E2": 20, "E3": 15, "E4": 15, "E5": 15, "E6": 15}
+        gov_office = repo.get_standard("std-2026Q4-gov-office-v1")
+        assert gov_office is not None
+        assert gov_office.object_type == "gov_office_answer"
+        assert gov_office.dimension_weights == {
+            "G1": 25,
+            "G2": 25,
+            "G3": 15,
+            "G4": 15,
+            "G5": 15,
+            "G6": 5,
+        }
 
     def test_should_be_idempotent_when_run_twice(self, db_session):
         # given / when：连续两次播种
         first = seed_standards(db_session)
         second = seed_standards(db_session)
         # then
-        assert first == 2
+        assert first == 3
         assert second == 0
-        assert len(eval_repo(db_session).list_standards()) == 2
+        assert len(eval_repo(db_session).list_standards()) == 3
 
     def test_should_skip_chemical_when_other_active_exists(self, db_session):
         # given：chemical 已有他 id 的 active 标准
@@ -572,8 +583,8 @@ class TestSeedStandards:
         db_session.commit()
         # when
         count = seed_standards(db_session)
-        # then：仅 investment 新建；chemical 保持自定义 active
-        assert count == 1
+        # then：investment 与 gov_office 新建；chemical 保持自定义 active
+        assert count == 2
         assert repo.get_standard("std-2026Q4-chemical-v1") is None
         assert repo.get_active_standard("chemical", "solution").standard_id == "std-custom-1"
 
@@ -584,17 +595,18 @@ class TestSeedStandards:
         db_session.commit()
         # when
         count = seed_standards(db_session)
-        # then：chemical 跳过（不复活不新增）；investment 正常新建
-        assert count == 1
+        # then：chemical 跳过（不复活不新增）；investment 与 gov_office 正常新建
+        assert count == 2
         assert repo.get_standard("std-2026Q4-chemical-v1").status == "archived"
         assert repo.get_standard("std-2026Q4-investment-v1") is not None
+        assert repo.get_standard("std-2026Q4-gov-office-v1") is not None
 
     def test_should_report_standards_in_seed_all_stats(self, db_session):
         # given / when：seed_all 两次（统计口径）
         first = seed_all(db_session)
         second = seed_all(db_session)
         # then
-        assert first["standards"] == 2
+        assert first["standards"] == 3
         assert second["standards"] == 0
         assert second == {"users": 0, "agents": 0, "domains": 0, "standards": 0}
 

@@ -14,10 +14,10 @@ from core.gateway.permissions import ensure_permission_tables
 logger = logging.getLogger(__name__)
 
 DEMO_USERS = [
-    {"user_id": "u-expert", "username": "expert", "name": "化学工程师（演示）", "role_id": Roles.EXPERT, "org": "功能化学事业部", "domain_scope": ["chemical"]},
-    {"user_id": "u-kbadmin", "username": "kbadmin", "name": "知识管理员（演示）", "role_id": Roles.KB_ADMIN, "org": "知识运营中心", "domain_scope": ["chemical", "investment"]},
-    {"user_id": "u-admin", "username": "admin", "name": "平台管理员（演示）", "role_id": Roles.PLATFORM_ADMIN, "org": "数字化平台部", "domain_scope": ["chemical", "investment"]},
-    {"user_id": "u-auditor", "username": "auditor", "name": "安全审计员（演示）", "role_id": Roles.SEC_AUDITOR, "org": "安全合规部", "domain_scope": ["chemical"]},
+    {"user_id": "u-expert", "username": "expert", "name": "化学工程师（演示）", "role_id": Roles.EXPERT, "org": "功能化学事业部", "domain_scope": ["chemical", "gov_office"]},
+    {"user_id": "u-kbadmin", "username": "kbadmin", "name": "知识管理员（演示）", "role_id": Roles.KB_ADMIN, "org": "知识运营中心", "domain_scope": ["chemical", "investment", "gov_office"]},
+    {"user_id": "u-admin", "username": "admin", "name": "平台管理员（演示）", "role_id": Roles.PLATFORM_ADMIN, "org": "数字化平台部", "domain_scope": ["chemical", "investment", "gov_office"]},
+    {"user_id": "u-auditor", "username": "auditor", "name": "安全审计员（演示）", "role_id": Roles.SEC_AUDITOR, "org": "安全合规部", "domain_scope": ["chemical", "gov_office"]},
 ]
 
 
@@ -50,6 +50,13 @@ def seed_users(db: Session) -> int:
             )
             db.add(user)
             count += 1
+        else:
+            existing_scope = list(user.domain_scope or [])
+            missing_scope = [
+                domain for domain in spec["domain_scope"] if domain not in existing_scope
+            ]
+            if missing_scope:
+                user.domain_scope = [*existing_scope, *missing_scope]
     db.commit()
     logger.info("seed users: +%d", count)
     return count
@@ -59,7 +66,8 @@ def seed_agents(db: Session) -> int:
     """智能体服务账号（按领域最小授权，03 §3.5）。"""
     from core.admin.security import hash_password
 
-    if db.get(GovUser, "u-agent") is None:
+    row = db.get(GovUser, "u-agent")
+    if row is None:
         db.add(
             GovUser(
                 user_id="u-agent",
@@ -68,11 +76,15 @@ def seed_agents(db: Session) -> int:
                 name="智能体服务账号",
                 org="platform",
                 role_id=Roles.AGENT,
-                domain_scope=["chemical", "investment"],
+                domain_scope=["chemical", "investment", "gov_office"],
             )
         )
         db.commit()
         return 1
+    existing_scope = list(row.domain_scope or [])
+    if "gov_office" not in existing_scope:
+        row.domain_scope = [*existing_scope, "gov_office"]
+        db.commit()
     return 0
 
 
@@ -87,7 +99,11 @@ def seed_domains(db: Session) -> int:
     from core.domains import load_domain_hooks
 
     count = 0
-    for domain_id, status in (("chemical", "online"), ("investment", "draft")):
+    for domain_id, status in (
+        ("chemical", "online"),
+        ("investment", "draft"),
+        ("gov_office", "draft"),
+    ):
         yaml_path = Path("domains") / domain_id / "domain.yaml"
         if not yaml_path.exists():
             continue

@@ -1,0 +1,210 @@
+schema_version: "1.0"
+ruleset_id: gov-document-rules
+ruleset_version: 0.1.0
+status: draft
+standard_refs:
+  - name: 党政机关公文处理工作条例
+    note: 文种、行文规则和公文处理流程依据，实施时核对现行有效版本
+  - name: GB/T 9704-2012
+    note: 党政机关公文格式依据，具体单位模板及字体版式需人工复核
+principles:
+  - 规则只校验结构和明确要素，不替代核稿、签发、公开审查和用印
+  - 缺少关键事实时要求补充，不允许模型虚构数字、对象和时间
+  - 模板只提供结构与版式，不改变政策依据和法律效力
+document_types:
+  notice:
+    name: 通知
+    required_elements: [标题, 主送对象, 发文目的, 事项内容, 执行要求, 发文机关, 成文日期]
+    structure: [标题, 主送对象, 正文, 附件说明, 发文机关署名, 成文日期]
+    machine_checks:
+      required_fields: [title, recipient, issuing_authority, document_date]
+      min_body_chars: 20
+    hard_rules:
+      - 事项内容和执行要求不得为空
+      - 涉及时间、范围、对象的要求必须能在事实清单中找到来源
+      - 不得混用请示的请求批准语气
+  request:
+    name: 请示
+    required_elements: [标题, 主送机关, 请示事由, 请示事项, 发文机关, 成文日期]
+    structure: [标题, 主送机关, 正文, 发文机关署名, 成文日期]
+    machine_checks:
+      required_fields: [title, recipient, issuing_authority, document_date]
+      min_body_chars: 20
+    hard_rules:
+      - 必须一文一事
+      - 必须提出明确请求事项
+      - 不得抄送下级机关
+  report:
+    name: 报告
+    required_elements: [标题, 主送机关, 基本情况, 工作或问题, 下一步安排, 发文机关, 成文日期]
+    structure: [标题, 主送机关, 正文, 发文机关署名, 成文日期]
+    machine_checks:
+      required_fields: [title, recipient, issuing_authority, document_date]
+      min_body_chars: 20
+    hard_rules:
+      - 报告中不得夹带请示事项
+      - 事实、成绩和问题必须可追溯
+      - 标题、主送机关、正文和成文日期完整
+  letter:
+    name: 函
+    required_elements: [标题, 主送机关, 商洽或询问事项, 发文机关, 成文日期]
+    structure: [标题, 主送机关, 正文, 发文机关署名, 成文日期]
+    machine_checks:
+      required_fields: [title, recipient, issuing_authority, document_date]
+      min_body_chars: 20
+    hard_rules:
+      - 用于不相隶属机关之间商洽、询问、答复或请求批准
+      - 不得使用命令性表述要求不相隶属机关执行
+      - 商洽或询问事项应明确，发文机关和日期完整
+  minutes:
+    name: 纪要
+    required_elements: [标题, 会议基本情况, 议定事项, 责任分工, 成文日期]
+    structure: [标题, 会议基本情况, 议定事项, 责任分工, 成文日期]
+    machine_checks:
+      required_fields: [title, issuing_authority, document_date]
+      min_body_chars: 20
+    hard_rules:
+      - 议定事项必须有会议记录依据
+      - 不得把个人建议写成会议决定
+      - 未形成决定的事项明确标注待定
+global_checks:
+  numeric:
+    - 数字、日期、比例和金额与事实清单一致
+  referential:
+    - 政策名称、发文字号和条款引用能够定位到已审核版本
+  sensitive:
+    - 发布或导出前检查个人信息、内部敏感信息和不应公开内容
+  completeness:
+    - 必填要素缺失时阻止清洁稿导出
+  semantic:
+    - 模型只提出跑题、遗漏、过度承诺等审校建议，由规则和人工决定最终处置
+
+# 每条硬规则和全局检查至少一正一反；mode=human_review 表示当前需人工判断，
+# deterministic 表示已有机器检查可产生 expected_code。
+rule_examples:
+  notice:
+    - rule_id: NOTICE-01
+      rule: 事项内容和执行要求不得为空
+      mode: deterministic
+      expected_code: BODY_TOO_SHORT
+      valid: 正文完整说明培训目的、对象、时间和执行要求。
+      invalid: 只写“请贯彻落实”，没有具体事项和执行要求。
+    - rule_id: NOTICE-02
+      rule: 涉及时间、范围、对象的要求必须能在事实清单中找到来源
+      mode: deterministic
+      expected_code: UNSOURCED_NUMBER
+      valid: 事实清单写明“2026年10月开展培训，参加人数50人”。
+      invalid: 正文写“2026年10月开展培训，参加人数50人”，事实清单为空。
+    - rule_id: NOTICE-03
+      rule: 不得混用请示的请求批准语气
+      mode: human_review
+      expected_code: ""
+      valid: 通知明确部署事项和要求，不请求上级批准。
+      invalid: 通知正文写“以上事项请批准后执行”。
+  request:
+    - rule_id: REQUEST-01
+      rule: 必须一文一事
+      mode: human_review
+      expected_code: ""
+      valid: 围绕一项政务公开培训经费追加事项提出请示。
+      invalid: 同一请示同时要求批准经费、调整编制和采购设备。
+    - rule_id: REQUEST-02
+      rule: 必须提出明确请求事项
+      mode: human_review
+      expected_code: ""
+      valid: 明确写明“请批准追加培训经费5万元”。
+      invalid: 只陈述困难，没有提出请求批准或指示的具体事项。
+    - rule_id: REQUEST-03
+      rule: 不得抄送下级机关
+      mode: human_review
+      expected_code: ""
+      valid: 主送上级机关，未抄送下级单位。
+      invalid: 主送上级机关，同时抄送本机关下属单位。
+  report:
+    - rule_id: REPORT-01
+      rule: 报告中不得夹带请示事项
+      mode: deterministic
+      expected_code: REPORT_CONTAINS_REQUEST
+      valid: 报告工作情况、存在问题和下一步安排，不请求批准。
+      invalid: 报告末尾写“请批准增加专项经费”。
+    - rule_id: REPORT-02
+      rule: 事实、成绩和问题必须可追溯
+      mode: deterministic
+      expected_code: UNSOURCED_NUMBER
+      valid: 报告中的数量与所附事实材料一致。
+      invalid: 报告写“完成120项任务”，事实材料没有该数字。
+    - rule_id: REPORT-03
+      rule: 标题、主送机关、正文和成文日期完整
+      mode: deterministic
+      expected_code: REQUIRED_FIELD_MISSING
+      valid: 通知对象、发文机关和日期均已填写。
+      invalid: 缺少主送机关和成文日期。
+  letter:
+    - rule_id: LETTER-01
+      rule: 用于不相隶属机关之间商洽、询问、答复或请求批准
+      mode: human_review
+      expected_code: ""
+      valid: 向不相隶属部门发函商洽联合培训事项。
+      invalid: 对下属单位使用函布置必须执行的行政命令。
+    - rule_id: LETTER-02
+      rule: 不得使用命令性表述要求不相隶属机关执行
+      mode: human_review
+      expected_code: ""
+      valid: 使用“请予支持”“请协助”等商洽表述。
+      invalid: 使用“必须执行”“限期完成，不得有误”等命令性表述。
+    - rule_id: LETTER-03
+      rule: 商洽或询问事项应明确，发文机关和日期完整
+      mode: deterministic
+      expected_code: REQUIRED_FIELD_MISSING
+      valid: 正文明确商洽事项，发文机关和日期完整。
+      invalid: 未填写发文机关和成文日期。
+  minutes:
+    - rule_id: MINUTES-01
+      rule: 议定事项必须有会议记录依据
+      mode: deterministic
+      expected_code: MINUTES_WITHOUT_RECORD
+      valid: 事实清单附会议记录和议定事项。
+      invalid: 未提供会议记录事实材料。
+    - rule_id: MINUTES-02
+      rule: 不得把个人建议写成会议决定
+      mode: human_review
+      expected_code: ""
+      valid: 仅将会议形成的一致意见写入议定事项。
+      invalid: 将个人发言中的建议直接写成“会议决定”。
+    - rule_id: MINUTES-03
+      rule: 未形成决定的事项明确标注待定
+      mode: human_review
+      expected_code: ""
+      valid: 注明“该事项继续研究，本次会议未作决定”。
+      invalid: 对未表决事项直接写成已经决定并明确执行期限。
+  global:
+    - rule_id: GLOBAL-NUMERIC
+      rule: 数字、日期、比例和金额与事实清单一致
+      mode: deterministic
+      expected_code: UNSOURCED_NUMBER
+      valid: 正文数字均能在事实清单中找到。
+      invalid: 正文出现事实清单中没有的金额或人数。
+    - rule_id: GLOBAL-REFERENTIAL
+      rule: 政策名称、发文字号和条款引用能够定位到已审核版本
+      mode: deterministic
+      expected_code: POLICY_CITATION_INVALID
+      valid: 引用 ID 对应已审核且已发布条款。
+      invalid: 引用不存在、未发布或无权限条款。
+    - rule_id: GLOBAL-SENSITIVE
+      rule: 发布或导出前检查个人信息、内部敏感信息和不应公开内容
+      mode: human_review
+      expected_code: ""
+      valid: 已删除身份证号、手机号和内部讨论意见。
+      invalid: 正文包含完整手机号和内部会议争论记录。
+    - rule_id: GLOBAL-COMPLETENESS
+      rule: 必填要素缺失时阻止清洁稿导出
+      mode: deterministic
+      expected_code: REQUIRED_FIELD_MISSING
+      valid: 标题、主送、发文机关和日期齐全。
+      invalid: 缺少主送机关，仍尝试导出清洁稿。
+    - rule_id: GLOBAL-SEMANTIC
+      rule: 模型只提出跑题、遗漏、过度承诺等审校建议，由规则和人工决定最终处置
+      mode: human_review
+      expected_code: ""
+      valid: 模型提示“第三段可能超出材料范围”，人工复核后决定。
+      invalid: 模型直接把无依据表述发布为正式内容。

@@ -82,6 +82,7 @@ def create_app(config_name: str | None = None) -> FastAPI:
     from app.domains.routes import router as domains_router
     from app.domains.routes_v2 import router as domains_v2_router
     from app.evaluation.routes import router as evaluation_router
+    from app.gov_office.routes import router as gov_office_router
     from app.governance.routes import router as governance_router
     from app.growth.routes import router as growth_router
     from app.knowledge.routes import router as knowledge_router
@@ -92,6 +93,7 @@ def create_app(config_name: str | None = None) -> FastAPI:
     app.include_router(auth_router, prefix="/api/v1")
     app.include_router(chat_router, prefix="/api/v1")
     app.include_router(knowledge_router, prefix="/api/v1")
+    app.include_router(gov_office_router, prefix="/api/v1")
     app.include_router(evaluation_router, prefix="/api/v1")
     app.include_router(memory_router, prefix="/api/v1")
     app.include_router(runs_router, prefix="/api/v1")

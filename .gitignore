@@ -35,9 +35,12 @@ Thumbs.db
 # 本地/内部资料（不随仓库发布）
 .qoder/
 python/
-TASKS.md
+/TASKS.md
 
 # 运行采集载荷（05）
 platform/data/run_payloads/
 run_payloads/
 
+
+# 申报材料含个人信息，不入公开仓库
+政务智能体/申报材料/

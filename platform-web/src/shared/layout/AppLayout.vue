@@ -10,6 +10,7 @@ const userStore = useUserStore()
 const menuItems = computed(() => {
   const items = [
     { path: '/chat', label: '领域智能体对话台', perm: 'chat.use' },
+    { path: '/gov', label: '政务办公工作台', perm: 'chat.use' },
     { path: '/evaluation', label: '评估中心', perm: 'eval.run' },
     { path: '/knowledge', label: '知识管理', perm: 'knowledge.write' },
     { path: '/memory', label: '我的记忆', perm: 'memory.mine.read' },

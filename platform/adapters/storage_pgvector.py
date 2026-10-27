@@ -10,6 +10,7 @@ from __future__ import annotations
 from sqlalchemy import text
 
 from adapters.storage_sqlite import SqlKnowledgeRepositoryBase, _chunk_to_dto
+from adapters.tokenize import tokenize
 from core.abstraction.dtos import KbChunkRecord, RetrievalQuery, ScoredChunk
 
 
@@ -41,16 +42,27 @@ class PgVectorKnowledgeRepository(SqlKnowledgeRepositoryBase):
             conditions.append("source_type = ANY(:source_types)")
             params["source_types"] = list(q.source_types)
 
-        ts_query = " | ".join(t for t in q.query.split() if t) or ""
-        params["ts_query"] = ts_query
+        # 索引侧与查询侧必须共用同一 jieba 分词；plainto_tsquery 对参数做安全解析，
+        # 避免标点进入 to_tsquery 造成语法错误。plainto 默认将词项按 AND 组合。
+        query_tokens = tokenize(q.query)
+        params["ts_query"] = " ".join(query_tokens)
+        if not query_tokens and not q.query_vec:
+            return []
+        if query_tokens:
+            lexical_expr = (
+                "COALESCE(ts_rank(content_tsv, "
+                "plainto_tsquery('simple', :ts_query)), 0)"
+            )
+        else:
+            lexical_expr = "0"
         if q.query_vec:
             params["query_vec"] = q.query_vec
             score_expr = (
                 "(:vec_w * GREATEST(0, 1 - (embedding <=> CAST(:query_vec AS vector)))"
-                " + :lex_w * COALESCE(ts_rank(content_tsv, to_tsquery('simple', :ts_query)), 0))"
+                f" + :lex_w * {lexical_expr})"
             )
         else:
-            score_expr = "COALESCE(ts_rank(content_tsv, to_tsquery('simple', :ts_query)), 0)"
+            score_expr = lexical_expr
 
         sql = text(
             f"""

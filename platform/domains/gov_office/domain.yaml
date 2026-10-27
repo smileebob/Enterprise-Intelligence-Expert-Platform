@@ -1,0 +1,60 @@
+# 政务办公领域包（GovOffice）——政策、公文、文稿、总结与咨询拟稿
+domain_id: gov_office
+name: 可信政务办公智能体
+version: 0.1.0
+status: draft
+
+knowledge_binding:
+  collections:
+    - { name: gov_policy_public, source_types: [external], permission_level: 1 }
+    - { name: gov_policy_internal, source_types: [internal], permission_level: 2 }
+  default_partition_order: [internal, external]
+  fusion_priority: [confirmed, internal, stated, external, ai_inferred]
+  compliance_override:
+    enabled: false
+    category_tag: "policy"
+  topic_signatures:
+    政府信息公开: [政府信息, 公开, 主动公开, 依申请公开]
+    政策时效: [施行, 废止, 修订, 有效期]
+
+eval_config:
+  object_type: gov_office_answer
+  standard_ref: std-2026Q4-gov-office-v1
+  dimensions:
+    - { code: G1, name: 政策适用性,     default_weight: 25, scorer: gov_office.g1_policy_fit }
+    - { code: G2, name: 证据支持度,     default_weight: 25, scorer: gov_office.g2_evidence_support }
+    - { code: G3, name: 任务完整性,     default_weight: 15, scorer: gov_office.g3_task_completeness }
+    - { code: G4, name: 公文规范性,     default_weight: 15, scorer: gov_office.g4_document_norm }
+    - { code: G5, name: 合规与安全,     default_weight: 15, scorer: gov_office.g5_compliance }
+    - { code: G6, name: 表达可用性,     default_weight: 5,  scorer: gov_office.g6_usability }
+  scenario_profiles:
+    默认:     { G1: 25, G2: 25, G3: 15, G4: 15, G5: 15, G6: 5 }
+    政策解读: { G1: 35, G2: 30, G3: 10, G4: 5,  G5: 15, G6: 5 }
+    公文起草: { G1: 10, G2: 15, G3: 20, G4: 20, G5: 20, G6: 15 }
+    提炼总结: { G1: 10, G2: 25, G3: 25, G4: 5,  G5: 20, G6: 15 }
+    咨询拟稿: { G1: 20, G2: 20, G3: 15, G4: 5,  G5: 30, G6: 10 }
+
+agent_config:
+  role_prompt_ref: prompts/gov_office_system.md
+  clarify_slots: [政策地区, 事项时间, 政策对象, 文种]
+  required_slots_by_mode:
+    selection: [政策地区, 事项时间]
+    diagnostic: [政策地区, 事项时间]
+    process: [文种]
+    analysis: [政策地区, 事项时间]
+    challenge: [政策地区, 事项时间]
+  constraints: [权威来源优先, 强制引用, 无据不下结论, 冲突显式标注, 人工审核后外发]
+  confidence_threshold: 0.6
+  routing_keywords:
+    parallel: [政策, 法规, 条例, 办法, 通知, 公文, 修订, 废止, 施行]
+  slot_dictionary:
+    政策地区: [全国, 本市, 厦门市, 福建省, 区县]
+    事项时间: [当前, 现在, 历史, 去年, 今年, 2024年, 2025年, 2026年]
+    政策对象: [公民, 个人, 法人, 企业, 事业单位, 社会组织, 行政机关]
+    文种: [通知, 请示, 报告, 函, 纪要, 汇报材料, 讲话稿, 工作总结]
+
+toolset_ref: tools/gov_tools.yaml
+
+memory_policy:
+  promotion: { min_distinct_users: 2, require_review: true }
+  decay:     { gt_1y: 0.8, gt_2y: 0.5, archive_below: 0.3 }

@@ -102,6 +102,54 @@ def seeded(db_session):
     return db_session
 
 
+GOV_SAMPLE_DIR = Path(__file__).resolve().parents[2] / "政务智能体" / "samples" / "public"
+
+
+def _import_gov_sample(client, headers, sample, key):
+    return client.post(
+        "/api/v1/gov/policies/import",
+        json=sample,
+        headers={**headers, "Idempotency-Key": key},
+    )
+
+
+@pytest.fixture()
+def gov_ready(client, seeded, kb_headers):
+    """公开政策双版本导入、关系审核、审核发布就绪。"""
+    samples = [
+        json.loads((GOV_SAMPLE_DIR / "GOV-REG-492-2007.json").read_text(encoding="utf-8")),
+        json.loads((GOV_SAMPLE_DIR / "GOV-REG-711-2019.json").read_text(encoding="utf-8")),
+    ]
+    for index, sample in enumerate(samples):
+        imported = _import_gov_sample(client, kb_headers, sample, f"gov-fixture-{index}")
+        assert imported.status_code == 201, imported.text
+    detail = client.get(
+        f"/api/v1/gov/policies/{samples[0]['document']['doc_id']}", headers=kb_headers
+    ).json()["data"]
+    relation_id = detail["relations"][0]["relation_id"]
+    approved_relation = client.post(
+        f"/api/v1/gov/policies/relations/{relation_id}/review",
+        json={"action": "approve"},
+        headers={**kb_headers, "Idempotency-Key": "gov-fixture-relation"},
+    )
+    assert approved_relation.status_code == 200, approved_relation.text
+    for index, sample in enumerate(samples):
+        label = sample["version"]["version_label"]
+        doc_id = sample["document"]["doc_id"]
+        reviewed = client.post(
+            f"/api/v1/gov/policies/{doc_id}/versions/{label}/review",
+            json={"action": "approve"},
+            headers={**kb_headers, "Idempotency-Key": f"gov-fixture-review-{index}"},
+        )
+        assert reviewed.status_code == 200, reviewed.text
+        published = client.post(
+            f"/api/v1/gov/policies/{doc_id}/publish",
+            headers={**kb_headers, "Idempotency-Key": f"gov-fixture-publish-{index}"},
+        )
+        assert published.status_code == 200, published.text
+    return seeded
+
+
 _TOKEN_CACHE: dict[str, str] = {}
 
 

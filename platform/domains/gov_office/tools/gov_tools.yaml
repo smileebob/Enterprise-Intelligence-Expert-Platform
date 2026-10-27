@@ -1,0 +1,6 @@
+schema_version: "1.0"
+domain_id: gov_office
+tools: []
+notes:
+  - 首期不开放任何外部工具或政务写入能力
+  - 未来只读事项查询需要单独配置权限、超时、结果上限和审核

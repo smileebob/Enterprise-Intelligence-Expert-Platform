@@ -22,6 +22,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '领域智能体对话台', perm: 'chat.use' },
       },
       {
+        path: 'gov',
+        name: 'GovWorkbench',
+        component: () => import('@/modules/gov-office/views/GovWorkbench.vue'),
+        meta: { title: '政务办公工作台', perm: 'chat.use' },
+      },
+      {
         path: 'knowledge',
         name: 'Knowledge',
         component: () => import('@/modules/knowledge/views/KnowledgeView.vue'),
@@ -51,6 +57,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/modules/admin/views/AuditView.vue'),
         meta: { title: '安全审计台', perm: 'audit.read' },
       },
+      {
+        path: 'forbidden',
+        name: 'Forbidden',
+        component: () => import('@/modules/auth/views/ForbiddenView.vue'),
+        meta: { title: '无访问权限' },
+      },
     ],
   },
 ]
@@ -79,7 +91,7 @@ router.beforeEach(async (to) => {
   }
   const perm = to.meta.perm as string | undefined
   if (perm && !userStore.hasPerm(perm)) {
-    return { name: 'Chat' }
+    return { name: 'Forbidden', query: { from: to.fullPath } }
   }
   return true
 })

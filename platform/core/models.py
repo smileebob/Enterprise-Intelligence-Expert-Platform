@@ -43,6 +43,17 @@ from domains.chemical.models import (  # noqa: F401
     ChemProduct,
     ChemSolution,
 )
+from domains.gov_office.models import (  # noqa: F401
+    GovDocumentDraft,
+    GovInterpretOperation,
+    GovInterpretSession,
+    GovPolicyClause,
+    GovPolicyDocument,
+    GovPolicyImportOperation,
+    GovPolicyRelation,
+    GovPolicyVersion,
+    GovWritingDraft,
+)
 from domains.investment.models import (  # noqa: F401
     InvEnterprise,
     InvParkResource,
