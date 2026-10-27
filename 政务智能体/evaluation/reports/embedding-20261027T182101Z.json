@@ -1,0 +1,586 @@
+{
+  "run_at": "2026-10-27T18:21:01.411088+00:00",
+  "case_count": 12,
+  "models": [
+    "text-embedding-v3",
+    "qwen3.7-text-embedding-flash",
+    "qwen3.7-text-embedding"
+  ],
+  "summary": {
+    "text-embedding-v3": {
+      "total": 12,
+      "citation_hit": 12,
+      "version_hit": 12,
+      "avg_latency_ms": 236.57
+    },
+    "qwen3.7-text-embedding-flash": {
+      "total": 12,
+      "citation_hit": 12,
+      "version_hit": 12,
+      "avg_latency_ms": 164.73
+    },
+    "qwen3.7-text-embedding": {
+      "total": 12,
+      "citation_hit": 12,
+      "version_hit": 12,
+      "avg_latency_ms": 180.96
+    }
+  },
+  "by_case": {
+    "GOV-PUB-001": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版",
+          "CL-f0433fa9be99598c0542777622327e79@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 718.28
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版",
+          "CL-f0433fa9be99598c0542777622327e79@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 142.13
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版",
+          "CL-f0433fa9be99598c0542777622327e79@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 270.83
+      }
+    },
+    "GOV-PUB-002": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版",
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版",
+          "CL-4b0874a8e41d0d8761937471f564e5f8@国务院令第711号修订版",
+          "CL-9f2fddca1f1188aa6467bab0f9c13a24@国务院令第711号修订版",
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版",
+          "CL-a4a79cb42eb3fb418a555d2c5a813b86@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 154.2
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版",
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版",
+          "CL-a4a79cb42eb3fb418a555d2c5a813b86@国务院令第711号修订版",
+          "CL-9f2fddca1f1188aa6467bab0f9c13a24@国务院令第711号修订版",
+          "CL-4b0874a8e41d0d8761937471f564e5f8@国务院令第711号修订版",
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 162.23
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版",
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版",
+          "CL-4b0874a8e41d0d8761937471f564e5f8@国务院令第711号修订版",
+          "CL-9f2fddca1f1188aa6467bab0f9c13a24@国务院令第711号修订版",
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版",
+          "CL-a4a79cb42eb3fb418a555d2c5a813b86@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 160.56
+      }
+    },
+    "GOV-PUB-003": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版",
+          "CL-f0433fa9be99598c0542777622327e79@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 244.99
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版",
+          "CL-f0433fa9be99598c0542777622327e79@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 168.19
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版",
+          "CL-f0433fa9be99598c0542777622327e79@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 153.23
+      }
+    },
+    "GOV-PUB-005": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-c579fe288bcd6087f70877258fe5e9f1@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-c579fe288bcd6087f70877258fe5e9f1@国务院令第492号原版",
+          "CL-2c0a4620a262581d1caea82a807d0d27@国务院令第492号原版",
+          "CL-ce29cdffb4f2dc215f11a29f88431ec5@国务院令第492号原版",
+          "CL-4ecaf6fe5b2db411046f7af632192b02@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 160.13
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-c579fe288bcd6087f70877258fe5e9f1@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-c579fe288bcd6087f70877258fe5e9f1@国务院令第492号原版",
+          "CL-ce29cdffb4f2dc215f11a29f88431ec5@国务院令第492号原版",
+          "CL-4ecaf6fe5b2db411046f7af632192b02@国务院令第492号原版",
+          "CL-2c0a4620a262581d1caea82a807d0d27@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 164.1
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-c579fe288bcd6087f70877258fe5e9f1@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-c579fe288bcd6087f70877258fe5e9f1@国务院令第492号原版",
+          "CL-2c0a4620a262581d1caea82a807d0d27@国务院令第492号原版",
+          "CL-ce29cdffb4f2dc215f11a29f88431ec5@国务院令第492号原版",
+          "CL-4ecaf6fe5b2db411046f7af632192b02@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 156.81
+      }
+    },
+    "GOV-PUB-006": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-56a6ade9e9d4f6e520f4ed0cb00f4530@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-56a6ade9e9d4f6e520f4ed0cb00f4530@国务院令第711号修订版",
+          "CL-666b0126ab577759d44f9e6fa1aa561c@国务院令第711号修订版",
+          "CL-f1ac932fdd240fdd185f38b6dc96506b@国务院令第711号修订版",
+          "CL-8e8bc8875d98e37bc06519c6a45ceaa8@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 203.35
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-56a6ade9e9d4f6e520f4ed0cb00f4530@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-56a6ade9e9d4f6e520f4ed0cb00f4530@国务院令第711号修订版",
+          "CL-666b0126ab577759d44f9e6fa1aa561c@国务院令第711号修订版",
+          "CL-f1ac932fdd240fdd185f38b6dc96506b@国务院令第711号修订版",
+          "CL-8e8bc8875d98e37bc06519c6a45ceaa8@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 195.4
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-56a6ade9e9d4f6e520f4ed0cb00f4530@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-56a6ade9e9d4f6e520f4ed0cb00f4530@国务院令第711号修订版",
+          "CL-666b0126ab577759d44f9e6fa1aa561c@国务院令第711号修订版",
+          "CL-f1ac932fdd240fdd185f38b6dc96506b@国务院令第711号修订版",
+          "CL-8e8bc8875d98e37bc06519c6a45ceaa8@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 187.37
+      }
+    },
+    "GOV-PUB-007": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版",
+          "CL-d333b0d9edd4cfbb7b80f0987a3f5c7f@国务院令第711号修订版",
+          "CL-32790e1f8113c339715fd45c7559ea4b@国务院令第711号修订版",
+          "CL-39ee803a3fe0f277e33389f2aff0b83b@国务院令第711号修订版",
+          "CL-05e4b7f378fd1063fdfad1fa4f23e5e7@国务院令第711号修订版",
+          "CL-f1ac932fdd240fdd185f38b6dc96506b@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 334.28
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版",
+          "CL-d333b0d9edd4cfbb7b80f0987a3f5c7f@国务院令第711号修订版",
+          "CL-32790e1f8113c339715fd45c7559ea4b@国务院令第711号修订版",
+          "CL-39ee803a3fe0f277e33389f2aff0b83b@国务院令第711号修订版",
+          "CL-f1ac932fdd240fdd185f38b6dc96506b@国务院令第711号修订版",
+          "CL-a4a79cb42eb3fb418a555d2c5a813b86@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 165.22
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版",
+          "CL-d333b0d9edd4cfbb7b80f0987a3f5c7f@国务院令第711号修订版",
+          "CL-32790e1f8113c339715fd45c7559ea4b@国务院令第711号修订版",
+          "CL-39ee803a3fe0f277e33389f2aff0b83b@国务院令第711号修订版",
+          "CL-f1ac932fdd240fdd185f38b6dc96506b@国务院令第711号修订版",
+          "CL-79d68baab850cca4ac0a33ea226243dc@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 183.94
+      }
+    },
+    "GOV-PUB-008": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-12e94487e65da3fe5f68d212b7b56d04@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-12e94487e65da3fe5f68d212b7b56d04@国务院令第492号原版",
+          "CL-694ef6c0fca63331d0b1fdb0a64627d2@国务院令第492号原版",
+          "CL-aa452232ed8d36371bd9f53aa63960b8@国务院令第492号原版",
+          "CL-819b5aa74646016b01cd1da595220cd2@国务院令第492号原版",
+          "CL-b5d933114aa8d91cc25b575ebdf13ee1@国务院令第492号原版",
+          "CL-5b904f9b0b48731f6aba7c82627c0c59@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 186.28
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-12e94487e65da3fe5f68d212b7b56d04@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-12e94487e65da3fe5f68d212b7b56d04@国务院令第492号原版",
+          "CL-694ef6c0fca63331d0b1fdb0a64627d2@国务院令第492号原版",
+          "CL-aa452232ed8d36371bd9f53aa63960b8@国务院令第492号原版",
+          "CL-819b5aa74646016b01cd1da595220cd2@国务院令第492号原版",
+          "CL-b7f85719d243da1f15b1b32d3f7637d2@国务院令第492号原版",
+          "CL-b5d933114aa8d91cc25b575ebdf13ee1@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 168.51
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-12e94487e65da3fe5f68d212b7b56d04@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-12e94487e65da3fe5f68d212b7b56d04@国务院令第492号原版",
+          "CL-694ef6c0fca63331d0b1fdb0a64627d2@国务院令第492号原版",
+          "CL-aa452232ed8d36371bd9f53aa63960b8@国务院令第492号原版",
+          "CL-819b5aa74646016b01cd1da595220cd2@国务院令第492号原版",
+          "CL-5b904f9b0b48731f6aba7c82627c0c59@国务院令第492号原版",
+          "CL-b7f85719d243da1f15b1b32d3f7637d2@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 205.06
+      }
+    },
+    "GOV-PUB-009": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版",
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版",
+          "CL-9f2fddca1f1188aa6467bab0f9c13a24@国务院令第711号修订版",
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版",
+          "CL-160362d6f28374e74fe2c2dc50dfcf53@国务院令第711号修订版",
+          "CL-05e4b7f378fd1063fdfad1fa4f23e5e7@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 139.35
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版",
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版",
+          "CL-9f2fddca1f1188aa6467bab0f9c13a24@国务院令第711号修订版",
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版",
+          "CL-160362d6f28374e74fe2c2dc50dfcf53@国务院令第711号修订版",
+          "CL-05e4b7f378fd1063fdfad1fa4f23e5e7@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 149.39
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版",
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版",
+          "CL-9f2fddca1f1188aa6467bab0f9c13a24@国务院令第711号修订版",
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版",
+          "CL-160362d6f28374e74fe2c2dc50dfcf53@国务院令第711号修订版",
+          "CL-05e4b7f378fd1063fdfad1fa4f23e5e7@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 176.29
+      }
+    },
+    "GOV-PUB-010": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-668fc36d9e03cd4faec72ca0e9679e47@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-668fc36d9e03cd4faec72ca0e9679e47@国务院令第711号修订版",
+          "CL-39ee803a3fe0f277e33389f2aff0b83b@国务院令第711号修订版",
+          "CL-098225e36a9ad7324104329b7846b277@国务院令第711号修订版",
+          "CL-7c7a2aace6933edea27645e23dd8566b@国务院令第711号修订版",
+          "CL-8e8bc8875d98e37bc06519c6a45ceaa8@国务院令第711号修订版",
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 194.52
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-668fc36d9e03cd4faec72ca0e9679e47@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-668fc36d9e03cd4faec72ca0e9679e47@国务院令第711号修订版",
+          "CL-39ee803a3fe0f277e33389f2aff0b83b@国务院令第711号修订版",
+          "CL-098225e36a9ad7324104329b7846b277@国务院令第711号修订版",
+          "CL-7c7a2aace6933edea27645e23dd8566b@国务院令第711号修订版",
+          "CL-8e8bc8875d98e37bc06519c6a45ceaa8@国务院令第711号修订版",
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 135.56
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-668fc36d9e03cd4faec72ca0e9679e47@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-668fc36d9e03cd4faec72ca0e9679e47@国务院令第711号修订版",
+          "CL-39ee803a3fe0f277e33389f2aff0b83b@国务院令第711号修订版",
+          "CL-098225e36a9ad7324104329b7846b277@国务院令第711号修订版",
+          "CL-7c7a2aace6933edea27645e23dd8566b@国务院令第711号修订版",
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版",
+          "CL-8e8bc8875d98e37bc06519c6a45ceaa8@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 152.74
+      }
+    },
+    "GOV-PUB-011": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-88d8da001c4d9198bb449f6002058a77@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-88d8da001c4d9198bb449f6002058a77@国务院令第492号原版",
+          "CL-b7f85719d243da1f15b1b32d3f7637d2@国务院令第492号原版",
+          "CL-ff2b08c272381bf60e0ad191f6d07699@国务院令第492号原版",
+          "CL-803d952a2954f2292a9d4ddd488a693c@国务院令第492号原版",
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 155.41
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-88d8da001c4d9198bb449f6002058a77@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-88d8da001c4d9198bb449f6002058a77@国务院令第492号原版",
+          "CL-b7f85719d243da1f15b1b32d3f7637d2@国务院令第492号原版",
+          "CL-ff2b08c272381bf60e0ad191f6d07699@国务院令第492号原版",
+          "CL-803d952a2954f2292a9d4ddd488a693c@国务院令第492号原版",
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 173.37
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-88d8da001c4d9198bb449f6002058a77@国务院令第492号原版"
+        ],
+        "actual_citation_ids": [
+          "CL-88d8da001c4d9198bb449f6002058a77@国务院令第492号原版",
+          "CL-b7f85719d243da1f15b1b32d3f7637d2@国务院令第492号原版",
+          "CL-ff2b08c272381bf60e0ad191f6d07699@国务院令第492号原版",
+          "CL-803d952a2954f2292a9d4ddd488a693c@国务院令第492号原版",
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 175.13
+      }
+    },
+    "GOV-PUB-012": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-79d68baab850cca4ac0a33ea226243dc@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-79d68baab850cca4ac0a33ea226243dc@国务院令第711号修订版",
+          "CL-32790e1f8113c339715fd45c7559ea4b@国务院令第711号修订版",
+          "CL-666b0126ab577759d44f9e6fa1aa561c@国务院令第711号修订版",
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 207.31
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-79d68baab850cca4ac0a33ea226243dc@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-79d68baab850cca4ac0a33ea226243dc@国务院令第711号修订版",
+          "CL-666b0126ab577759d44f9e6fa1aa561c@国务院令第711号修订版",
+          "CL-32790e1f8113c339715fd45c7559ea4b@国务院令第711号修订版",
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 171.17
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-79d68baab850cca4ac0a33ea226243dc@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-79d68baab850cca4ac0a33ea226243dc@国务院令第711号修订版",
+          "CL-666b0126ab577759d44f9e6fa1aa561c@国务院令第711号修订版",
+          "CL-32790e1f8113c339715fd45c7559ea4b@国务院令第711号修订版",
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 173.3
+      }
+    },
+    "GOV-PUB-013": {
+      "text-embedding-v3": {
+        "required": [
+          "CL-49140f234c7249edc04f8042474226f6@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-49140f234c7249edc04f8042474226f6@国务院令第711号修订版",
+          "CL-95f266ffb498be497f623e16ebd3d26d@国务院令第711号修订版",
+          "CL-078d54022fca9dc8c057de6e4d9ed149@国务院令第711号修订版",
+          "CL-7e6a05cadfd8baab8a6e5a6d880b0e2c@国务院令第711号修订版",
+          "CL-ef264e0ede6ef326832d3d812f50c5e0@国务院令第711号修订版",
+          "CL-987d860408c28e0263a72aca5c564832@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 140.77
+      },
+      "qwen3.7-text-embedding-flash": {
+        "required": [
+          "CL-49140f234c7249edc04f8042474226f6@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-49140f234c7249edc04f8042474226f6@国务院令第711号修订版",
+          "CL-95f266ffb498be497f623e16ebd3d26d@国务院令第711号修订版",
+          "CL-ef264e0ede6ef326832d3d812f50c5e0@国务院令第711号修订版",
+          "CL-d333b0d9edd4cfbb7b80f0987a3f5c7f@国务院令第711号修订版",
+          "CL-7e6a05cadfd8baab8a6e5a6d880b0e2c@国务院令第711号修订版",
+          "CL-72c52e8a9ae3e2bb2e389f27f1f846e3@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 181.53
+      },
+      "qwen3.7-text-embedding": {
+        "required": [
+          "CL-49140f234c7249edc04f8042474226f6@国务院令第711号修订版"
+        ],
+        "actual_citation_ids": [
+          "CL-49140f234c7249edc04f8042474226f6@国务院令第711号修订版",
+          "CL-95f266ffb498be497f623e16ebd3d26d@国务院令第711号修订版",
+          "CL-7e6a05cadfd8baab8a6e5a6d880b0e2c@国务院令第711号修订版",
+          "CL-d333b0d9edd4cfbb7b80f0987a3f5c7f@国务院令第711号修订版",
+          "CL-77506b662317474f595d0d1e4f35e045@国务院令第711号修订版",
+          "CL-ae1fa033416e0267f7602f921aa0905c@国务院令第711号修订版"
+        ],
+        "citation_hit": true,
+        "version_hit": true,
+        "latency_ms": 176.25
+      }
+    }
+  }
+}

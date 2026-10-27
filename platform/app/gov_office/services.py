@@ -39,6 +39,9 @@ from domains.gov_office.models import (
 
 REVIEWED = "approved"
 PUBLISHED = "published"
+# 嵌入服务批量上限不一致：text-embedding-v3 单请求最多 10 条，
+# qwen3.7-text-embedding 最多 25 条；统一按 10 条分批。
+EMBED_BATCH_SIZE = 10
 logger = logging.getLogger(__name__)
 STOP_TOKENS = {
     "什么",
@@ -601,7 +604,10 @@ class GovPolicyService:
                 "embedding_model": model_name,
                 "duplicated": False,
             }
-        vectors = await gateway.embed([clause.content for clause in clauses])
+        vectors: list[list[float]] = []
+        for start in range(0, len(clauses), EMBED_BATCH_SIZE):
+            batch = clauses[start : start + EMBED_BATCH_SIZE]
+            vectors.extend(await gateway.embed([clause.content for clause in batch]))
         if len(vectors) != len(clauses):
             raise BusinessError(
                 "EMBEDDING_RESULT_INVALID", "向量数量与条款数量不一致", 503

@@ -1,0 +1,1218 @@
+{
+  "run_at": "2026-10-27T18:25:52.476531+00:00",
+  "source": "D:\\work\\外包\\传化比赛\\angentplatform\\政务智能体\\evaluation\\reports\\model-20261027T182542Z.json",
+  "models": [
+    "qwen3.8-max",
+    "qwen3.8-flash",
+    "deepseek-v4.1-flash"
+  ],
+  "cases": [
+    {
+      "case_id": "GOV-PUB-001",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开申请不能当场答复的，答复期限是多少个工作日？",
+        "jurisdiction": "全国",
+        "as_of": "2019-05-14",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按事项日期 2019-05-14 适用 492 原版，引用第二十四条并给出 15 个工作日。"
+        ],
+        "must_include": [
+          "15个工作日内予以答复"
+        ],
+        "must_not_include": [
+          "20个工作日内予以答复"
+        ],
+        "required_policy_versions": [
+          "国务院令第492号原版"
+        ],
+        "required_citation_ids": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ]
+      },
+      "risk": "high",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "旧版第二十四条；2019-05-15 起旧版失效，属上界边界。"
+    },
+    {
+      "case_id": "GOV-PUB-002",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开申请不能当场答复的，答复期限是多少个工作日？",
+        "jurisdiction": "全国",
+        "as_of": "2019-05-15",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按事项日期 2019-05-15 适用 711 修订版，引用第三十三条并给出 20 个工作日。"
+        ],
+        "must_include": [
+          "20个工作日内予以答复"
+        ],
+        "must_not_include": [
+          "15个工作日内予以答复"
+        ],
+        "required_policy_versions": [
+          "国务院令第711号修订版"
+        ],
+        "required_citation_ids": [
+          "CL-3bf64c4ec4167af87dfde7c8435594cb@国务院令第711号修订版"
+        ]
+      },
+      "risk": "high",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "新版第三十三条；生效日当天按新法，旧版 effective_to 为开区间上界。"
+    },
+    {
+      "case_id": "GOV-PUB-003",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开申请不能当场答复的，答复期限是多少个工作日？",
+        "jurisdiction": "全国",
+        "as_of": "2019-04-20",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "公布不等于生效；2019-04-20 仍适用 492 原版。"
+        ],
+        "must_include": [
+          "15个工作日内予以答复"
+        ],
+        "must_not_include": [
+          "20个工作日内予以答复"
+        ],
+        "required_policy_versions": [
+          "国务院令第492号原版"
+        ],
+        "required_citation_ids": [
+          "CL-ef7a71b1ede05a5100c468b6d83f6206@国务院令第492号原版"
+        ]
+      },
+      "risk": "high",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "新版已公布但未生效（2019-05-15 生效），陷阱样本。"
+    },
+    {
+      "case_id": "GOV-PUB-004",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开申请不能当场答复的，答复期限是多少个工作日？",
+        "jurisdiction": "全国",
+        "as_of": "2008-04-30",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "insufficient",
+        "criteria": [
+          "任一版本均未生效，应说明依据不足并拒绝给出期限。"
+        ],
+        "must_not_include": [
+          "15个工作日内予以答复",
+          "20个工作日内予以答复"
+        ]
+      },
+      "risk": "high",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "早于旧版 2008-05-01 生效日，应拒答而不是猜版本。"
+    },
+    {
+      "case_id": "GOV-PUB-005",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "依申请公开政府信息，行政机关可以收取检索、复制、邮寄等成本费用吗？",
+        "jurisdiction": "全国",
+        "as_of": "2010-01-01",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按 2010-01-01 适用 492 原版，引用第二十七条。"
+        ],
+        "must_include": [
+          "成本费用"
+        ],
+        "must_not_include": [
+          "不收取费用"
+        ],
+        "required_policy_versions": [
+          "国务院令第492号原版"
+        ],
+        "required_citation_ids": [
+          "CL-c579fe288bcd6087f70877258fe5e9f1@国务院令第492号原版"
+        ]
+      },
+      "risk": "high",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "旧版第二十七条允许收取检索、复制、邮寄等成本费用。"
+    },
+    {
+      "case_id": "GOV-PUB-006",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "依申请公开政府信息，行政机关可以收取检索、复制、邮寄等成本费用吗？",
+        "jurisdiction": "全国",
+        "as_of": "2020-01-01",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按 2020-01-01 适用 711 修订版，引用第四十二条。"
+        ],
+        "must_include": [
+          "不收取费用"
+        ],
+        "must_not_include": [
+          "检索、复制、邮寄等成本费用"
+        ],
+        "required_policy_versions": [
+          "国务院令第711号修订版"
+        ],
+        "required_citation_ids": [
+          "CL-56a6ade9e9d4f6e520f4ed0cb00f4530@国务院令第711号修订版"
+        ]
+      },
+      "risk": "high",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "新版第四十二条改为不收取费用，仅在数量频次明显超合理范围时收信息处理费。"
+    },
+    {
+      "case_id": "GOV-PUB-007",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开申请内容不明确时，行政机关应当怎么处理？",
+        "jurisdiction": "全国",
+        "as_of": "2020-03-01",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按新版第三十条给出 7 个工作日内一次性告知补正。"
+        ],
+        "must_include": [
+          "7个工作日",
+          "补正"
+        ],
+        "must_not_include": [
+          "更改、补充"
+        ],
+        "required_policy_versions": [
+          "国务院令第711号修订版"
+        ],
+        "required_citation_ids": [
+          "CL-51524e676496b4dd1d05f3e04cdf8443@国务院令第711号修订版"
+        ]
+      },
+      "risk": "high",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "新版第三十条新增强制补正告知期限；与旧版第二十一条处理方式形成对照。"
+    },
+    {
+      "case_id": "GOV-PUB-008",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开申请内容不明确时，行政机关应当怎么处理？",
+        "jurisdiction": "全国",
+        "as_of": "2019-04-01",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按 2019-04-01 适用 492 原版，不得出现新版 7 个工作日补正期限。"
+        ],
+        "must_include": [
+          "更改、补充"
+        ],
+        "must_not_include": [
+          "7个工作日"
+        ],
+        "required_policy_versions": [
+          "国务院令第492号原版"
+        ],
+        "required_citation_ids": [
+          "CL-12e94487e65da3fe5f68d212b7b56d04@国务院令第492号原版"
+        ]
+      },
+      "risk": "high",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "旧版第二十一条只规定告知更改、补充，没有 7 个工作日补正期限。"
+    },
+    {
+      "case_id": "GOV-PUB-009",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "行政机关就政府信息公开申请征求第三方意见的，第三方应当在多少个工作日内提出意见？",
+        "jurisdiction": "全国",
+        "as_of": "2020-06-01",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按新版第三十二条给出 15 个工作日。"
+        ],
+        "must_include": [
+          "15个工作日"
+        ],
+        "required_policy_versions": [
+          "国务院令第711号修订版"
+        ],
+        "required_citation_ids": [
+          "CL-b8f1dddc10a381ab2a71bce5d8ae84ea@国务院令第711号修订版"
+        ]
+      },
+      "risk": "medium",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "新版第三十二条明确 15 个工作日；旧版第二十三条未规定该期限。"
+    },
+    {
+      "case_id": "GOV-PUB-010",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开工作年度报告应当在什么时间前公布？",
+        "jurisdiction": "全国",
+        "as_of": "2026-10-27",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按新版第四十九条同时给出 1 月 31 日和 3 月 31 日两个时限。"
+        ],
+        "must_include": [
+          "1月31日",
+          "3月31日"
+        ],
+        "required_policy_versions": [
+          "国务院令第711号修订版"
+        ],
+        "required_citation_ids": [
+          "CL-668fc36d9e03cd4faec72ca0e9679e47@国务院令第711号修订版"
+        ]
+      },
+      "risk": "medium",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "新版第四十九条区分县级以上部门与地方政府公布时限。"
+    },
+    {
+      "case_id": "GOV-PUB-011",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开工作年度报告应当在什么时间前公布？",
+        "jurisdiction": "全国",
+        "as_of": "2015-01-01",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按 2015-01-01 适用 492 原版，不得出现新版部门 1 月 31 日时限。"
+        ],
+        "must_include": [
+          "3月31日"
+        ],
+        "must_not_include": [
+          "1月31日"
+        ],
+        "required_policy_versions": [
+          "国务院令第492号原版"
+        ],
+        "required_citation_ids": [
+          "CL-88d8da001c4d9198bb449f6002058a77@国务院令第492号原版"
+        ]
+      },
+      "risk": "high",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "旧版第三十一条只有 3 月 31 日前公布，不能套用新版 1 月 31 日。"
+    },
+    {
+      "case_id": "GOV-PUB-012",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "申请政府信息公开必须采用书面形式吗？",
+        "jurisdiction": "全国",
+        "as_of": "2020-01-01",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按新版第二十九条说明书面为原则、口头为例外。"
+        ],
+        "must_include": [
+          "书面形式",
+          "口头"
+        ],
+        "required_policy_versions": [
+          "国务院令第711号修订版"
+        ],
+        "required_citation_ids": [
+          "CL-79d68baab850cca4ac0a33ea226243dc@国务院令第711号修订版"
+        ]
+      },
+      "risk": "medium",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "新版第二十九条允许书面困难时口头提出并由受理机构代填。"
+    },
+    {
+      "case_id": "GOV-PUB-013",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "行政机关的内部事务信息和过程性信息是否应当公开？",
+        "jurisdiction": "全国",
+        "as_of": "2020-01-01",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "answer",
+        "criteria": [
+          "按新版第十六条说明可以不予公开，不得表述为必须公开。"
+        ],
+        "must_include": [
+          "可以不予公开"
+        ],
+        "required_policy_versions": [
+          "国务院令第711号修订版"
+        ],
+        "required_citation_ids": [
+          "CL-49140f234c7249edc04f8042474226f6@国务院令第711号修订版"
+        ]
+      },
+      "risk": "medium",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "新版第十六条将内部事务信息和过程性信息列为可以不予公开。"
+    },
+    {
+      "case_id": "GOV-PUB-014",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开申请应当如何提出？",
+        "jurisdiction": null,
+        "as_of": "2026-10-27",
+        "materials": []
+      },
+      "expected": {
+        "outcome": "clarify",
+        "criteria": [
+          "缺地区时应先澄清，不得直接给结论。"
+        ],
+        "must_include": [
+          "政策地区"
+        ]
+      },
+      "risk": "low",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "缺地区时必须先澄清。"
+    },
+    {
+      "case_id": "GOV-PUB-015",
+      "split": "test",
+      "task_mode": "policy_interpretation",
+      "data_kind": "public",
+      "input": {
+        "user_request": "政府信息公开申请应当如何提出？",
+        "jurisdiction": "全国",
+        "as_of": null,
+        "materials": []
+      },
+      "expected": {
+        "outcome": "clarify",
+        "criteria": [
+          "缺时间时应先澄清事项时间。"
+        ],
+        "must_include": [
+          "事项时间"
+        ]
+      },
+      "risk": "low",
+      "source_refs": [
+        "samples/public/GOV-REG-711-2019.json",
+        "samples/public/GOV-REG-492-2007.json"
+      ],
+      "source_group": "GOV-REG-GOV-INFO-DISCLOSURE",
+      "label_status": "draft",
+      "reviewer": null,
+      "notes": "缺事项时间时必须先澄清。"
+    }
+  ],
+  "by_case": {
+    "GOV-PUB-001": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 1,
+          "unsupported": 0,
+          "statuses": [
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "政府信息公开申请不能当场答复的，应当自收到申请之日起15个工作日内予以答复；如需延长答复期限，延长答复的期限最长不得超过15个工作日。 行政机关不能当场答复的，应当自收到申请之日起15个工作日内予以答复；如需延长答复期限的，应当经政府信息公开工作机构负责人同意，并告知申请人，延长答复的期限最长不得超过15个工作日。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "qwen3.8-flash": {
+          "claims": 1,
+          "unsupported": 0,
+          "statuses": [
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "不能当场答复的，应当自收到申请之日起15个工作日内予以答复。 行政机关不能当场答复的，应当自收到申请之日起15个工作日内予以答复。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "行政机关不能当场答复的，应当自收到申请之日起15个工作日内予以答复；如需延长答复期限，应当经政府信息公开工作机构负责人同意并告知申请人，延长答复的期限最长不得超过15个工作日。 行政机关不能当场答复的，应当自收到申请之日起15个工作日内予以答复。 如需延长答复期限，应当经政府信息公开工作机构负责人同意，并告知申请人，延长答复的期限最长不得超过15个工作日。",
+          "original_reasons": [],
+          "gated_reasons": []
+        }
+      }
+    },
+    "GOV-PUB-002": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 1,
+          "unsupported": 0,
+          "statuses": [
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "政府信息公开申请不能当场答复的，行政机关应当自收到申请之日起20个工作日内予以答复；需要延长答复期限的，应当经政府信息公开工作机构负责人同意并告知申请人，延长的期限最长不得超过20个工作日。 行政机关不能当场答复的，应当自收到申请之日起20个工作日内予以答复；需要延长答复期限的，应当经政府信息公开工作机构负责人同意并告知申请人，延长的期限最长不得超过20个工作日。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "qwen3.8-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "政府信息公开申请不能当场答复的，行政机关应当自收到申请之日起20个工作日内予以答复；需要延长答复期限的，延长的期限最长不得超过20个工作日。 行政机关不能当场答复的，应当自收到申请之日起20个工作日内予以答复。 需要延长答复期限的，应当经政府信息公开工作机构负责人同意并告知申请人，延长的期限最长不得超过20个工作日。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "行政机关不能当场答复的，应当自收到申请之日起20个工作日内予以答复；需要延长答复期限的，应经政府信息公开工作机构负责人同意并告知申请人，延长的期限最长不得超过20个工作日。 不能当场答复的，应当自收到申请之日起20个工作日内予以答复。 需要延长答复期限的，应当经政府信息公开工作机构负责人同意并告知申请人，延长的期限最长不得超过20个工作日。",
+          "original_reasons": [],
+          "gated_reasons": []
+        }
+      }
+    },
+    "GOV-PUB-003": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 1,
+          "unsupported": 0,
+          "statuses": [
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "不能当场答复的，应当自收到申请之日起15个工作日内予以答复。 行政机关不能当场答复的，应当自收到申请之日起15个工作日内予以答复。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "qwen3.8-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "政府信息公开申请不能当场答复的，行政机关应当自收到申请之日起15个工作日内予以答复；如需延长答复期限的，延长答复的期限最长不得超过15个工作日。 行政机关收到政府信息公开申请，不能当场答复的，应当自收到申请之日起15个工作日内予以答复。 如需延长答复期限的，应当经政府信息公开工作机构负责人同意，并告知申请人，延长答复的期限最长不得超过15个工作日。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "政府信息公开申请不能当场答复的，应当自收到申请之日起15个工作日内予以答复；如需延长答复期限，经政府信息公开工作机构负责人同意并告知申请人后，延长答复的期限最长不得超过15个工作日。 行政机关不能当场答复的，应当自收到申请之日起15个工作日内予以答复。 如需延长答复期限，应当经政府信息公开工作机构负责人同意，并告知申请人，延长答复的期限最长不得超过15个工作日。",
+          "original_reasons": [],
+          "gated_reasons": []
+        }
+      }
+    },
+    "GOV-PUB-004": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 0,
+          "unsupported": 0,
+          "statuses": [],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "qwen3.8-flash": {
+          "claims": 0,
+          "unsupported": 0,
+          "statuses": [],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 0,
+          "unsupported": 0,
+          "statuses": [],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": []
+        }
+      }
+    },
+    "GOV-PUB-005": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 3,
+          "unsupported": 1,
+          "statuses": [
+            "partial",
+            "partial",
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：成本费用"
+          ]
+        },
+        "qwen3.8-flash": {
+          "claims": 4,
+          "unsupported": 2,
+          "statuses": [
+            "partial",
+            "partial",
+            "insufficient",
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：成本费用"
+          ]
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 4,
+          "unsupported": 3,
+          "statuses": [
+            "insufficient",
+            "partial",
+            "insufficient",
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：成本费用"
+          ]
+        }
+      }
+    },
+    "GOV-PUB-006": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "依据给出的条款，行政机关依申请提供政府信息原则上不收取费用，因此不可以收取检索、复制、邮寄等成本费用；只有申请人申请公开政府信息的数量、频次明显超过合理范围的，行政机关才可以收取信息处理费。 行政机关依申请提供政府信息，不收取费用。 申请人申请公开政府信息的数量、频次明显超过合理范围的，行政机关可以收取信息处理费。",
+          "original_reasons": [
+            "出现不应有的内容：检索、复制、邮寄等成本费用"
+          ],
+          "gated_reasons": [
+            "出现不应有的内容：检索、复制、邮寄等成本费用"
+          ]
+        },
+        "qwen3.8-flash": {
+          "claims": 3,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "一般情况下，行政机关依申请提供政府信息不收取费用，不能收取检索、复制、邮寄等成本费用。只有当申请人申请公开政府信息的数量、频次明显超过合理范围时，行政机关才可以收取信息处理费，具体办法由国务院价格主管部门会同国务院财政部门、全国政府信息公开工作主管部门制定。 行政机关依申请提供政府信息，不收取费用。 申请人申请公开政府信息的数量、频次明显超过合理范围的，行政机关可以收取信息处理费。 行政机关收取信息处理费的具体办法由国务院价格主管部门会同国务院财政部门、全国政府信息公开工作主管部门制定。",
+          "original_reasons": [
+            "出现不应有的内容：检索、复制、邮寄等成本费用"
+          ],
+          "gated_reasons": [
+            "出现不应有的内容：检索、复制、邮寄等成本费用"
+          ]
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "不可以收取检索、复制、邮寄等成本费用。行政机关依申请提供政府信息不收取费用；仅在申请人申请公开政府信息的数量、频次明显超过合理范围时，行政机关可以收取信息处理费。 行政机关依申请提供政府信息，不收取费用。 申请人申请公开政府信息的数量、频次明显超过合理范围的，行政机关可以收取信息处理费。",
+          "original_reasons": [
+            "出现不应有的内容：检索、复制、邮寄等成本费用"
+          ],
+          "gated_reasons": [
+            "出现不应有的内容：检索、复制、邮寄等成本费用"
+          ]
+        }
+      }
+    },
+    "GOV-PUB-007": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 3,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "政府信息公开申请内容不明确的，行政机关应当给予指导和释明，并自收到申请之日起7个工作日内一次性告知申请人作出补正，说明需要补正的事项和合理的补正期限。答复期限自行政机关收到补正的申请之日起计算。申请人无正当理由逾期不补正的，视为放弃申请，行政机关不再处理该政府信息公开申请。 政府信息公开申请内容不明确的，行政机关应当给予指导和释明，并自收到申请之日起7个工作日内一次性告知申请人作出补正，说明需要补正的事项和合理的补正期限。 答复期限自行政机关收到补正的申请之日起计算。 申请人无正当理由逾期不补正的，视为放弃申请，行政机关不再处理该政府信息公开申请。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "qwen3.8-flash": {
+          "claims": 3,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "政府信息公开申请内容不明确的，行政机关应当给予指导和释明，并自收到申请之日起7个工作日内一次性告知申请人作出补正，说明需要补正的事项和合理的补正期限；答复期限自行政机关收到补正的申请之日起计算。申请人无正当理由逾期不补正的，视为放弃申请，行政机关不再处理该政府信息公开申请。 政府信息公开申请内容不明确的，行政机关应当给予指导和释明，并自收到申请之日起7个工作日内一次性告知申请人作出补正，说明需要补正的事项和合理的补正期限。 答复期限自行政机关收到补正的申请之日起计算。 申请人无正当理由逾期不补正的，视为放弃申请，行政机关不再处理该政府信息公开申请。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 3,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "政府信息公开申请内容不明确的，行政机关应当给予指导和释明，并自收到申请之日起7个工作日内一次性告知申请人作出补正，说明需要补正的事项和合理的补正期限。答复期限自行政机关收到补正的申请之日起计算。申请人无正当理由逾期不补正的，视为放弃申请，行政机关不再处理该政府信息公开申请。 政府信息公开申请内容不明确的，行政机关应当给予指导和释明，并自收到申请之日起7个工作日内一次性告知申请人作出补正，说明需要补正的事项和合理的补正期限。 答复期限自行政机关收到补正的申请之日起计算。 申请人无正当理由逾期不补正的，视为放弃申请，行政机关不再处理该政府信息公开申请。",
+          "original_reasons": [],
+          "gated_reasons": []
+        }
+      }
+    },
+    "GOV-PUB-008": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 1,
+          "unsupported": 1,
+          "statuses": [
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：更改、补充"
+          ]
+        },
+        "qwen3.8-flash": {
+          "claims": 1,
+          "unsupported": 1,
+          "statuses": [
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：更改、补充"
+          ]
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 1,
+          "unsupported": 1,
+          "statuses": [
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：更改、补充"
+          ]
+        }
+      }
+    },
+    "GOV-PUB-009": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 1,
+          "unsupported": 1,
+          "statuses": [
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：15个工作日"
+          ]
+        },
+        "qwen3.8-flash": {
+          "claims": 1,
+          "unsupported": 1,
+          "statuses": [
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：15个工作日"
+          ]
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 1,
+          "unsupported": 1,
+          "statuses": [
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：15个工作日"
+          ]
+        }
+      }
+    },
+    "GOV-PUB-010": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "县级以上人民政府部门应当在每年1月31日前向社会公布本行政机关上一年度政府信息公开工作年度报告；县级以上地方人民政府的政府信息公开工作主管部门应当在每年3月31日前向社会公布本级政府上一年度政府信息公开工作年度报告。 县级以上人民政府部门应当在每年1月31日前向本级政府信息公开工作主管部门提交本行政机关上一年度政府信息公开工作年度报告并向社会公布。 县级以上地方人民政府的政府信息公开工作主管部门应当在每年3月31日前向社会公布本级政府上一年度政府信息公开工作年度报告。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "qwen3.8-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "县级以上人民政府部门应当在每年1月31日前向社会公布本行政机关上一年度政府信息公开工作年度报告；县级以上地方人民政府的政府信息公开工作主管部门应当在每年3月31日前向社会公布本级政府上一年度政府信息公开工作年度报告。 县级以上人民政府部门应当在每年1月31日前向本级政府信息公开工作主管部门提交本行政机关上一年度政府信息公开工作年度报告并向社会公布。 县级以上地方人民政府的政府信息公开工作主管部门应当在每年3月31日前向社会公布本级政府上一年度政府信息公开工作年度报告。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "县级以上人民政府部门应当在每年1月31日前向本级政府信息公开工作主管部门提交本行政机关上一年度政府信息公开工作年度报告并向社会公布；县级以上地方人民政府的政府信息公开工作主管部门应当在每年3月31日前向社会公布本级政府上一年度政府信息公开工作年度报告。 县级以上人民政府部门应当在每年1月31日前向本级政府信息公开工作主管部门提交本行政机关上一年度政府信息公开工作年度报告并向社会公布。 县级以上地方人民政府的政府信息公开工作主管部门应当在每年3月31日前向社会公布本级政府上一年度政府信息公开工作年度报告。",
+          "original_reasons": [],
+          "gated_reasons": []
+        }
+      }
+    },
+    "GOV-PUB-011": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 1,
+          "unsupported": 0,
+          "statuses": [
+            "direct"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "政府信息公开工作年度报告应当在每年3月31日前公布。 各级行政机关应当在每年3月31日前公布本行政机关的政府信息公开工作年度报告。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "qwen3.8-flash": {
+          "claims": 1,
+          "unsupported": 0,
+          "statuses": [
+            "direct"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "各级行政机关应当在每年3月31日前公布本行政机关的政府信息公开工作年度报告。 各级行政机关应当在每年3月31日前公布本行政机关的政府信息公开工作年度报告。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 1,
+          "unsupported": 0,
+          "statuses": [
+            "direct"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "各级行政机关应当在每年3月31日前公布本行政机关的政府信息公开工作年度报告。 各级行政机关应当在每年3月31日前公布本行政机关的政府信息公开工作年度报告。",
+          "original_reasons": [],
+          "gated_reasons": []
+        }
+      }
+    },
+    "GOV-PUB-012": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "不必须。申请政府信息公开一般应当采用包括信件、数据电文在内的书面形式；但采用书面形式确有困难的，申请人可以口头提出，由受理该申请的政府信息公开工作机构代为填写政府信息公开申请。 公民、法人或者其他组织申请获取政府信息，应当向行政机关的政府信息公开工作机构提出，并采用包括信件、数据电文在内的书面形式。 采用书面形式确有困难的，申请人可以口头提出，由受理该申请的政府信息公开工作机构代为填写政府信息公开申请。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "qwen3.8-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "不是必须采用书面形式。申请政府信息公开一般应当采用包括信件、数据电文在内的书面形式；但如果采用书面形式确有困难，申请人可以口头提出，由受理该申请的政府信息公开工作机构代为填写政府信息公开申请。 公民、法人或者其他组织申请获取政府信息的，应当采用包括信件、数据电文在内的书面形式。 采用书面形式确有困难的，申请人可以口头提出，由受理该申请的政府信息公开工作机构代为填写政府信息公开申请。",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 2,
+          "unsupported": 0,
+          "statuses": [
+            "partial",
+            "partial"
+          ],
+          "gated_outcome": "answer",
+          "gated_text": "原则上应当采用书面形式，包括信件、数据电文等形式；但采用书面形式确有困难的，申请人可以口头提出，由受理申请的政府信息公开工作机构代为填写政府信息公开申请。因此，并非在任何情况下都必须由申请人自行采用书面形式。 申请获取政府信息应当向行政机关的政府信息公开工作机构提出，并采用包括信件、数据电文在内的书面形式。 采用书面形式确有困难的，申请人可以口头提出，由受理该申请的政府信息公开工作机构代为填写政府信息公开申请。",
+          "original_reasons": [],
+          "gated_reasons": []
+        }
+      }
+    },
+    "GOV-PUB-013": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 4,
+          "unsupported": 1,
+          "statuses": [
+            "partial",
+            "partial",
+            "insufficient",
+            "direct"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：可以不予公开"
+          ]
+        },
+        "qwen3.8-flash": {
+          "claims": 5,
+          "unsupported": 1,
+          "statuses": [
+            "partial",
+            "partial",
+            "insufficient",
+            "direct",
+            "partial"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：可以不予公开"
+          ]
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 3,
+          "unsupported": 1,
+          "statuses": [
+            "partial",
+            "partial",
+            "insufficient"
+          ],
+          "gated_outcome": "insufficient",
+          "gated_text": "",
+          "original_reasons": [],
+          "gated_reasons": [
+            "outcome 期望 answer，实际 insufficient",
+            "缺少必需内容：可以不予公开"
+          ]
+        }
+      }
+    },
+    "GOV-PUB-014": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 0,
+          "unsupported": 0,
+          "statuses": [],
+          "gated_outcome": "clarify",
+          "gated_text": "缺少地区或事项时间",
+          "original_reasons": [
+            "缺少必需内容：政策地区"
+          ],
+          "gated_reasons": [
+            "缺少必需内容：政策地区"
+          ]
+        },
+        "qwen3.8-flash": {
+          "claims": 0,
+          "unsupported": 0,
+          "statuses": [],
+          "gated_outcome": "clarify",
+          "gated_text": "缺少地区或事项时间",
+          "original_reasons": [
+            "缺少必需内容：政策地区"
+          ],
+          "gated_reasons": [
+            "缺少必需内容：政策地区"
+          ]
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 0,
+          "unsupported": 0,
+          "statuses": [],
+          "gated_outcome": "clarify",
+          "gated_text": "缺少地区或事项时间",
+          "original_reasons": [
+            "缺少必需内容：政策地区"
+          ],
+          "gated_reasons": [
+            "缺少必需内容：政策地区"
+          ]
+        }
+      }
+    },
+    "GOV-PUB-015": {
+      "models": {
+        "qwen3.8-max": {
+          "claims": 0,
+          "unsupported": 0,
+          "statuses": [],
+          "gated_outcome": "clarify",
+          "gated_text": "缺少地区或事项时间",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "qwen3.8-flash": {
+          "claims": 0,
+          "unsupported": 0,
+          "statuses": [],
+          "gated_outcome": "clarify",
+          "gated_text": "缺少地区或事项时间",
+          "original_reasons": [],
+          "gated_reasons": []
+        },
+        "deepseek-v4.1-flash": {
+          "claims": 0,
+          "unsupported": 0,
+          "statuses": [],
+          "gated_outcome": "clarify",
+          "gated_text": "缺少地区或事项时间",
+          "original_reasons": [],
+          "gated_reasons": []
+        }
+      }
+    }
+  },
+  "summary": {
+    "qwen3.8-max": {
+      "total": 15,
+      "original_pass": 13,
+      "gated_pass": 9,
+      "unsupported_cases": 4
+    },
+    "qwen3.8-flash": {
+      "total": 15,
+      "original_pass": 13,
+      "gated_pass": 9,
+      "unsupported_cases": 4
+    },
+    "deepseek-v4.1-flash": {
+      "total": 15,
+      "original_pass": 13,
+      "gated_pass": 9,
+      "unsupported_cases": 4
+    }
+  }
+}
