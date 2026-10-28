@@ -2,9 +2,10 @@
 
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL%20v3%20or%20later-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.121-009688.svg)](https://fastapi.tiangolo.com/)
 [![Vue](https://img.shields.io/badge/Vue-3.5-42B883.svg)](https://vuejs.org/)
-[![Tests](https://img.shields.io/badge/tests-267%20passed-brightgreen.svg)](#十一测试与质量)
+[![Tests](https://img.shields.io/badge/tests-351%20passed-brightgreen.svg)](#十一测试与质量)
+[![Release](https://img.shields.io/badge/release-v1.2.1-blue.svg)](https://github.com/smileebob/Enterprise-Intelligence-Expert-Platform/releases/tag/v1.2.1)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://docs.docker.com/compose/)
 
 **中文** ｜ [English](README.en.md)
@@ -13,12 +14,13 @@
 >
 > 通用底座 + 可插拔领域插件：一套平台，装配任意领域的「懂行、可信、越用越聪明」的专家智能体。
 
-平台内置两个可直接体验的领域实例：
+平台内置两个可直接体验的企业领域实例，并提供独立的政务办公工作台：
 
 - **AI 化学家** —— 功能化学 / 纺织印染助剂领域的产品选型、应用方案与合规判断；
-- **AI 产业招商专家** —— 生物技术产业园区的企业画像、资源匹配与招商策略。
+- **AI 产业招商专家** —— 生物技术产业园区的企业画像、资源匹配与招商策略；
+- **政务办公工作台** —— 政策版本与条款引用、公文与文稿草稿、人工审核和审计，独立入口 `/gov`。
 
-两个实例共用同一套知识管道、编排引擎、评估体系、记忆与安全治理机制，用于验证平台「换领域不换底座」的扩展能力。
+三个场景共用同一套知识管道、编排引擎、评估体系、记忆与安全治理机制，用于验证平台「换领域不换底座」的扩展能力。
 
 ---
 
@@ -31,7 +33,7 @@
 - [五、架构总览](#五架构总览)
 - [六、快速开始](#六快速开始)
 - [七、5 分钟体验路径](#七5-分钟体验路径)
-- [八、两个领域实例](#八两个领域实例)
+- [八、领域实例与政务工作台](#八领域实例与政务工作台)
 - [九、项目结构](#九项目结构)
 - [十、文档索引](#十文档索引)
 - [十一、测试与质量](#十一测试与质量)
@@ -112,8 +114,10 @@ AngentPlatform 把这些能力做成**平台级机制**，而不是某个业务�
 
 | 指标 | 数值 |
 |---|---|
-| 自动化测试 | **267 项全绿**（单元 / 契约 / 集成 / 验收；2026-10-23 复跑） |
-| 代码覆盖率 | **87.25%**（门禁 60%） |
+| 自动化测试 | **351 项全绿**（单元 / 契约 / 集成 / 验收；2026-10-28 全量复跑） |
+| 代码覆盖率 | **87.67%**（门禁 60%） |
+| 政务专项 | **84 项通过**（政策闭环、公文、文稿/总结/咨询、权限审核、PG 查询构造与嵌入分批） |
+| PostgreSQL 目标库 | PostgreSQL **18.6 + pgvector 0.8.1.3** 小数据验证通过（16 个迁移、54 张表；2019-05-14 选 492、2019-05-15 选 711） |
 | 8 问回归引用命中率 | **1.000**（达标线 ≥0.85） |
 | 内外部冲突场景（CS-01~05） | **全过**；反朴素 RAG 对照 **5/5 vs 0/5** |
 | 六维评估金值对拍 | **83.8 / 69.3 / 84.6 / 83.1（误差 ≤0.1）** |
@@ -126,17 +130,17 @@ AngentPlatform 把这些能力做成**平台级机制**，而不是某个业务�
 ## 五、架构总览
 
 ```
-platform-web（Vue 3 独立工程：对话台 / 评估卡 / 装配台 / 审计台）
+platform-web（Vue 3 独立工程：对话台 / 评估卡 / 装配台 / 审计台 / 政务工作台）
         │ REST /api/v1 + SSE（先校验后外发）
-app/ FastAPI（create_app 工厂 + APIRouter 业务域）
+app/ FastAPI 0.121（create_app 工厂 + APIRouter 业务域，含 gov_office）
 core/ 通用底座：abstraction │ knowledge(KP-1) │ orchestration
       memory │ evaluation │ gateway │ guardrails │ growth │ admin
-domains/ 领域插件：chemical（完整实例）+ investment（轻量实例）
+domains/ 领域插件：chemical（完整实例）+ investment（轻量实例）+ gov_office（政务）
 adapters/：storage_pgvector / storage_sqlite / model_gateway / ...
-PostgreSQL 16 + pgvector │ Valkey │ Celery
+PostgreSQL 16+ / pgvector（目标库实测 18.6） │ Valkey │ Celery
 ```
 
-- **backend**：FastAPI 0.115 + SQLAlchemy 2.0 + PostgreSQL 16 / pgvector + Valkey + Celery；
+- **backend**：FastAPI 0.121 + SQLAlchemy 2.0 + PostgreSQL / pgvector + Valkey + Celery；
 - **frontend**：Vue 3.5 + Vite + TypeScript strict + Element Plus；
 - **deploy**：Docker Compose 五容器一键起栈，可选 observability / ollama / minio profile。
 
@@ -198,7 +202,7 @@ cd ../platform-web && npm install && npm run dev    # http://localhost:5173
 
 ---
 
-## 八、两个领域实例
+## 八、领域实例与政务工作台
 
 ### 8.1 功能化学 · AI 化学家
 
@@ -216,6 +220,14 @@ cd ../platform-web && npm install && npm run dev    # http://localhost:5173
 > 能力映射、演示路径与三个延伸方向（智能选址 / 政策匹配 / 销量增长）的实现方案：
 > **[doc/02-生物领域场景说明.md](doc/02-生物领域场景说明.md)**
 
+### 8.3 政务办公 · 政策与公文工作台
+
+面向机关内部政策与文字办公：政策版本/效力判断、条款原文引用、澄清与拒答、公文模板与事实数字核对、文稿/总结/咨询草稿、审核分离和审计。前端使用独立 `/gov` 工作台，与原通用对话台分开，但共用登录、权限和审计底座。
+
+准确口径是「通用底座 + 政务领域插件 + 政务业务域 + 前端模块」，不是仅靠 `domain.yaml` 就能装配的纯插件。当前只使用公开政策样本和合成材料，没有机关试点或真实业务数据。
+
+> 公开政策样本见 [政务智能体/samples/README.md](政务智能体/samples/README.md)，公文规则模板见 [政务智能体/templates/gov_document_rules.yaml](政务智能体/templates/gov_document_rules.yaml)；内部备赛文档与评测材料不随公开仓库发布。
+
 ---
 
 ## 九、项目结构
@@ -224,6 +236,9 @@ cd ../platform-web && npm install && npm run dev    # http://localhost:5173
 ├── platform/            # 后端：FastAPI 应用（app/）+ 通用底座（core/）+ 领域插件（domains/）+ 适配器（adapters/）
 ├── platform-web/        # 前端：Vue 3 独立工程（对话台 / 评估卡 / 装配台 / 审计台）
 ├── deploy/              # 可观测配置（prometheus.yml）
+├── 政务智能体/          # 政务办公公开样本与公文规则模板（内部备赛文档不随仓库发布）
+│   ├── samples/public/  # 国务院公开政策双版本样本，供自动化测试读取
+│   └── templates/       # 五类公文规则与正反例
 ├── doc/                 # 领域说明、团队介绍、技术实现、合规与数据说明
 │   ├── 01-化学领域场景说明.md
 │   ├── 02-生物领域场景说明.md
@@ -247,6 +262,8 @@ cd ../platform-web && npm install && npm run dev    # http://localhost:5173
 | [doc/03-团队介绍.md](doc/03-团队介绍.md) | 维护团队的能力画像与工程方法 |
 | [doc/04-技术实现说明.md](doc/04-技术实现说明.md) | 关键算法、架构、数据来源、外部依赖、测试结果与限制 |
 | [doc/05-合规与数据说明.md](doc/05-合规与数据说明.md) | 开源许可、示例数据、第三方依赖、安全隐私与免责声明 |
+| [政务智能体/samples/README.md](政务智能体/samples/README.md) | 政务公开政策样本来源、版本与使用边界 |
+| [政务智能体/templates/gov_document_rules.yaml](政务智能体/templates/gov_document_rules.yaml) | 五类公文模板、必填要素、硬规则与正反例 |
 | [platform/README.md](platform/README.md) | 后端工程说明（模块 / 运行 / API / 依赖） |
 | [tech-plan/README.md](tech-plan/README.md) | 演进技术方案索引（状态 / 优先级 / 实施约定） |
 
@@ -256,8 +273,9 @@ cd ../platform-web && npm install && npm run dev    # http://localhost:5173
 
 ```bash
 cd platform
-pytest                                                        # 267 项：单元 / 契约 / 集成 / 验收
-pytest --cov=app --cov=core --cov-fail-under=60               # 覆盖率门禁（当前 87.25%）
+pytest                                                        # 351 项：单元 / 契约 / 集成 / 验收
+pytest --cov=app --cov=core --cov-fail-under=60               # 覆盖率门禁（当前 87.67%）
+pytest tests/test_phase27_gov_policy.py tests/test_phase28_gov_documents.py        tests/test_phase29_gov_interpret_sessions.py tests/test_phase30_gov_rules.py        tests/test_phase31_gov_writing.py tests/test_phase32_pg_query.py        tests/test_phase33_gov_embedding_batch.py -q           # 政务专项 84 项
 ruff check .                                                  # 静态检查
 bandit -r app core adapters domains -ll                       # 安全扫描（高危 0）
 python scripts/run_regression.py                              # 8 问回归 + CS-01~05 + 反朴素 RAG 对照
@@ -283,7 +301,10 @@ npm run build       # 生产构建无 >500KB chunk
 4. `live` 模式回答质量取决于所接大模型；`offline` 模式为确定性兜底；
 5. 单机 Compose 为参考部署形态，生产化扩展（读写分离、检索下推、worker 水平扩展）需结合真实负载设计；
 6. 编排层的领域特定装配仍有少量化学专用代码，正在抽象为领域插件钩子（见 `core/orchestration/engine.py`）；
-7. 已实现 05-A 运行采集：append-only 事件、加密受控载荷、seq/哈希链与 inspect 查看；**冻结复跑与 fork 尚未实现**。模型网关 `replay` 仍仅回放预录向量。
+7. 已实现 05-A 运行采集、frozen 复跑和 live_eval fork；sandbox fork 与完整节点重算仍在实施。模型网关 `replay` 仍仅回放预录向量。
+8. 政务办公目前使用公开政策样本和合成材料，**没有机关试点、真实用户和落地成效**；金标样本仍为 `draft`，独立人工复核未完成。
+9. 政务条款向量仍是 JSONB + Python 余弦，不是 pgvector/HNSW；PostgreSQL 18.6 + pgvector 只做了小数据、单进程验证，私有化/信创/高可用未验证。
+10. 模型初筛与成本（完整评测约 1.073 元）是公开样本上的开发者自检，不是正式选型或对账后的采购成本。
 
 **路线图（落地计划与详细方案见 [tech-plan/README.md](tech-plan/README.md)）**
 

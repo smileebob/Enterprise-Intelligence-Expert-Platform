@@ -2,9 +2,10 @@
 
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL%20v3%20or%20later-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.121-009688.svg)](https://fastapi.tiangolo.com/)
 [![Vue](https://img.shields.io/badge/Vue-3.5-42B883.svg)](https://vuejs.org/)
-[![Tests](https://img.shields.io/badge/tests-267%20passed-brightgreen.svg)](#testing--quality)
+[![Tests](https://img.shields.io/badge/tests-351%20passed-brightgreen.svg)](#testing--quality)
+[![Release](https://img.shields.io/badge/release-v1.2.1-blue.svg)](https://github.com/smileebob/Enterprise-Intelligence-Expert-Platform/releases/tag/v1.2.1)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://docs.docker.com/compose/)
 
 [中文](README.md) ｜ **English**
@@ -13,12 +14,13 @@
 >
 > A general core + pluggable domain plugins: one platform to assemble expert agents that know the business, can be trusted, and get smarter with use.
 
-Two ready-to-try domain instances ship with the repository:
+Two enterprise domain instances and a separate government-office workbench ship with the repository:
 
 - **AI Chemist** — product selection, application proposals, and compliance checks for textile dyeing & finishing auxiliaries;
-- **AI Investment Promotion Expert** — enterprise profiling, park resource matching, and promotion strategy for biotech industrial parks.
+- **AI Investment Promotion Expert** — enterprise profiling, park resource matching, and promotion strategy for biotech industrial parks;
+- **Government Office Workbench** — policy version/clause citations, official-document and writing drafts, human review and audit, served at `/gov`.
 
-Both share the same knowledge pipeline, orchestration engine, evaluation system, memory, and security governance — demonstrating that the platform can serve a new domain without changing the core.
+All three share the same knowledge pipeline, orchestration engine, evaluation system, memory, and security governance — demonstrating that the platform can serve a new domain without changing the core.
 
 ---
 
@@ -31,7 +33,7 @@ Both share the same knowledge pipeline, orchestration engine, evaluation system,
 - [Architecture](#architecture)
 - [Quick start](#quick-start)
 - [5-minute walkthrough](#5-minute-walkthrough)
-- [The two domain instances](#the-two-domain-instances)
+- [Domain instances and government workbench](#domain-instances-and-government-workbench)
 - [Project layout](#project-layout)
 - [Documentation](#documentation)
 - [Testing & quality](#testing--quality)
@@ -106,8 +108,10 @@ Compared with general-purpose agent builders, this project treats four things as
 
 | Metric | Value |
 |---|---|
-| Automated tests | **267 passing** (unit / contract / integration / acceptance; re-run 2026-10-23) |
-| Code coverage | **87.25%** (gate: 60%) |
+| Automated tests | **351 passing** (unit / contract / integration / acceptance; re-run 2026-10-28) |
+| Code coverage | **87.67%** (gate: 60%) |
+| Government-office suite | **84 passing** (policy loop, documents, writing/summary/consultation, RBAC/review, PG query and embedding batches) |
+| PostgreSQL target | PostgreSQL **18.6 + pgvector 0.8.1.3** small-data validation (16 migrations, 54 tables; 2019-05-14 → 492, 2019-05-15 → 711) |
 | Citation hit rate (8-question regression) | **1.000** (threshold ≥0.85) |
 | Internal/external conflict scenarios (CS-01~05) | **All pass**; vs. naive RAG control **5/5 vs 0/5** |
 | Six-dimension golden comparison | **83.8 / 69.3 / 84.6 / 83.1 (tolerance ≤0.1)** |
@@ -118,17 +122,17 @@ Compared with general-purpose agent builders, this project treats four things as
 ## Architecture
 
 ```
-platform-web (Vue 3 standalone: Chat / EvalCard / Assembly / Audit consoles)
+platform-web (Vue 3 standalone: Chat / EvalCard / Assembly / Audit / Gov workbench)
         │ REST /api/v1 + SSE (verify before streaming)
-app/ FastAPI (create_app factory + APIRouter business domains)
+app/ FastAPI 0.121 (create_app factory + APIRouter business domains, including gov_office)
 core/ domain-agnostic core: abstraction │ knowledge (KP-1) │ orchestration
       memory │ evaluation │ gateway │ guardrails │ growth │ admin
-domains/ domain plugins: chemical (full) + investment (lightweight)
+domains/ domain plugins: chemical (full) + investment (lightweight) + gov_office
 adapters/: storage_pgvector / storage_sqlite / model_gateway / ...
-PostgreSQL 16 + pgvector │ Valkey │ Celery
+PostgreSQL 16+ / pgvector (validated on 18.6) │ Valkey │ Celery
 ```
 
-- **Backend**: FastAPI 0.115 + SQLAlchemy 2.0 + PostgreSQL 16 / pgvector + Valkey + Celery;
+- **Backend**: FastAPI 0.121 + SQLAlchemy 2.0 + PostgreSQL / pgvector + Valkey + Celery;
 - **Frontend**: Vue 3.5 + Vite + strict TypeScript + Element Plus;
 - **Deploy**: one-command Docker Compose (5 containers), optional observability / ollama / minio profiles.
 
@@ -178,7 +182,7 @@ cd ../platform-web && npm install && npm run dev    # http://localhost:5173
 6. Log in as `auditor` → replay any turn's input/retrieval/tool/output hook records by `trace_id`.
 7. Quantitative regression: `python scripts/run_regression.py` → citation hit rate, CS-01~05, naive-RAG comparison.
 
-## The two domain instances
+## Domain instances and government workbench
 
 ### Functional chemistry · AI Chemist
 
@@ -192,12 +196,23 @@ Enterprise discovery, profiling, resource matching, and promotion strategy for a
 
 > Capability mapping, walkthrough, and three extension directions (smart site selection / policy matching / sales growth): **[doc/02-生物领域场景说明.md](doc/02-生物领域场景说明.md)** (Chinese)
 
+### Government office · policy and official-document workbench
+
+Internal policy and writing support: policy version/effectivity, clause-level citations, clarification and refusal, official-document templates with fact/number checks, writing/summary/consultation drafts, separation of drafting and review, and audit. The `/gov` workbench is separate from the generic chat console but shares login, permissions and audit.
+
+The accurate description is "general core + government domain plugin + government business domain + frontend module", not a pure plugin assembled from `domain.yaml` alone. Only public policy samples and synthetic material are used; there is no agency pilot or real business data.
+
+> Public samples: [政务智能体/samples/README.md](政务智能体/samples/README.md); document-rule template: [政务智能体/templates/gov_document_rules.yaml](政务智能体/templates/gov_document_rules.yaml). Internal preparation documents and evaluation material are not published.
+
 ## Project layout
 
 ```
 ├── platform/            # backend: FastAPI app (app/) + core (core/) + domain plugins (domains/) + adapters (adapters/)
 ├── platform-web/        # frontend: Vue 3 standalone (Chat / EvalCard / Assembly / Audit)
 ├── deploy/              # observability config (prometheus.yml)
+├── 政务智能体/          # public government samples and document-rule templates (internal prep docs not published)
+│   ├── samples/public/
+│   └── templates/
 ├── doc/                 # domain guides, team intro, technical implementation, compliance & data
 ├── tech-plan/           # evolution design docs (index & conventions in tech-plan/README.md)
 ├── docker-compose.yml   # one-command stack (web/api/worker/db/valkey + optional profiles)
@@ -215,6 +230,8 @@ Enterprise discovery, profiling, resource matching, and promotion strategy for a
 | [doc/03-团队介绍.md](doc/03-团队介绍.md) | Maintainer team profile and engineering method |
 | [doc/04-技术实现说明.md](doc/04-技术实现说明.md) | Algorithms, architecture, data sources, dependencies, tests, limitations |
 | [doc/05-合规与数据说明.md](doc/05-合规与数据说明.md) | License, sample data, third-party dependencies, security & privacy, disclaimer |
+| [政务智能体/samples/README.md](政务智能体/samples/README.md) | Public government-policy sample sources, versions and usage boundaries |
+| [政务智能体/templates/gov_document_rules.yaml](政务智能体/templates/gov_document_rules.yaml) | Five official-document templates, required fields, hard rules and examples |
 | [platform/README.md](platform/README.md) | Backend engineering guide (modules / run / API / dependencies) |
 | [tech-plan/README.md](tech-plan/README.md) | Evolution design index (status / priority / implementation conventions) |
 
@@ -222,8 +239,12 @@ Enterprise discovery, profiling, resource matching, and promotion strategy for a
 
 ```bash
 cd platform
-pytest                                                        # 267 tests: unit / contract / integration / acceptance
-pytest --cov=app --cov=core --cov-fail-under=60               # coverage gate (current 87.25%)
+pytest                                                        # 351 tests: unit / contract / integration / acceptance
+pytest --cov=app --cov=core --cov-fail-under=60               # coverage gate (current 87.67%)
+pytest tests/test_phase27_gov_policy.py tests/test_phase28_gov_documents.py \
+       tests/test_phase29_gov_interpret_sessions.py tests/test_phase30_gov_rules.py \
+       tests/test_phase31_gov_writing.py tests/test_phase32_pg_query.py \
+       tests/test_phase33_gov_embedding_batch.py -q           # government suite: 84 tests
 ruff check .                                                  # static checks
 bandit -r app core adapters domains -ll                       # security scan (0 high)
 python scripts/run_regression.py                              # 8-question regression + CS-01~05 + naive-RAG comparison
@@ -247,13 +268,16 @@ npm run build       # no chunk > 500KB
 4. In `live` mode, answer quality depends on the connected LLM; `offline` mode is a deterministic fallback;
 5. Single-node Compose is a reference deployment; production scaling requires load-specific design;
 6. The orchestration layer still contains a small amount of chemical-specific assembly code, being abstracted into domain plugin hooks (see `core/orchestration/engine.py`);
-7. 05-A run collection is implemented: append-only events, encrypted controlled payloads, seq/hash-chain and inspect. **Frozen replay and fork are not implemented yet.** The model gateway `replay` still only replays pre-recorded embeddings.
+7. 05-A run collection, frozen replay and live_eval fork are implemented; sandbox fork and full node recomputation remain in progress. The model gateway `replay` still only replays pre-recorded embeddings.
+8. Government office currently uses public policy samples and synthetic material: **no agency pilot, real users or measured outcomes**. Gold labels remain `draft`; independent human review is pending.
+9. Government clause vectors remain JSONB + Python cosine, not pgvector/HNSW; PostgreSQL 18.6 + pgvector was validated only with small data and a single process. Private deployment, 信创 and HA remain unverified.
+10. Model screening and cost (about CNY 1.073 for the full public-sample run) are developer checks, not a formal model selection or reconciled procurement cost.
 
 **Roadmap** (plans live in [tech-plan/README.md](tech-plan/README.md))
 
 - **Execution replay & fork**: append-only events, encrypted payloads, inspect, cancel/replay, run diff, frozen generate/output replay (zero business writes) and live_eval fork (read-only tools, zero business writes) are implemented; sandbox fork and full node recomputation are still in progress;
 - **Semantic review adapter layer**: pluggable semantic review for input/output hooks beyond deterministic rules;
-- **MCP interoperability**: bridge the @tool registry into a real MCP server / client (plan 03);
+- **MCP interoperability**: controlled read-only MCP Server (Streamable HTTP, dedicated audience token, Inspector handshake) and admin-allowlisted MCP Client (SSRF/DNS validation, read-only calls, bounded results) are implemented; public OAuth host compatibility is still in progress;
 - **Domain plugin hooks**: move all domain-specific orchestration logic into plugins (plan 01);
 - **Multimodality & real data connectors**.
 
