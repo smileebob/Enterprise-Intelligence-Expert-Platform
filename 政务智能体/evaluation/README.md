@@ -48,5 +48,6 @@
 - 完整重复见 `reports/repeat-20261028T035901Z.md`：15 条 × 3 次，三个模型均 13/15，outcome 稳定 15/15。
 - 支持性检查消融见 `reports/support-ablation-20261027T182552Z.md`：确定性门禁把原样 13/15 降到 9/15，暴露词面支持检查对同义改写过严。
 - 嵌入回归见 `reports/embedding-20261027T182101Z.md`：`text-embedding-v3`、`qwen3.7-text-embedding-flash`、`qwen3.7-text-embedding` 在 12 条引用要求样本上均 12/12；混合检索含词面分数，不是纯向量对比。
-- 目标验证与成本见 `reports/g23-target-cost-20261028.md`：公开云端点/快照/数据边界通过；完整评测约 1.073 元（目录价，未对账）；PG/私有化/目标政务云未验证。
+- 目标验证与成本见 `reports/g23-target-cost-20261028.md`：公开云端点/快照/数据边界通过；完整评测约 1.073 元（目录价，未对账）。
+- PostgreSQL 目标库见 `reports/pg-target-20261028.md`：RDS PostgreSQL 18.6 + pgvector 0.8.1.3 小数据验证通过；私有化/信创/生产容量未验证。
 - 独立人工复核、真实模型通道和专家评审尚未完成；公开样本仅一组文件，不能外推通用政策准确率。

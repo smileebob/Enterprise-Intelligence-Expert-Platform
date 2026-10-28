@@ -31,6 +31,44 @@ from core.admin.seed import seed_all  # noqa: E402
 SAMPLE_DIR = REPO_ROOT / "政务智能体" / "samples" / "public"
 
 
+async def _seed_samples(
+    service: GovPolicyService, actor: Actor
+) -> list[dict[str, Any]]:
+    """同一事件循环内完成导入、审核、发布和嵌入，避免复用已关闭的模型客户端。"""
+    results: list[dict[str, Any]] = []
+    for path in sorted(SAMPLE_DIR.glob("*.json")):
+        payload = PolicyImportIn.model_validate(
+            json.loads(path.read_text(encoding="utf-8"))
+        )
+        imported = service.import_policy(
+            payload, actor, f"init-gov-{payload.document.doc_id}-{payload.version.version_label}"
+        )
+        version = service.get_version(
+            payload.document.doc_id, payload.version.version_label
+        )["version"]
+        if version["review_status"] == "draft":
+            service.review_version(
+                payload.document.doc_id,
+                payload.version.version_label,
+                PolicyReviewIn(action="approve", note="公开样本开发初始化"),
+                actor,
+            )
+        service.publish_document(payload.document.doc_id, actor)
+        indexed = await service.build_embeddings(
+            payload.document.doc_id, payload.version.version_label, actor
+        )
+        results.append(
+            {
+                "file": path.name,
+                "doc_id": imported["doc_id"],
+                "version_id": imported["version_id"],
+                "duplicated": imported["duplicated"],
+                "embedded": indexed["embedded"],
+            }
+        )
+    return results
+
+
 def main() -> int:
     actor = Actor(
         user_id="u-kbadmin",
@@ -42,39 +80,7 @@ def main() -> int:
     try:
         stats = seed_all(db)
         service = GovPolicyService(db)
-        results = []
-        for path in sorted(SAMPLE_DIR.glob("*.json")):
-            payload = PolicyImportIn.model_validate(
-                json.loads(path.read_text(encoding="utf-8"))
-            )
-            imported = service.import_policy(
-                payload, actor, f"init-gov-{payload.document.doc_id}-{payload.version.version_label}"
-            )
-            version = service.get_version(
-                payload.document.doc_id, payload.version.version_label
-            )["version"]
-            if version["review_status"] == "draft":
-                service.review_version(
-                    payload.document.doc_id,
-                    payload.version.version_label,
-                    PolicyReviewIn(action="approve", note="公开样本开发初始化"),
-                    actor,
-                )
-            service.publish_document(payload.document.doc_id, actor)
-            indexed = asyncio.run(
-                service.build_embeddings(
-                    payload.document.doc_id, payload.version.version_label, actor
-                )
-            )
-            results.append(
-                {
-                    "file": path.name,
-                    "doc_id": imported["doc_id"],
-                    "version_id": imported["version_id"],
-                    "duplicated": imported["duplicated"],
-                    "embedded": indexed["embedded"],
-                }
-            )
+        results = asyncio.run(_seed_samples(service, actor))
         print(
             json.dumps(
                 {
