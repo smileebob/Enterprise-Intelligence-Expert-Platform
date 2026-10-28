@@ -4,19 +4,42 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+No unreleased changes.
+
+## [1.2.0] - 2026-10-28
+
 ### Added
 
-- Frozen replay for generate/output nodes: per-node encrypted state snapshots, pure recomputation, zero business writes, version/payload blockers.
-- `live_eval` fork: child run with whitelisted input patch, read-only tool sandbox, no inherited dangerous approvals, zero business writes.
-- Controlled-client MCP server over Streamable HTTP with dedicated audience tokens, Origin/Host checks, read-only tools, and per-call ToolGateway authorization.
-- Admin-allowlisted MCP client with SSRF/DNS validation, environment-backed credentials, no auto-registration of remote tools, and bounded read-only results.
-- Official MCP Inspector handshake evidence (initialize / tools/list / tools/call) plus 401/403 rejection paths and automated MCP tests.
+- Government office domain plugin and `/gov` workbench: public-policy import/review/publish, version effectivity and applicability, clause-level citations, multi-turn clarification, hybrid retrieval, document drafts with template/fact/policy checks, writing/summary/consultation drafts, DOCX + evidence export, review queue and audit.
+- Public-policy evaluation assets: case schema v2, 15 public test cases + 12 synthetic dev cases, label guide, blind-review and expert-review templates, and runners for offline/naive/model/repeat/support/embedding evaluation.
+- Bailian model readiness, model comparison, token/cost conversion and PostgreSQL/pgvector target-validation tooling with dated reports.
+- Frozen replay for generate/output nodes, `live_eval` fork, controlled-client MCP server over Streamable HTTP, admin-allowlisted MCP client with SSRF/DNS validation, and MCP Inspector handshake evidence.
 
 ### Changed
 
-- Upgraded FastAPI to 0.121 and Starlette to 0.49.1 (required by `sse-starlette>=3`).
-- Locked the official MCP Python SDK at **2.3.0** (`mcp-types==2.3.0`, latest protocol `2026-07-28`, default negotiated `2025-03-26`); the SDK is now installed in the main backend environment.
-- MCP server/client implementation is still pending; this entry only records the pinned SDK and framework compatibility.
+- Upgraded FastAPI to 0.121 and Starlette to 0.49.1; pinned the official MCP Python SDK at 2.3.0.
+- Embedding ingestion now batches at 10 items to respect provider limits (`text-embedding-v3` 10, `qwen3.7` 25).
+- `init_gov_demo` runs imports, reviews, publishing and embeddings in one event loop, so PostgreSQL/model-gateway clients are reused safely.
+- PostgreSQL policy search tokenizes Chinese with jieba and uses parameterized `plainto_tsquery` instead of splitting on spaces and concatenating `to_tsquery`.
+
+### Fixed
+
+- PostgreSQL Chinese full-text mismatch and punctuation syntax risk in the query path.
+- Prompt-injection checks now cover direct policy interpretation and search entry points.
+- Test suite forces offline model mode, so a local live `.env` and model quota cannot affect regression results.
+
+### Security
+
+- Government-office audit records, content hashes, review separation, unpublished-read restrictions and sensitive-number blocking.
+- Evaluation reports contain no API keys, database passwords, hostnames or personal data.
+
+### Known limitations
+
+- No pilot unit; all gold labels are `draft` and independent human review is pending.
+- Model results are public-sample developer checks, not a formal model selection; cost is list-price conversion, not a reconciled bill.
+- Government clause vectors remain JSONB + Python cosine rather than pgvector/HNSW.
+- PostgreSQL/pgvector was validated only with small data and a single process; private deployment, 信创 and HA remain unverified.
+- The 3–5 minute narrated eight-step demo is still pending.
 
 ## [1.1.0] - 2026-10-23
 
