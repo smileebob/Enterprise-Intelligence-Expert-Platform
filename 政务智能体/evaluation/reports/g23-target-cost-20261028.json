@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-28",
+  "source_report": "政务智能体/evaluation/reports/repeat-20261028T035901Z.json",
+  "data_kind": "public + synthetic questions",
+  "target_validation": {
+    "chat_endpoint": "PASS",
+    "embedding_endpoint": "PASS",
+    "embedding_dim": 1024,
+    "pinned_models": {
+      "qwen3.8-max-0902": "200",
+      "deepseek-v4.1-flash-1017": "200"
+    },
+    "calls": 135,
+    "transport_errors": 0,
+    "outcome_stability": "15/15 per model",
+    "private_deployment": "BLOCKED",
+    "postgres_pgvector": "BLOCKED",
+    "target_gov_cloud": "BLOCKED"
+  },
+  "tokens": {
+    "qwen3.8-max": {
+      "calls": 45,
+      "in": 22668,
+      "out": 17118
+    },
+    "qwen3.8-flash": {
+      "calls": 45,
+      "in": 22668,
+      "out": 15233
+    },
+    "deepseek-v4.1-flash": {
+      "calls": 45,
+      "in": 22275,
+      "out": 10288
+    },
+    "text-embedding-v3": {
+      "batches": 10,
+      "in": 6789
+    }
+  },
+  "prices_cny_per_million": {
+    "qwen3.8-max": {
+      "in": 12,
+      "out": 36
+    },
+    "qwen3.8-flash": {
+      "in": 0.8,
+      "out": 2.4,
+      "out_thinking": 8
+    },
+    "deepseek-v4.1-flash": {
+      "in_busy": 2,
+      "out_busy": 8,
+      "in_idle": 1,
+      "out_idle": 4
+    },
+    "text-embedding-v3": {
+      "in": 0.5,
+      "batch_in": 0.25
+    }
+  },
+  "cost_cny": {
+    "qwen3.8-max": 0.888264,
+    "qwen3.8-flash": 0.054694,
+    "qwen3.8-flash_thinking": 0.139998,
+    "deepseek-v4.1-flash_busy": 0.126854,
+    "deepseek-v4.1-flash_idle": 0.063427,
+    "text-embedding-v3": 0.003394,
+    "full_primary": 1.073206,
+    "full_range": [
+      1.009779,
+      1.15851
+    ],
+    "per_15_case_run_primary": 0.357735,
+    "per_1000_calls": {
+      "qwen3.8-max": 19.7392,
+      "qwen3.8-flash": 1.2154,
+      "deepseek-v4.1-flash": 2.819
+    }
+  },
+  "sources": [
+    "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "https://help.aliyun.com/zh/model-studio/deepseek-v4-1-flash",
+    "https://help.aliyun.com/zh/model-studio/embedding"
+  ],
+  "limitations": [
+    "价格未含免费额度、缓存、Batch、税费和优惠券",
+    "flash 思考/非思考模式未显式记录，按区间给出",
+    "deepseek 忙时/闲时按运行时间取忙时主口径",
+    "目标政务云/私有化/PostgreSQL/pgvector/信创未验证",
+    "不是正式选型或采购结论"
+  ]
+}
