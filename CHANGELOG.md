@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows Keep
 
 No unreleased changes.
 
+## [1.2.1] - 2026-10-28
+
+### Removed
+
+- Internal competition preparation documents, evaluation cases/reports and recording tools are no longer tracked in the public tree; they remain local and ignored.
+- Public-policy samples and document-rule templates are retained because the automated tests read them.
+
+### Security
+
+- Public source no longer exposes internal task lists, fact registers, model-evaluation reports or review checklists.
+- Earlier commits and the v1.2.0 tag still contain those files; Git history was not rewritten.
+
 ## [1.2.0] - 2026-10-28
 
 ### Added

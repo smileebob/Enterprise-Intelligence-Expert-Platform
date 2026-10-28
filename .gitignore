@@ -44,3 +44,10 @@ run_payloads/
 
 # 申报材料含个人信息，不入公开仓库
 政务智能体/申报材料/
+
+# 政务赛内部备赛文档与评测材料（仅本地；samples/templates 供测试保留）
+政务智能体/0*.md
+政务智能体/1*.md
+政务智能体/TASKS.md
+政务智能体/evaluation/
+政务智能体/tools/
