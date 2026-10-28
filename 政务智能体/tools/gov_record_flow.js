@@ -38,14 +38,14 @@ async function openGov(page) {
   try {
     await login(page, 'expert', 'Expert@12345');
     await openGov(page);
-    await page.waitForTimeout(4000);
+    await page.waitForTimeout(5000);
 
     await page.getByPlaceholder('例如：本区企业申请高技能人才培训补贴需要哪些条件和材料？').fill('政府信息公开申请不能当场答复的，答复期限是多少个工作日？');
     await page.getByPlaceholder('例如：杭州市余杭区', { exact: true }).fill('全国');
     await fillDate(page, '选择事项发生或适用日期', '2026-10-27');
     await page.getByRole('button', { name: '开始解读' }).click();
     await page.getByText('20个工作日内予以答复').first().waitFor({ timeout: 40000 });
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(4000);
     await page.mouse.wheel(0, 600);
     await page.waitForTimeout(4000);
 
@@ -60,7 +60,7 @@ async function openGov(page) {
     await page.locator('input[placeholder="来源引用（文件名/页码/链接/会议记录编号）"]:visible').first().fill('演示材料-01');
     await page.getByRole('button', { name: '生成待审草稿' }).click();
     await page.getByText('待审核').first().waitFor({ timeout: 30000 });
-    await page.waitForTimeout(6500);
+    await page.waitForTimeout(5000);
     await page.mouse.wheel(0, 500);
     await page.waitForTimeout(4000);
 
@@ -70,17 +70,17 @@ async function openGov(page) {
     await openGov(page);
     await page.getByRole('tab', { name: '待审草稿' }).click();
     await page.getByText('待审公文').first().waitFor({ timeout: 20000 });
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(4000);
     await page.getByRole('button', { name: '通过' }).first().click();
     await page.getByText('公文已通过审核').waitFor({ timeout: 15000 });
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000);
 
     await page.getByRole('tab', { name: '政策版本对照' }).click();
     await page.waitForTimeout(600);
     await page.getByRole('button', { name: '开始对照' }).click();
     await page.getByText('新增条款').first().waitFor({ timeout: 30000 });
-    await page.waitForTimeout(8000);
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(7000);
+    await page.waitForTimeout(4000);
     console.log('FLOW_OK');
   } catch (err) {
     console.error('FLOW_FAIL', err.message);

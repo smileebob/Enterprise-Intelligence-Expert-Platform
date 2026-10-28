@@ -183,6 +183,8 @@ async def probe(settings) -> dict:
                 "dim_ok": False,
                 "error": str(exc)[:200],
             }
+    errors = f"{result.get('chat', {}).get('error', '')} {result.get('embedding', {}).get('error', '')}"
+    result["billing_blocked"] = "arrearage" in errors.lower() or "overdue payment" in errors.lower()
     return result
 
 
@@ -204,7 +206,11 @@ def print_text(report: Readiness) -> None:
     if report.probe:
         print("\n探测结果：")
         for name, data in report.probe.items():
+            if name == "billing_blocked":
+                continue
             print(f"- {name}: {json.dumps(data, ensure_ascii=False)}")
+        if report.probe.get("billing_blocked"):
+            print("- 账户状态：百炼账户欠费/未结清，需充值或结清后才能继续调用")
     print("\n结论：", "READY" if report.ready else "NOT READY")
 
 

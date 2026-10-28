@@ -6,6 +6,9 @@
 |---|---|
 | `cases.schema.json` | 样本 Schema v2，含 split、来源组、结构化判据 |
 | `label-guide.md` | 标注手册：判据、拆分、复核、变更与运行方式 |
+| `blind-review-guide.md` | 人工盲评与效率对照流程、评分锚点、分歧处理 |
+| `blind-review-sheet.csv` | 盲评空白记录表 |
+| `expert-review-kit.md` | 外部场景评审邀请、记录表和闭环模板 |
 | `cases/public-test-v1.jsonl` | 公开政策测试集 15 条（2007/2019 两版） |
 | `cases/synthetic-dev-v1.jsonl` | 合成开发集 12 条（公文、文稿、总结、咨询、安全） |
 | `manifest-v1.json` | 冻结清单：文件哈希、拆分、标注状态、限制 |

@@ -3,7 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
+
+# 测试必须隔离：不读开发 .env，也不调用真实模型服务
+os.environ["APP_ENV"] = "testing"
+os.environ["DEMO_MODE"] = "offline"
+os.environ["LLM_API_KEY"] = ""
 
 import pytest
 from fastapi.testclient import TestClient
@@ -13,7 +19,10 @@ from sqlalchemy.pool import StaticPool
 
 import core.models  # noqa: F401 - 注册全部 ORM 模型
 from app import create_app
+from app.config import reset_settings_cache
 from app.db import Base, get_db
+
+reset_settings_cache()
 
 MOCK_DIR = Path("data/mock")
 KNOWLEDGE_FILES = ["products.json", "formulas.json", "processes.json", "experiment_cases.json", "external_knowledge.json"]

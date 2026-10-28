@@ -1,7 +1,7 @@
 """G-23 重复一致性抽查：同一模型对同一批样本运行三次。
 
-只跑 6 条高风险/边界样本，用于检查结果稳定性和时延离散度；
-不是完整 15 条的三次重复，也不构成正式选型。
+默认只跑 6 条高风险/边界样本；加 --all 跑完整 15 条三次重复。
+结果用于检查稳定性和时延离散度，不构成正式选型。
 
 用法（platform 目录）：
     ./.venv/Scripts/python.exe scripts/run_gov_model_repeat.py
@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import json
 import statistics
@@ -82,7 +83,7 @@ def write_report(payload: dict[str, Any]) -> Path:
         "# 模型重复一致性抽查（G-23 部分）",
         "",
         f"- 运行时间（UTC）：{payload['run_at']}",
-        f"- 样本：公开草案集 {len(CASE_IDS)} 条，每个模型重复 {REPEATS} 次",
+        f"- 样本：公开草案集 {len(payload['case_ids'])} 条，每个模型重复 {REPEATS} 次",
         "- 口径：开发者自检，不是完整测试集，不是正式选型",
         "",
         "| 模型 | 三次全过 | 至少一次通过 | 结果稳定 | 中位时延 | 最小值 | 最大值 | 各轮通过 |",
@@ -106,7 +107,7 @@ def write_report(payload: dict[str, Any]) -> Path:
             "",
             "## 限制",
             "",
-            "- 只抽查 6 条，不是完整 15 条；不能据此计算稳定准确率。",
+            "- 样本规模见上表；若不是完整 15 条，不能据此计算稳定准确率。",
             "- 模型输出受提示词和采样影响；本轮 temperature=0。",
             "- 没有人工复核，自动判据仍可能对否定句和同义表述误伤。",
         ]
@@ -116,7 +117,7 @@ def write_report(payload: dict[str, Any]) -> Path:
     return md_path
 
 
-async def main_async() -> int:
+async def main_async(all_cases: bool = False) -> int:
     base.DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     base.DB_PATH.unlink(missing_ok=True)
     Base.metadata.create_all(bind=engine)
@@ -128,7 +129,8 @@ async def main_async() -> int:
     finally:
         db.close()
 
-    cases = [case for case in base.load_cases() if case["case_id"] in CASE_IDS]
+    case_ids = [case["case_id"] for case in base.load_cases()] if all_cases else CASE_IDS
+    cases = [case for case in base.load_cases() if case["case_id"] in case_ids]
     settings = get_settings()
     rows: list[dict[str, Any]] = []
     by_case: dict[str, dict[str, list[dict[str, Any]]]] = {}
@@ -163,7 +165,7 @@ async def main_async() -> int:
     payload = {
         "run_at": datetime.now(UTC).isoformat(),
         "models": base.MODELS,
-        "case_ids": CASE_IDS,
+        "case_ids": case_ids,
         "repeats": REPEATS,
         "summary": summary,
         "by_case": by_case,
@@ -174,4 +176,7 @@ async def main_async() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(asyncio.run(main_async()))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--all", action="store_true", help="跑完整 15 条公开样本")
+    args = parser.parse_args()
+    raise SystemExit(asyncio.run(main_async(args.all)))
