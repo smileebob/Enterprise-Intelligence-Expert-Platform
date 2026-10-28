@@ -5,7 +5,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.121-009688.svg)](https://fastapi.tiangolo.com/)
 [![Vue](https://img.shields.io/badge/Vue-3.5-42B883.svg)](https://vuejs.org/)
 [![Tests](https://img.shields.io/badge/tests-351%20passed-brightgreen.svg)](#testing--quality)
-[![Release](https://img.shields.io/badge/release-v1.2.1-blue.svg)](https://github.com/smileebob/Enterprise-Intelligence-Expert-Platform/releases/tag/v1.2.1)
+[![Release](https://img.shields.io/badge/release-v1.2.2-blue.svg)](https://github.com/smileebob/Enterprise-Intelligence-Expert-Platform/releases/tag/v1.2.2)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://docs.docker.com/compose/)
 
 [中文](README.md) ｜ **English**

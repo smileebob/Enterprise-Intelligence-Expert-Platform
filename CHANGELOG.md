@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows Keep
 
 No unreleased changes.
 
+## [1.2.2] - 2026-10-28
+
+### Documentation
+
+- README (Chinese and English) updated for v1.2.1: 351 tests / 87.67% coverage, government-office workbench, PostgreSQL 18.6 + pgvector small-data validation, and current limitations.
+- Public tree now documents only the retained government samples and document-rule templates; internal preparation documents and evaluation material remain local and ignored.
+- No runtime or API changes in this release.
+
 ## [1.2.1] - 2026-10-28
 
 ### Removed
